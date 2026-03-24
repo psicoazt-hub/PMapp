@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Pachucos Men App</title>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.5/dist/signature_pad.umd.min.js"></script>
+    <style>
+        :root { --oro: #D4AF37; --cromo: #C0C0C0; --negro: #121212; }
+        body { font-family: sans-serif; background: var(--negro); color: white; margin: 0; padding-bottom: 80px; }
+        .tab-content { display: none; padding: 15px; }
+        .active { display: block; }
+        .btn { background: linear-gradient(135deg, var(--oro), #996515); color: black; border: none; padding: 12px; width: 100%; border-radius: 5px; font-weight: bold; margin: 5px 0; cursor: pointer; }
+        .btn-delete { background: #b30000; color: white; font-size: 0.8em; width: auto; padding: 5px 10px; border:none; border-radius:3px; }
+        .btn-edit { background: #2e7d32; color: white; font-size: 0.8em; width: auto; padding: 5px 10px; margin-right: 5px; border:none; border-radius:3px; }
+        .navbar { position: fixed; bottom: 0; width: 100%; background: #000; display: flex; border-top: 2px solid var(--oro); }
+        .nav-item { flex: 1; text-align: center; padding: 15px 5px; font-size: 0.75em; color: var(--cromo); }
+        .nav-item.active { color: var(--oro); border-top: 3px solid var(--oro); }
+        .fecha-card { background: #222; border-left: 4px solid var(--oro); padding: 12px; margin-bottom: 10px; border-radius: 5px; }
+        .month-header { background: var(--oro); color: black; padding: 5px 10px; font-weight: bold; margin: 15px 0 5px 0; border-radius: 3px; }
+        input, select { width: 100%; padding: 10px; margin: 5px 0; border-radius: 4px; border: 1px solid #444; background: #333; color: white; box-sizing: border-box; }
+        .signature-pad { border: 1px solid var(--oro); background: white; width: 100%; height: 180px; margin: 10px 0; }
+        .actions { margin-top: 10px; text-align: right; }
+    </style>
+</head>
+<body>
+
+    <div id="agenda" class="tab-content active">
+        <h3 style="text-align: center; color: var(--oro);">PACHUCOS MEN 2026</h3>
+        <div id="lista-eventos"></div>
+    </div>
+
+    <div id="nuevo" class="tab-content">
+        <h2 id="form-title">NUEVA TOCADA</h2>
+        <input type="hidden" id="edit-id">
+        <input type="number" id="dia" placeholder="Día">
+        <select id="mes">
+            <option value="Enero">Enero</option><option value="Febrero">Febrero</option><option value="Marzo">Marzo</option>
+            <option value="Abril">Abril</option><option value="Mayo">Mayo</option><option value="Junio">Junio</option>
+            <option value="Julio">Julio</option><option value="Agosto">Agosto</option><option value="Septiembre">Septiembre</option>
+            <option value="Octubre">Octubre</option><option value="Noviembre">Noviembre</option><option value="Diciembre">Diciembre</option>
+        </select>
+        <input type="number" id="anio" value="2026">
+        <input type="text" id="lugar" placeholder="Lugar / Poblado">
+        <select id="quien">
+            <option value="José">José</option><option value="Toño">Toño</option><option value="Chava">Chava</option><option value="Otro">Otro</option>
+        </select>
+        <input type="text" id="horario" placeholder="Horario">
+        <input type="text" id="horas" placeholder="Horas">
+        <button class="btn" id="btnGuardar" onclick="guardarEvento()">GUARDAR</button>
+        <button class="btn" style="background:#444; color:white;" onclick="resetForm()">CANCELAR</button>
+    </div>
+
+    <div id="contratos" class="tab-content">
+        <h3>CONTRATO</h3>
+        <input type="text" id="c-cliente" placeholder="Nombre Cliente">
+        <input type="text" id="c-lugar" placeholder="Lugar">
+        <input type="number" id="c-precio" placeholder="Precio $">
+        <input type="number" id="c-anticipo" placeholder="Anticipo $">
+        <canvas id="pad-cliente" class="signature-pad"></canvas>
+        <button class="btn" onclick="generarPDF()">GENERAR PDF</button>
+    </div>
+
+    <nav class="navbar">
+        <div class="nav-item active" onclick="switchTab('agenda')">📅 Agenda</div>
+        <div class="nav-item" onclick="switchTab('nuevo')">➕ Nueva</div>
+        <div class="nav-item" onclick="switchTab('contratos')">📄 Contrato</div>
+    </nav>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyBtZHmeBSCMAAsGLm1ADxoNvhdusw-BlkM",
+            authDomain: "pachucosapp.firebaseapp.com",
+            databaseURL: "https://pachucosapp-default-rtdb.firebaseio.com",
+            projectId: "pachucosapp",
+            storageBucket: "pachucosapp.firebasestorage.app",
+            messagingSenderId: "573811803303",
+            appId: "1:573811803303:web:0ceaa831d13f0e0ada8782"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+        const canvas = document.getElementById('pad-cliente');
+        const signaturePad = new SignaturePad(canvas);
+
+        function switchTab(id) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            event.currentTarget.classList.add('active');
+        }
+
+        function guardarEvento() {
+            const id = document.getElementById('edit-id').value;
+            const data = {
+                dia: document.getElementById('dia').value,
+                mes: document.getElementById('mes').value,
+                anio: document.getElementById('anio').value,
+                lugar: document.getElementById('lugar').value,
+                quien: document.getElementById('quien').value,
+                horario: document.getElementById('horario').value || "?",
+                horas: document.getElementById('horas').value || "?"
+            };
+            if(!data.dia || !data.lugar) return alert("Faltan datos");
+            if(id) {
+                db.ref('agenda/' + id).update(data).then(() => { resetForm(); switchTab('agenda'); });
+            } else {
+                db.ref('agenda/').push(data).then(() => { resetForm(); switchTab('agenda'); });
+            }
+        }
+
+        function borrarEvento(id) {
+            if(confirm("¿Borrar esta fecha?")) db.ref('agenda/' + id).remove();
+        }
+
+        function editarEvento(id, d, m, a, l, q, h, hr) {
+            document.getElementById('edit-id').value = id;
+            document.getElementById('dia').value = d;
+            document.getElementById('mes').value = m;
+            document.getElementById('anio').value = a;
+            document.getElementById('lugar').value = l;
+            document.getElementById('quien').value = q;
+            document.getElementById('horario').value = h;
+            document.getElementById('horas').value = hr;
+            document.getElementById('form-title').innerText = "EDITAR FECHA";
+            switchTab('nuevo');
+        }
+
+        function resetForm() {
+            document.getElementById('edit-id').value = "";
+            document.getElementById('form-title').innerText = "NUEVA TOCADA";
+            document.querySelectorAll('#nuevo input').forEach(i => i.value = "");
+            document.getElementById('anio').value = "2026";
+        }
+
+        db.ref('agenda/').on('value', (snap) => {
+            if(!snap.exists()) {
+                const iniciales = [
+                    {dia:29, mes:"Marzo", anio:2026, lugar:"Santiago Conguripo", quien:"José", horario:"?", horas:"?"},
+                    {dia:10, mes:"Abril", anio:2026, lugar:"Pendiente", quien:"Chava", horario:"?", horas:"2 HRS"},
+                    {dia:3, mes:"Mayo", anio:2026, lugar:"Sin batería", quien:"Chava", horario:"?", horas:"?"},
+                    {dia:16, mes:"Mayo", anio:2026, lugar:"Pendiente", quien:"Toño", horario:"?", horas:"?"},
+                    {dia:22, mes:"Mayo", anio:2026, lugar:"Puruandiro", quien:"Chava", horario:"?", horas:"1 hora"},
+                    {dia:23, mes:"Mayo", anio:2026, lugar:"Potrerillos", quien:"Toño", horario:"?", horas:"?"},
+                    {dia:20, mes:"Junio", anio:2026, lugar:"Pendiente", quien:"Toño", horario:"?", horas:"?"},
+                    {dia:5, mes:"Diciembre", anio:2026, lugar:"La Palma", quien:"Toño", horario:"?", horas:"?"},
+                    {dia:13, mes:"Diciembre", anio:2026, lugar:"Potrerillos", quien:"Toño", horario:"?", horas:"?"},
+                    {dia:24, mes:"Diciembre", anio:2026, lugar:"Casas Viejas", quien:"Chava", horario:"?", horas:"?"},
+                    {dia:27, mes:"Diciembre", anio:2026, lugar:"Salón Eclipse", quien:"José", horario:"?", horas:"?"},
+                    {dia:28, mes:"Diciembre", anio:2026, lugar:"Santiago", quien:"Chava", horario:"?", horas:"?"},
+                    {dia:29, mes:"Diciembre", anio:2026, lugar:"Pendiente", quien:"José", horario:"?", horas:"3 horas"}
+                ];
+                iniciales.forEach(f => db.ref('agenda/').push(f));
+                return;
+            }
+            const list = document.getElementById('lista-eventos');
+            list.innerHTML = "";
+            let currentMonth = "";
+            const items = [];
+            snap.forEach(c => { items.push({id: c.key, ...c.val()}); });
+            items.sort((a,b) => (new Date(`${a.mes} ${a.dia}, ${a.anio}`)) - (new Date(`${b.mes} ${b.dia}, ${b.anio}`)));
+            items.forEach(d => {
+                if(d.mes !== currentMonth) { currentMonth = d.mes; list.innerHTML += `<div class="month-header">${currentMonth.toUpperCase()}</div>`; }
+                list.innerHTML += `<div class="fecha-card"><strong>${d.dia}: ${d.lugar}</strong><br><small>${d.quien} | ${d.horas} | ${d.horario}</small>
+                <div class="actions"><button class="btn-edit" onclick="editarEvento('${d.id}','${d.dia}','${d.mes}','${d.anio}','${d.lugar}','${d.quien}','${d.horario}','${d.horas}')">Editar</button>
+                <button class="btn-delete" onclick="borrarEvento('${d.id}')">Borrar</button></div></div>`;
+            });
+        });
+
+        function generarPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            const cli = document.getElementById('c-cliente').value;
+            doc.text("CONTRATO PACHUCOS MEN", 10, 20);
+            doc.text(`Cliente: ${cli}`, 10, 40);
+            doc.text(`Lugar: ${document.getElementById('c-lugar').value}`, 10, 50);
+            const img = signaturePad.toDataURL();
+            doc.addImage(img, 'PNG', 10, 70, 50, 30);
+            doc.save(`Contrato_${cli}.pdf`);
+        }
+    </script>
+</body>
+</html>
