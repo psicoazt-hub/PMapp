@@ -3,12 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pachucos Men - Staff App</title>
+    <title>Pachucos Men - Control Total</title>
     <style>
         :root { --oro: #d4af37; --cromo: #e5e5e5; --fondo: #0a0a0a; --rojo: #cc0000; }
+        * { box-sizing: border-box; }
         body { background: var(--fondo); color: white; font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; height: 100vh; overflow: hidden; }
         
-        /* SIDEBAR (Menú a la izquierda como pediste) */
+        /* SIDEBAR (Menú a la izquierda) */
         #sidebar { width: 230px; background: #111; border-right: 1px solid #333; display: flex; flex-direction: column; padding-top: 20px; flex-shrink: 0; }
         .nav-btn { background: transparent; border: none; color: #888; padding: 15px 25px; text-align: left; font-size: 15px; cursor: pointer; border-left: 4px solid transparent; transition: 0.3s; font-weight: bold; }
         .nav-btn:hover, .nav-btn.active { color: var(--oro); border-left: 4px solid var(--oro); background: #1a1a1a; }
@@ -17,31 +18,30 @@
         .section { display: none; max-width: 900px; margin: 0 auto; }
         .section.active { display: block; }
         
-        /* CALENDARIO Y LISTA MINIMALISTA */
-        .fecha-card { background: #1a1a1a; border: 1px solid #333; border-radius: 8px; padding: 15px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
-        .fecha-info h3 { margin: 0; color: var(--oro); text-transform: uppercase; letter-spacing: 1px; }
-        .btn-group { display: flex; gap: 8px; }
+        /* LISTA MINIMALISTA (CALENDARIO) */
+        .card { background: #1a1a1a; border: 1px solid #333; border-radius: 8px; padding: 15px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
+        .card h3 { margin: 0; color: var(--oro); font-size: 18px; text-transform: uppercase; }
         .btn-action { background: none; border: 1px solid #444; color: white; padding: 5px 10px; cursor: pointer; border-radius: 4px; font-size: 12px; }
         .btn-action.del { border-color: var(--rojo); color: var(--rojo); }
 
-        /* FLYERS (Reconocimiento de Estilos) */
-        #flyer-canvas { width: 100%; height: 450px; background: #222; position: relative; overflow: hidden; border: 2px solid var(--oro); }
-        .estilo-thumb { width: 100px; height: 100px; border: 2px solid #444; cursor: pointer; object-fit: cover; }
-        .estilo-thumb.selected { border-color: var(--oro); }
-        .text-overlay { position: absolute; cursor: move; font-size: 45px; font-weight: bold; text-shadow: 3px 3px 6px #000; }
+        /* FLYERS (Estilos por imagen) */
+        #flyer-canvas { width: 100%; height: 400px; background: #222; position: relative; overflow: hidden; border: 2px solid var(--oro); }
+        .thumb-estilo { width: 90px; height: 90px; object-fit: cover; border: 2px solid #444; cursor: pointer; border-radius: 5px; }
+        .thumb-estilo.selected { border-color: var(--oro); }
+        .text-drag { position: absolute; cursor: move; font-size: 45px; font-weight: bold; text-shadow: 3px 3px 6px #000; white-space: nowrap; user-select: none; }
 
-        /* CONTRATOS (Doble Pad de Firma) */
-        .pad-container { background: white; border-radius: 5px; margin-top: 5px; }
-        canvas.sig-pad { width: 100%; height: 120px; touch-action: none; cursor: crosshair; }
+        /* CONTRATOS (Doble Pad Firma Digital) */
+        .pad-wrap { background: white; border-radius: 5px; margin-top: 5px; border: 1px solid var(--oro); }
+        canvas.sig-pad { width: 100%; height: 130px; touch-action: none; cursor: crosshair; }
         
-        input, select { width: 100%; padding: 12px; margin: 8px 0; background: #1a1a1a; border: 1px solid #444; color: white; border-radius: 5px; box-sizing: border-box; }
-        .btn-save { background: var(--oro); color: black; border: none; padding: 15px; width: 100%; font-weight: bold; cursor: pointer; margin-top: 10px; border-radius: 5px; }
+        input, select { width: 100%; padding: 12px; margin: 8px 0; background: #1a1a1a; border: 1px solid #444; color: white; border-radius: 5px; }
+        .btn-japo { background: var(--oro); color: black; border: none; padding: 16px; width: 100%; font-weight: bold; font-size: 17px; border-radius: 5px; cursor: pointer; margin-top: 10px; }
     </style>
 </head>
 <body>
 
 <nav id="sidebar">
-    <div style="text-align:center; padding-bottom:30px;"><h2 style="color:var(--oro); margin:0;">PACHUCOS</h2></div>
+    <div style="text-align:center; padding-bottom:30px;"><h2 style="color:var(--oro); margin:0; letter-spacing:2px;">PACHUCOS</h2></div>
     <button class="nav-btn active" onclick="nav('calendario')">📅 CALENDARIO</button>
     <button class="nav-btn" onclick="nav('agregar')">➕ AGREGAR FECHA</button>
     <button class="nav-btn" onclick="nav('galeria')">🖼️ GALERÍA</button>
@@ -52,32 +52,32 @@
 <main>
     <section id="calendario" class="section active">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-            <h1 style="color:var(--oro); margin:0;">AGENDA ACTUAL</h1>
-            <button onclick="shareAgenda()" style="background:var(--oro); border:none; padding:8px 15px; font-weight:bold; border-radius:4px;">COMPARTIR LISTA</button>
+            <h1 style="color:var(--oro); margin:0;">AGENDA PACHUCOS</h1>
+            <button onclick="shareAgenda()" style="background:var(--oro); border:none; padding:8px 15px; font-weight:bold; border-radius:4px;">COMPARTIR TODO</button>
         </div>
-        <div id="lista-fechas">Cargando libreta del Drive...</div>
+        <div id="lista-fechas">Cargando jales...</div>
     </section>
 
     <section id="agregar" class="section">
         <h1>REGISTRAR NUEVA FECHA</h1>
         <div style="display:flex; gap:10px;">
-            <input type="number" id="dia" placeholder="Día">
-            <select id="mes">
+            <input type="number" id="d" placeholder="Día">
+            <select id="m">
                 <option value="1">Enero</option><option value="2">Febrero</option><option value="3">Marzo</option>
                 <option value="4">Abril</option><option value="5">Mayo</option><option value="6">Junio</option>
                 <option value="7">Julio</option><option value="8">Agosto</option><option value="9">Septiembre</option>
                 <option value="10">Octubre</option><option value="11">Noviembre</option><option value="12">Diciembre</option>
             </select>
-            <input type="number" id="anio" value="2026">
+            <input type="number" id="a" value="2026">
         </div>
-        <select id="rep">
+        <select id="vende">
             <option value="">¿Quién agendó?</option>
-            <option value="JOSÉ">JOSÉ</option><option value="CHAVA">CHAVA</option><option value="TOÑO">TOÑO</option><option value="JAPO">JAPO</option><option value="OTROS">OTROS</option>
+            <option value="JOSÉ">JOSÉ</option><option value="TOÑO">TOÑO</option><option value="CHAVA">CHAVA</option><option value="JAPO">JAPO</option><option value="OTROS">OTROS</option>
         </select>
-        <input type="text" id="lugar" placeholder="Lugar/Pueblo">
-        <input type="text" id="hora" placeholder="Hora de inicio">
-        <input type="text" id="tiempo" placeholder="Tiempo de jale (Ej. 5 hrs)">
-        <button class="btn-save" onclick="saveNewDate()">GUARDAR EN DRIVE</button>
+        <input type="text" id="lug" placeholder="Lugar/Pueblo">
+        <input type="text" id="hor" placeholder="Hora de inicio">
+        <input type="text" id="tiem" placeholder="Tiempo (Ej. 5 hrs)">
+        <button class="btn-japo" onclick="guardarJale()">GUARDAR EN DRIVE</button>
     </section>
 
     <section id="galeria" class="section">
@@ -88,148 +88,151 @@
     <section id="flyers" class="section">
         <h1>DISEÑADOR DE FLYERS</h1>
         <div id="flyer-canvas"></div>
-        <input type="text" id="flyer-input" placeholder="Escribe el nombre del evento">
-        <p>Selecciona una imagen para copiar su estilo:</p>
-        <div id="estilos-drive" style="display:flex; gap:10px; overflow-x:auto; padding-bottom:10px;"></div>
-        <button class="btn-save" onclick="createTextWithStyle()">APLICAR ESTILO Y CREAR</button>
+        <input type="text" id="flyer-txt" placeholder="Escribe el nombre del evento">
+        <p>Pícale a una imagen para jalar su estilo (Oro/Cromo):</p>
+        <div id="estilos-drive" style="display:flex; gap:10px; overflow-x:auto; padding-bottom:15px;"></div>
+        <button class="btn-japo" onclick="crearTitulo()">APLICAR ESTILO Y CREAR</button>
     </section>
 
     <section id="contratos" class="section">
         <h1>CONTRATOS DIGITALES</h1>
-        <button class="btn-save" style="background:#444; color:white; margin-bottom:10px;" onclick="window.print()">IMPRIMIR MACHOTE VACÍO</button>
-        <input type="text" id="c-cliente" placeholder="Nombre del Cliente">
-        <input type="text" id="c-monto" placeholder="Monto Total $">
+        <button class="btn-japo" style="background:#333; color:white; margin-bottom:15px;" onclick="window.print()">IMPRIMIR MACHOTE VACÍO</button>
+        <input type="text" id="c-nom" placeholder="Nombre del Cliente">
         <div style="display:flex; gap:15px; margin-top:10px;">
             <div style="flex:1; text-align:center;">
                 <small>FIRMA REPRESENTANTE</small>
-                <div class="pad-container"><canvas id="pad-rep" class="sig-pad"></canvas></div>
+                <div class="pad-wrap"><canvas id="p-rep" class="sig-pad"></canvas></div>
             </div>
             <div style="flex:1; text-align:center;">
                 <small>FIRMA CLIENTE</small>
-                <div class="pad-container"><canvas id="pad-cli" class="sig-pad"></canvas></div>
+                <div class="pad-wrap"><canvas id="p-cli" class="sig-pad"></canvas></div>
             </div>
         </div>
-        <button class="btn-save" style="background:#25D366;" onclick="enviarWA()">GENERAR Y MANDAR WHATSAPP</button>
+        <button class="btn-japo" style="background:#25D366; margin-top:15px;" onclick="mandarWhatsApp()">GENERAR Y MANDAR WHATSAPP</button>
     </section>
 </main>
 
 <script>
-    const URL_APPS = 'https://script.google.com/macros/s/AKfycbuW-UQvGgP2BsRBJUTSBcsh02qXQagGB3XhXDIU6_rt3YAN1RRU3UF_LEXeQz7KjxA/exec';
-    let agendaMaster = [];
+    const API_URL = 'https://script.google.com/macros/s/AKfycbuW-UQvGgP2BsRBJUTSBcsh02qXQagGB3XhXDIU6_rt3YAN1RRU3UF_LEXeQz7KjxA/exec';
+    let dataAgenda = [];
 
     function nav(id) {
         document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
         document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
         document.getElementById(id).classList.add('active');
-        if(id === 'calendario') loadAgenda();
-        if(id === 'galeria') loadFiles('BODEGA', 'lista-galeria');
-        if(id === 'flyers') loadFiles('03_ESTILOS_TITULO', 'estilos-drive');
+        if(id === 'calendario') cargarAgenda();
+        if(id === 'galeria') cargarFiles('BODEGA', 'lista-galeria');
+        if(id === 'flyers') cargarFiles('03_ESTILOS_TITULO', 'estilos-drive');
     }
 
-    // CALENDARIO: CARGAR, ORDENAR POR MESES (1-12) Y EDITAR/BORRAR
-    async function loadAgenda() {
-        const res = await fetch(`${URL_APPS}?action=getAgenda`);
-        agendaMaster = await res.json();
-        agendaMaster.sort((a, b) => new Date(a.anio, a.mes-1, a.dia) - new Date(b.anio, b.mes-1, b.dia));
+    // CALENDARIO CON ORDEN REAL DE MESES
+    async function cargarAgenda() {
+        const res = await fetch(`${API_URL}?action=getAgenda`);
+        dataAgenda = await res.json();
+        dataAgenda.sort((a, b) => new Date(a.anio, a.mes-1, a.dia) - new Date(b.anio, b.mes-1, b.dia));
         
         const container = document.getElementById('lista-fechas');
-        container.innerHTML = agendaMaster.map((f, i) => `
-            <div class="fecha-card">
-                <div class="fecha-info">
+        container.innerHTML = dataAgenda.map((f, i) => `
+            <div class="card">
+                <div>
                     <h3>${f.dia}/${f.mes}/${f.anio}</h3>
                     <p>📍 ${f.lugar} | 🤵 ${f.representante}</p>
                 </div>
                 <div class="btn-group">
-                    <button class="btn-action" onclick="editDate(${i})">EDITAR</button>
-                    <button class="btn-action del" onclick="deleteDate(${i})">BORRAR</button>
+                    <button class="btn-action" onclick="editarJale(${i})">EDITAR</button>
+                    <button class="btn-action del" onclick="borrarJale(${i})">BORRAR</button>
                 </div>
             </div>
         `).join('');
     }
 
-    async function saveNewDate() {
-        const dia = document.getElementById('dia').value;
-        const mes = document.getElementById('mes').value;
-        const anio = document.getElementById('anio').value;
-        const rep = document.getElementById('rep').value;
+    async function guardarJale() {
+        const dia = document.getElementById('d').value;
+        const mes = document.getElementById('m').value;
+        const anio = document.getElementById('a').value;
+        const rep = document.getElementById('vende').value;
 
-        if(!dia || !mes || !anio || !rep) return alert("¡RELLENA DÍA, MES, AÑO Y REPRESENTANTE!");
+        if(!dia || !mes || !anio || !rep) return alert("¡Día, Mes, Año y Vendedor son obligatorios!");
 
-        const jale = { dia, mes, anio, representante: rep, lugar: document.getElementById('lugar').value || '?', hora: document.getElementById('hora').value || '?', tiempo: document.getElementById('tiempo').value || '?' };
-        agendaMaster.push(jale);
-        await fetch(URL_APPS, { method: 'POST', body: JSON.stringify(agendaMaster) });
+        const jale = { dia, mes, anio, representante: rep, lugar: document.getElementById('lug').value || '?', hora: document.getElementById('hor').value || '?', tiempo: document.getElementById('tiem').value || '?' };
+        dataAgenda.push(jale);
+        await fetch(API_URL, { method: 'POST', body: JSON.stringify(dataAgenda) });
         nav('calendario');
     }
 
-    async function deleteDate(i) {
-        if(confirm("¿Seguro que quieres borrar esta fecha de la lista?")) {
-            agendaMaster.splice(i, 1);
-            await fetch(URL_APPS, { method: 'POST', body: JSON.stringify(agendaMaster) });
-            loadAgenda();
+    async function borrarJale(i) {
+        if(confirm("¿Seguro que quieres borrar esta fecha?")) {
+            dataAgenda.splice(i, 1);
+            await fetch(API_URL, { method: 'POST', body: JSON.stringify(dataAgenda) });
+            cargarAgenda();
         }
     }
 
-    // CARGAR ARCHIVOS (GALERÍA Y ESTILOS)
-    async function loadFiles(folder, targetId) {
-        const res = await fetch(`${URL_APPS}?action=getFiles&folder=${folder}`);
+    // GALERÍA Y ESTILOS
+    async function cargarFiles(folder, target) {
+        const res = await fetch(`${API_URL}?action=getFiles&folder=${folder}`);
         const files = await res.json();
-        const container = document.getElementById(targetId);
-        container.innerHTML = files.map(f => folder === 'BODEGA' ? `
+        const div = document.getElementById(target);
+        div.innerHTML = files.map(f => folder === 'BODEGA' ? `
             <div style="background:#222; padding:10px; border-radius:5px; text-align:center;">
                 <small>${f.nombre}</small><br>
                 <a href="${f.url}" target="_blank" style="color:var(--oro); font-size:11px;">VER/BAJAR</a>
-            </div>` : `<img src="${f.url}" class="estilo-thumb" onclick="pickStyle('${f.url}', this)">`
+            </div>` : `<img src="${f.url}" class="thumb-estilo" onclick="pickStyle('${f.url}', this)">`
         ).join('');
     }
 
-    // FLYERS: RECONOCER ESTILO DE IMAGEN
-    let styleSelected = '';
+    let urlEstilo = '';
     function pickStyle(url, el) {
-        document.querySelectorAll('.estilo-thumb').forEach(img => img.classList.remove('selected'));
+        document.querySelectorAll('.thumb-estilo').forEach(i => i.classList.remove('selected'));
         el.classList.add('selected');
-        styleSelected = url;
+        urlEstilo = url;
     }
 
-    function createTextWithStyle() {
-        const val = document.getElementById('flyer-input').value;
-        if(!val || !styleSelected) return alert("Escribe el nombre y selecciona un estilo de imagen");
+    function crearTitulo() {
+        const txt = document.getElementById('flyer-txt').value;
+        if(!txt || !urlEstilo) return alert("Escribe el nombre y elige una imagen de estilo");
         const div = document.createElement('div');
-        div.className = 'text-overlay';
-        div.innerText = val.toUpperCase();
-        // Lógica: Si el nombre de la imagen tiene "ORO", aplica color oro, si no, cromo.
-        div.style.color = styleSelected.toUpperCase().includes('ORO') ? '#d4af37' : '#e5e5e5';
-        div.style.left = "50px"; div.style.top = "50px";
-        makeDrag(div);
+        div.className = 'text-drag';
+        div.innerText = txt.toUpperCase();
+        div.style.color = urlEstilo.toUpperCase().includes('ORO') ? '#d4af37' : '#e5e5e5';
+        div.style.left = "40px"; div.style.top = "40px";
+        setDrag(div);
         document.getElementById('flyer-canvas').appendChild(div);
     }
 
-    function makeDrag(el) {
+    function setDrag(el) {
         let x=0, y=0, mx=0, my=0;
-        el.onmousedown = (e) => { 
-            mx=e.clientX; my=e.clientY; 
+        el.onmousedown = (e) => {
+            mx=e.clientX; my=e.clientY;
             document.onmousemove = (e) => { x=mx-e.clientX; y=my-e.clientY; mx=e.clientX; my=e.clientY; el.style.top=(el.offsetTop-y)+"px"; el.style.left=(el.offsetLeft-x)+"px"; };
             document.onmouseup = () => document.onmousemove = null;
         };
     }
 
-    // INICIAR PADS DE FIRMA
     function initPads() {
-        [document.getElementById('pad-rep'), document.getElementById('pad-cli')].forEach(canvas => {
-            const ctx = canvas.getContext('2d');
-            let drawing = false;
-            canvas.onmousedown = canvas.ontouchstart = () => drawing = true;
-            canvas.onmouseup = canvas.ontouchend = () => { drawing = false; ctx.beginPath(); };
-            canvas.onmousemove = canvas.ontouchmove = (e) => {
-                if(!drawing) return;
-                const rect = canvas.getBoundingClientRect();
-                const x = (e.clientX || e.touches[0].clientX) - rect.left;
-                const y = (e.clientY || e.touches[0].clientY) - rect.top;
+        [document.getElementById('p-rep'), document.getElementById('p-cli')].forEach(c => {
+            const ctx = c.getContext('2d');
+            let draw = false;
+            c.onmousedown = c.ontouchstart = () => draw = true;
+            c.onmouseup = c.ontouchend = () => { draw = false; ctx.beginPath(); };
+            c.onmousemove = c.ontouchmove = (e) => {
+                if(!draw) return;
+                const r = c.getBoundingClientRect();
+                const x = (e.clientX || e.touches[0].clientX) - r.left;
+                const y = (e.clientY || e.touches[0].clientY) - r.top;
                 ctx.lineWidth = 2; ctx.lineTo(x, y); ctx.stroke();
             };
         });
     }
 
-    window.onload = () => { loadAgenda(); initPads(); };
+    function shareAgenda() {
+        let t = "*AGENDA OFICIAL PACHUCOS MEN*\n\n";
+        dataAgenda.forEach(f => t += `📅 ${f.dia}/${f.mes}/${f.anio} - ${f.lugar}\n`);
+        window.open(`https://wa.me/?text=${encodeURIComponent(t)}`);
+    }
+
+    window.onload = () => { cargarAgenda(); initPads(); };
 </script>
 </body>
 </html>
+
