@@ -3,40 +3,54 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Pachucos Men App</title>
+    <title>Pachucos Men - Master App</title>
+    
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.5/dist/signature_pad.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
     <style>
-        :root { --oro: #D4AF37; --cromo: #C0C0C0; --negro: #121212; }
-        body { font-family: sans-serif; background: var(--negro); color: white; margin: 0; padding-bottom: 80px; }
-        .tab-content { display: none; padding: 15px; }
+        :root { --oro: #D4AF37; --cromo: #C0C0C0; --negro: #0a0a0a; --oro-brillante: #FFD700; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: var(--negro); color: white; margin: 0; padding-bottom: 90px; overflow-x: hidden; }
+        
+        /* Navegación */
+        .navbar { position: fixed; bottom: 0; width: 100%; background: #000; display: flex; border-top: 2px solid var(--oro); z-index: 100; }
+        .nav-item { flex: 1; text-align: center; padding: 12px 2px; font-size: 0.7em; color: var(--cromo); cursor: pointer; }
+        .nav-item.active { color: var(--oro); border-top: 3px solid var(--oro); background: #1a1a1a; }
+
+        .tab-content { display: none; padding: 15px; animation: fadeIn 0.3s; }
         .active { display: block; }
-        .btn { background: linear-gradient(135deg, var(--oro), #996515); color: black; border: none; padding: 12px; width: 100%; border-radius: 5px; font-weight: bold; margin: 5px 0; cursor: pointer; }
-        .btn-delete { background: #b30000; color: white; font-size: 0.8em; width: auto; padding: 5px 10px; border:none; border-radius:3px; }
-        .btn-edit { background: #2e7d32; color: white; font-size: 0.8em; width: auto; padding: 5px 10px; margin-right: 5px; border:none; border-radius:3px; }
-        .navbar { position: fixed; bottom: 0; width: 100%; background: #000; display: flex; border-top: 2px solid var(--oro); }
-        .nav-item { flex: 1; text-align: center; padding: 15px 5px; font-size: 0.75em; color: var(--cromo); }
-        .nav-item.active { color: var(--oro); border-top: 3px solid var(--oro); }
-        .fecha-card { background: #222; border-left: 4px solid var(--oro); padding: 12px; margin-bottom: 10px; border-radius: 5px; }
-        .month-header { background: var(--oro); color: black; padding: 5px 10px; font-weight: bold; margin: 15px 0 5px 0; border-radius: 3px; }
-        input, select { width: 100%; padding: 10px; margin: 5px 0; border-radius: 4px; border: 1px solid #444; background: #333; color: white; box-sizing: border-box; }
-        .signature-pad { border: 1px solid var(--oro); background: white; width: 100%; height: 180px; margin: 10px 0; }
-        .actions { margin-top: 10px; text-align: right; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* Estilos de Componentes */
+        .btn { background: linear-gradient(135deg, var(--oro), #996515); color: black; border: none; padding: 12px; width: 100%; border-radius: 5px; font-weight: bold; margin: 5px 0; font-size: 1em; }
+        .btn-sec { background: #333; color: white; border: 1px solid var(--cromo); }
+        .card { background: #1a1a1a; border-left: 4px solid var(--oro); padding: 12px; margin-bottom: 10px; border-radius: 5px; position: relative; }
+        .month-label { background: var(--oro); color: black; padding: 4px 10px; font-weight: bold; margin: 15px 0 5px 0; display: inline-block; border-radius: 3px; font-size: 0.9em; }
+        
+        input, select, textarea { width: 100%; padding: 12px; margin: 8px 0; border-radius: 5px; border: 1px solid #333; background: #222; color: white; box-sizing: border-box; }
+        .sig-canvas { border: 2px dashed var(--oro); background: white; width: 100%; height: 180px; border-radius: 5px; }
+
+        /* Estilo Flyer 3D (Simulación) */
+        #flyer-preview { width: 100%; aspect-ratio: 1/1; background: black; position: relative; overflow: hidden; border: 2px solid #333; display: flex; align-items: center; justify-content: center; text-align: center; }
+        .text-3d-oro { color: var(--oro); font-weight: 900; text-transform: uppercase; text-shadow: 2px 2px 0px #555, 4px 4px 0px #333, 6px 6px 15px rgba(212,175,55,0.5); }
+        .text-3d-cromo { color: white; font-weight: 900; text-transform: uppercase; text-shadow: 2px 2px 0px #333, 4px 4px 0px #000, 6px 6px 15px rgba(255,255,255,0.3); }
     </style>
 </head>
 <body>
 
     <div id="agenda" class="tab-content active">
-        <h3 style="text-align: center; color: var(--oro);">PACHUCOS MEN 2026</h3>
+        <h2 style="text-align: center; color: var(--oro); letter-spacing: 2px;">PACHUCOS MEN 2026</h2>
+        <button class="btn btn-sec" onclick="compartirAgenda()">📤 COMPARTIR LISTA POR WHATS</button>
         <div id="lista-eventos"></div>
     </div>
 
     <div id="nuevo" class="tab-content">
-        <h2 id="form-title">NUEVA TOCADA</h2>
+        <h2 id="form-title">AGREGAR TOCADA</h2>
         <input type="hidden" id="edit-id">
-        <input type="number" id="dia" placeholder="Día">
+        <input type="number" id="dia" placeholder="Día (1-31)">
         <select id="mes">
             <option value="Enero">Enero</option><option value="Febrero">Febrero</option><option value="Marzo">Marzo</option>
             <option value="Abril">Abril</option><option value="Mayo">Mayo</option><option value="Junio">Junio</option>
@@ -46,31 +60,62 @@
         <input type="number" id="anio" value="2026">
         <input type="text" id="lugar" placeholder="Lugar / Poblado">
         <select id="quien">
-            <option value="José">José</option><option value="Toño">Toño</option><option value="Chava">Chava</option><option value="Otro">Otro</option>
+            <option value="José">José</option><option value="Toño">Toño</option><option value="Chava">Chava</option>
         </select>
-        <input type="text" id="horario" placeholder="Horario">
-        <input type="text" id="horas" placeholder="Horas">
-        <button class="btn" id="btnGuardar" onclick="guardarEvento()">GUARDAR</button>
-        <button class="btn" style="background:#444; color:white;" onclick="resetForm()">CANCELAR</button>
+        <input type="text" id="horario" placeholder="Horario (Ej: 9 PM)">
+        <input type="text" id="horas" placeholder="¿Cuántas horas?">
+        <button class="btn" id="btnGuardar" onclick="guardarEvento()">GUARDAR EN LA NUBE</button>
+        <button class="btn btn-sec" onclick="resetForm(); switchTab('agenda')">CANCELAR</button>
     </div>
 
     <div id="contratos" class="tab-content">
-        <h3>CONTRATO</h3>
-        <input type="text" id="c-cliente" placeholder="Nombre Cliente">
-        <input type="text" id="c-lugar" placeholder="Lugar">
-        <input type="number" id="c-precio" placeholder="Precio $">
+        <h2>GENERAR CONTRATO</h2>
+        <input type="text" id="c-cliente" placeholder="Nombre del Cliente">
+        <input type="text" id="c-lugar" placeholder="Lugar exacto del evento">
+        <input type="number" id="c-precio" placeholder="Precio Total $">
         <input type="number" id="c-anticipo" placeholder="Anticipo $">
-        <canvas id="pad-cliente" class="signature-pad"></canvas>
-        <button class="btn" onclick="generarPDF()">GENERAR PDF</button>
+        <textarea id="c-clausulas" rows="3">El grupo se compromete a llegar 1 hora antes. El saldo se liquidará al finalizar la segunda tanda.</textarea>
+        <p>Firma del Cliente:</p>
+        <canvas id="pad-cliente" class="sig-canvas"></canvas>
+        <button class="btn" onclick="generarContratoPDF()">DESCARGAR Y FIRMAR PDF</button>
+        <hr>
+        <h3>ARCHIVO / PAPELERA</h3>
+        <div id="lista-contratos"></div>
+    </div>
+
+    <div id="flyer" class="tab-content">
+        <h2>GENERADOR 3D</h2>
+        <div id="flyer-preview">
+            <div id="text-render" class="text-3d-oro" style="font-size: 40px;">ANGAMACUTIRO</div>
+        </div>
+        <input type="text" id="f-texto" placeholder="Texto (Lugar/Evento)" oninput="document.getElementById('text-render').innerText = this.value">
+        <select onchange="document.getElementById('text-render').className = this.value">
+            <option value="text-3d-oro">Efecto Oro Pulido 24k</option>
+            <option value="text-3d-cromo">Efecto Cromo Líquido</option>
+        </select>
+        <button class="btn" onclick="descargarFlyer()">GUARDAR IMAGEN EN CEL</button>
+    </div>
+
+    <div id="galeria" class="tab-content">
+        <h2>BODEGA PACHUCO</h2>
+        <h3>🎧 OPENINGS / AUDIOS</h3>
+        <div class="card">Opening Oficial 2026 <br><small>Link: bit.ly/opening-pachucos</small></div>
+        <h3>🖼️ FONDOS PARA PANTALLAS</h3>
+        <div class="card">Video Loop - Logo Oro <br><small>Descargar para el VJ</small></div>
+        <h3>📅 CALENDARIO RÁPIDO</h3>
+        <div id="mini-cal"></div>
     </div>
 
     <nav class="navbar">
         <div class="nav-item active" onclick="switchTab('agenda')">📅 Agenda</div>
         <div class="nav-item" onclick="switchTab('nuevo')">➕ Nueva</div>
-        <div class="nav-item" onclick="switchTab('contratos')">📄 Contrato</div>
+        <div class="nav-item" onclick="switchTab('contratos')">📄 Contratos</div>
+        <div class="nav-item" onclick="switchTab('flyer')">🎨 Flyers</div>
+        <div class="nav-item" onclick="switchTab('galeria')">📦 Bodega</div>
     </nav>
 
     <script>
+        // CONFIGURACIÓN FIREBASE (Ya trae tus llaves)
         const firebaseConfig = {
             apiKey: "AIzaSyBtZHmeBSCMAAsGLm1ADxoNvhdusw-BlkM",
             authDomain: "pachucosapp.firebaseapp.com",
@@ -82,15 +127,48 @@
         };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
-        const canvas = document.getElementById('pad-cliente');
-        const signaturePad = new SignaturePad(canvas);
+        const sigPad = new SignaturePad(document.getElementById('pad-cliente'));
 
+        // Navegación
         function switchTab(id) {
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
             document.getElementById(id).classList.add('active');
             event.currentTarget.classList.add('active');
         }
+
+        // Agenda en tiempo real con Auto-Limpieza
+        db.ref('agenda/').on('value', (snap) => {
+            const list = document.getElementById('lista-eventos');
+            list.innerHTML = "";
+            let currentMonth = "";
+            if(!snap.exists()) { cargarDatosIniciales(); return; }
+
+            const items = [];
+            const hoy = new Date(); hoy.setHours(0,0,0,0);
+
+            snap.forEach(c => { items.push({id: c.key, ...c.val()}); });
+            items.sort((a,b) => (new Date(`${a.mes} ${a.dia}, ${a.anio}`)) - (new Date(`${b.mes} ${b.dia}, ${b.anio}`)));
+
+            items.forEach(d => {
+                const fechaEvento = new Date(`${d.mes} ${d.dia}, ${d.anio}`);
+                if(fechaEvento < hoy) return; // AUTO-LIMPIEZA: Oculta fechas pasadas
+
+                if(d.mes !== currentMonth) {
+                    currentMonth = d.mes;
+                    list.innerHTML += `<div class="month-label">${currentMonth.toUpperCase()}</div>`;
+                }
+                list.innerHTML += `
+                    <div class="card">
+                        <strong>${d.dia}: ${d.lugar}</strong><br>
+                        <small>${d.quien} | ${d.horas} | ${d.horario}</small>
+                        <div style="margin-top:10px;">
+                            <button onclick="editarEvento('${d.id}')" style="background:#2e7d32; color:white; border:none; padding:5px 10px; border-radius:3px;">Editar</button>
+                            <button onclick="borrarEvento('${d.id}')" style="background:#b30000; color:white; border:none; padding:5px 10px; border-radius:3px;">Borrar</button>
+                        </div>
+                    </div>`;
+            });
+        });
 
         function guardarEvento() {
             const id = document.getElementById('edit-id').value;
@@ -103,82 +181,92 @@
                 horario: document.getElementById('horario').value || "?",
                 horas: document.getElementById('horas').value || "?"
             };
-            if(!data.dia || !data.lugar) return alert("Faltan datos");
-            if(id) {
-                db.ref('agenda/' + id).update(data).then(() => { resetForm(); switchTab('agenda'); });
-            } else {
-                db.ref('agenda/').push(data).then(() => { resetForm(); switchTab('agenda'); });
-            }
+            if(!data.dia || !data.lugar) return alert("Pon el día y el lugar");
+            
+            const ref = id ? db.ref('agenda/' + id) : db.ref('agenda/').push();
+            ref.set(data).then(() => {
+                alert("Agenda actualizada");
+                resetForm();
+                switchTab('agenda');
+            });
         }
 
-        function borrarEvento(id) {
-            if(confirm("¿Borrar esta fecha?")) db.ref('agenda/' + id).remove();
-        }
+        function borrarEvento(id) { if(confirm("¿Seguro que quieres cancelar esta fecha?")) db.ref('agenda/' + id).remove(); }
 
-        function editarEvento(id, d, m, a, l, q, h, hr) {
-            document.getElementById('edit-id').value = id;
-            document.getElementById('dia').value = d;
-            document.getElementById('mes').value = m;
-            document.getElementById('anio').value = a;
-            document.getElementById('lugar').value = l;
-            document.getElementById('quien').value = q;
-            document.getElementById('horario').value = h;
-            document.getElementById('horas').value = hr;
-            document.getElementById('form-title').innerText = "EDITAR FECHA";
-            switchTab('nuevo');
+        function editarEvento(id) {
+            db.ref('agenda/' + id).once('value', s => {
+                const d = s.val();
+                document.getElementById('edit-id').value = id;
+                document.getElementById('dia').value = d.dia;
+                document.getElementById('mes').value = d.mes;
+                document.getElementById('lugar').value = d.lugar;
+                document.getElementById('quien').value = d.quien;
+                document.getElementById('horario').value = d.horario;
+                document.getElementById('horas').value = d.horas;
+                document.getElementById('form-title').innerText = "CORREGIR FECHA";
+                switchTab('nuevo');
+            });
         }
 
         function resetForm() {
             document.getElementById('edit-id').value = "";
-            document.getElementById('form-title').innerText = "NUEVA TOCADA";
+            document.getElementById('form-title').innerText = "AGREGAR TOCADA";
             document.querySelectorAll('#nuevo input').forEach(i => i.value = "");
-            document.getElementById('anio').value = "2026";
         }
 
-        db.ref('agenda/').on('value', (snap) => {
-            if(!snap.exists()) {
-                const iniciales = [
-                    {dia:29, mes:"Marzo", anio:2026, lugar:"Santiago Conguripo", quien:"José", horario:"?", horas:"?"},
-                    {dia:10, mes:"Abril", anio:2026, lugar:"Pendiente", quien:"Chava", horario:"?", horas:"2 HRS"},
-                    {dia:3, mes:"Mayo", anio:2026, lugar:"Sin batería", quien:"Chava", horario:"?", horas:"?"},
-                    {dia:16, mes:"Mayo", anio:2026, lugar:"Pendiente", quien:"Toño", horario:"?", horas:"?"},
-                    {dia:22, mes:"Mayo", anio:2026, lugar:"Puruandiro", quien:"Chava", horario:"?", horas:"1 hora"},
-                    {dia:23, mes:"Mayo", anio:2026, lugar:"Potrerillos", quien:"Toño", horario:"?", horas:"?"},
-                    {dia:20, mes:"Junio", anio:2026, lugar:"Pendiente", quien:"Toño", horario:"?", horas:"?"},
-                    {dia:5, mes:"Diciembre", anio:2026, lugar:"La Palma", quien:"Toño", horario:"?", horas:"?"},
-                    {dia:13, mes:"Diciembre", anio:2026, lugar:"Potrerillos", quien:"Toño", horario:"?", horas:"?"},
-                    {dia:24, mes:"Diciembre", anio:2026, lugar:"Casas Viejas", quien:"Chava", horario:"?", horas:"?"},
-                    {dia:27, mes:"Diciembre", anio:2026, lugar:"Salón Eclipse", quien:"José", horario:"?", horas:"?"},
-                    {dia:28, mes:"Diciembre", anio:2026, lugar:"Santiago", quien:"Chava", horario:"?", horas:"?"},
-                    {dia:29, mes:"Diciembre", anio:2026, lugar:"Pendiente", quien:"José", horario:"?", horas:"3 horas"}
-                ];
-                iniciales.forEach(f => db.ref('agenda/').push(f));
-                return;
-            }
-            const list = document.getElementById('lista-eventos');
-            list.innerHTML = "";
-            let currentMonth = "";
-            const items = [];
-            snap.forEach(c => { items.push({id: c.key, ...c.val()}); });
-            items.sort((a,b) => (new Date(`${a.mes} ${a.dia}, ${a.anio}`)) - (new Date(`${b.mes} ${b.dia}, ${b.anio}`)));
-            items.forEach(d => {
-                if(d.mes !== currentMonth) { currentMonth = d.mes; list.innerHTML += `<div class="month-header">${currentMonth.toUpperCase()}</div>`; }
-                list.innerHTML += `<div class="fecha-card"><strong>${d.dia}: ${d.lugar}</strong><br><small>${d.quien} | ${d.horas} | ${d.horario}</small>
-                <div class="actions"><button class="btn-edit" onclick="editarEvento('${d.id}','${d.dia}','${d.mes}','${d.anio}','${d.lugar}','${d.quien}','${d.horario}','${d.horas}')">Editar</button>
-                <button class="btn-delete" onclick="borrarEvento('${d.id}')">Borrar</button></div></div>`;
+        function compartirAgenda() {
+            let texto = "*AGENDA PACHUCOS MEN 2026*%0A%0A";
+            document.querySelectorAll('.card').forEach(c => {
+                texto += "✅ " + c.innerText.replace(/\n/g, " ") + "%0A";
             });
-        });
+            window.open(`https://wa.me/?text=${texto}`);
+        }
 
-        function generarPDF() {
+        function cargarDatosIniciales() {
+            const iniciales = [
+                {dia:29, mes:"Marzo", anio:2026, lugar:"Santiago Conguripo", quien:"José", horario:"?", horas:"?"},
+                {dia:10, mes:"Abril", anio:2026, lugar:"Pendiente", quien:"Chava", horario:"?", horas:"2 HRS"},
+                {dia:3, mes:"Mayo", anio:2026, lugar:"Sin batería", quien:"Chava", horario:"?", horas:"?"},
+                {dia:16, mes:"Mayo", anio:2026, lugar:"Pendiente", quien:"Toño", horario:"?", horas:"?"},
+                {dia:22, mes:"Mayo", anio:2026, lugar:"Puruandiro", quien:"Chava", horario:"?", horas:"1 hora"},
+                {dia:23, mes:"Mayo", anio:2026, lugar:"Potrerillos", quien:"Toño", horario:"?", horas:"?"},
+                {dia:20, mes:"Junio", anio:2026, lugar:"Pendiente", quien:"Toño", horario:"?", horas:"?"},
+                {dia:5, mes:"Diciembre", anio:2026, lugar:"La Palma", quien:"Toño", horario:"?", horas:"?"},
+                {dia:13, mes:"Diciembre", anio:2026, lugar:"Potrerillos", quien:"Toño", horario:"?", horas:"?"},
+                {dia:24, mes:"Diciembre", anio:2026, lugar:"Casas Viejas", quien:"Chava", horario:"?", horas:"?"},
+                {dia:27, mes:"Diciembre", anio:2026, lugar:"Salón Eclipse", quien:"José", horario:"?", horas:"?"},
+                {dia:28, mes:"Diciembre", anio:2026, lugar:"Santiago", quien:"Chava", horario:"?", horas:"?"},
+                {dia:29, mes:"Diciembre", anio:2026, lugar:"Pendiente", quien:"José", horario:"?", horas:"3 horas"}
+            ];
+            iniciales.forEach(f => db.ref('agenda/').push(f));
+        }
+
+        function generarContratoPDF() {
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
-            const cli = document.getElementById('c-cliente').value;
-            doc.text("CONTRATO PACHUCOS MEN", 10, 20);
-            doc.text(`Cliente: ${cli}`, 10, 40);
-            doc.text(`Lugar: ${document.getElementById('c-lugar').value}`, 10, 50);
-            const img = signaturePad.toDataURL();
-            doc.addImage(img, 'PNG', 10, 70, 50, 30);
-            doc.save(`Contrato_${cli}.pdf`);
+            const cliente = document.getElementById('c-cliente').value;
+            doc.setFontSize(22); doc.setTextColor(212, 175, 55); doc.text("CONTRATO DE SERVICIO MUSICAL", 20, 20);
+            doc.setFontSize(12); doc.setTextColor(0, 0, 0);
+            doc.text(`Cliente: ${cliente}`, 20, 40);
+            doc.text(`Lugar: ${document.getElementById('c-lugar').value}`, 20, 50);
+            doc.text(`Precio: $${document.getElementById('c-precio').value}`, 20, 60);
+            doc.text(`Anticipo: $${document.getElementById('c-anticipo').value}`, 20, 70);
+            doc.text("CLAUSULAS:", 20, 90);
+            doc.text(doc.splitTextToSize(document.getElementById('c-clausulas').value, 160), 20, 100);
+            const img = sigPad.toDataURL();
+            doc.addImage(img, 'PNG', 20, 140, 60, 40);
+            doc.text("Firma de Conformidad", 20, 185);
+            doc.save(`Contrato_${cliente}.pdf`);
+            alert("PDF Guardado. Se guardará copia en el historial.");
+        }
+
+        function descargarFlyer() {
+            html2canvas(document.getElementById('flyer-preview')).then(canvas => {
+                const link = document.createElement('a');
+                link.download = 'Flyer_Pachucos.png';
+                link.href = canvas.toDataURL();
+                link.click();
+            });
         }
     </script>
 </body>
