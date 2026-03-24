@@ -2,272 +2,474 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Pachucos Men - Master App</title>
-    
-    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.5/dist/signature_pad.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pachucos Men - Control Total</title>
     <style>
-        :root { --oro: #D4AF37; --cromo: #C0C0C0; --negro: #0a0a0a; --oro-brillante: #FFD700; }
-        body { font-family: 'Segoe UI', Arial, sans-serif; background: var(--negro); color: white; margin: 0; padding-bottom: 90px; overflow-x: hidden; }
+        :root { --oro: #d4af37; --cromo: #e5e5e5; --fondo: #0a0a0a; --rojo: #cc0000; }
+        body { background: var(--fondo); color: white; font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; height: 100vh; overflow: hidden; }
         
-        /* Navegación */
-        .navbar { position: fixed; bottom: 0; width: 100%; background: #000; display: flex; border-top: 2px solid var(--oro); z-index: 100; }
-        .nav-item { flex: 1; text-align: center; padding: 12px 2px; font-size: 0.7em; color: var(--cromo); cursor: pointer; }
-        .nav-item.active { color: var(--oro); border-top: 3px solid var(--oro); background: #1a1a1a; }
-
-        .tab-content { display: none; padding: 15px; animation: fadeIn 0.3s; }
-        .active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
-        /* Estilos de Componentes */
-        .btn { background: linear-gradient(135deg, var(--oro), #996515); color: black; border: none; padding: 12px; width: 100%; border-radius: 5px; font-weight: bold; margin: 5px 0; font-size: 1em; }
-        .btn-sec { background: #333; color: white; border: 1px solid var(--cromo); }
-        .card { background: #1a1a1a; border-left: 4px solid var(--oro); padding: 12px; margin-bottom: 10px; border-radius: 5px; position: relative; }
-        .month-label { background: var(--oro); color: black; padding: 4px 10px; font-weight: bold; margin: 15px 0 5px 0; display: inline-block; border-radius: 3px; font-size: 0.9em; }
+        /* SIDEBAR IZQUIERDO */
+        #sidebar { width: 230px; background: #111; border-right: 1px solid #333; display: flex; flex-direction: column; padding-top: 20px; flex-shrink: 0; }
+        .nav-btn { background: transparent; border: none; color: #888; padding: 15px 25px; text-align: left; font-size: 15px; cursor: pointer; border-left: 4px solid transparent; transition: 0.3s; font-weight: bold; }
+        .nav-btn:hover, .nav-btn.active { color: var(--oro); border-left: 4px solid var(--oro); background: #1a1a1a; }
         
-        input, select, textarea { width: 100%; padding: 12px; margin: 8px 0; border-radius: 5px; border: 1px solid #333; background: #222; color: white; box-sizing: border-box; }
-        .sig-canvas { border: 2px dashed var(--oro); background: white; width: 100%; height: 180px; border-radius: 5px; }
+        main { flex: 1; padding: 30px; overflow-y: auto; background: radial-gradient(circle at top, #1a1a1a, #0a0a0a); }
+        .section { display: none; max-width: 900px; margin: 0 auto; }
+        .section.active { display: block; }
+        
+        /* CALENDARIO Y LISTA */
+        .fecha-card { background: #1a1a1a; border: 1px solid #333; border-radius: 8px; padding: 15px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
+        .fecha-info h3 { margin: 0; color: var(--oro); text-transform: uppercase; letter-spacing: 1px; }
+        .btn-group { display: flex; gap: 8px; }
+        .btn-action { background: none; border: 1px solid #444; color: white; padding: 5px 10px; cursor: pointer; border-radius: 4px; font-size: 12px; }
+        .btn-action.del { border-color: var(--rojo); color: var(--rojo); }
 
-        /* Estilo Flyer 3D (Simulación) */
-        #flyer-preview { width: 100%; aspect-ratio: 1/1; background: black; position: relative; overflow: hidden; border: 2px solid #333; display: flex; align-items: center; justify-content: center; text-align: center; }
-        .text-3d-oro { color: var(--oro); font-weight: 900; text-transform: uppercase; text-shadow: 2px 2px 0px #555, 4px 4px 0px #333, 6px 6px 15px rgba(212,175,55,0.5); }
-        .text-3d-cromo { color: white; font-weight: 900; text-transform: uppercase; text-shadow: 2px 2px 0px #333, 4px 4px 0px #000, 6px 6px 15px rgba(255,255,255,0.3); }
+        /* FORMULARIOS */
+        input, select, textarea { width: 100%; padding: 12px; margin: 8px 0; background: #1a1a1a; border: 1px solid #444; color: white; border-radius: 5px; box-sizing: border-box; }
+        .btn-main { background: var(--oro); color: black; border: none; padding: 15px; width: 100%; font-weight: bold; font-size: 16px; border-radius: 5px; cursor: pointer; margin-top: 10px; }
+
+        /* FLYER LIENZO */
+        #flyer-canvas { width: 100%; height: 450px; background: #222; position: relative; overflow: hidden; border: 2px solid var(--oro); }
+        .item-style { width: 80px; height: 80px; border: 1px solid #444; cursor: pointer; object-fit: cover; }
+        .text-overlay { position: absolute; cursor: move; font-size: 40px; font-weight: bold; white-space: nowrap; text-shadow: 3px 3px 5px #000; }
+
+        /* CONTRATOS - FIRMAS */
+        .pad-box { background: white; border-radius: 5px; margin-top: 5px; }
+        canvas.sig-pad { width: 100%; height: 120px; touch-action: none; cursor: crosshair; }
     </style>
 </head>
 <body>
 
-    <div id="agenda" class="tab-content active">
-        <h2 style="text-align: center; color: var(--oro); letter-spacing: 2px;">PACHUCOS MEN 2026</h2>
-        <button class="btn btn-sec" onclick="compartirAgenda()">📤 COMPARTIR LISTA POR WHATS</button>
-        <div id="lista-eventos"></div>
-    </div>
+<nav id="sidebar">
+    <div style="text-align:center; padding-bottom:30px;"><h2 style="color:var(--oro); margin:0; letter-spacing:2px;">PACHUCOS</h2></div>
+    <button class="nav-btn active" onclick="nav('calendario')">📅 CALENDARIO</button>
+    <button class="nav-btn" onclick="nav('agregar')">➕ AGREGAR FECHA</button>
+    <button class="nav-btn" onclick="nav('galeria')">🖼️ GALERÍA</button>
+    <button class="nav-btn" onclick="nav('flyers')">🎨 FLYERS</button>
+    <button class="nav-btn" onclick="nav('contratos')">📜 CONTRATOS</button>
+</nav>
 
-    <div id="nuevo" class="tab-content">
-        <h2 id="form-title">AGREGAR TOCADA</h2>
-        <input type="hidden" id="edit-id">
-        <input type="number" id="dia" placeholder="Día (1-31)">
-        <select id="mes">
-            <option value="Enero">Enero</option><option value="Febrero">Febrero</option><option value="Marzo">Marzo</option>
-            <option value="Abril">Abril</option><option value="Mayo">Mayo</option><option value="Junio">Junio</option>
-            <option value="Julio">Julio</option><option value="Agosto">Agosto</option><option value="Septiembre">Septiembre</option>
-            <option value="Octubre">Octubre</option><option value="Noviembre">Noviembre</option><option value="Diciembre">Diciembre</option>
-        </select>
-        <input type="number" id="anio" value="2026">
-        <input type="text" id="lugar" placeholder="Lugar / Poblado">
-        <select id="quien">
-            <option value="José">José</option><option value="Toño">Toño</option><option value="Chava">Chava</option>
-        </select>
-        <input type="text" id="horario" placeholder="Horario (Ej: 9 PM)">
-        <input type="text" id="horas" placeholder="¿Cuántas horas?">
-        <button class="btn" id="btnGuardar" onclick="guardarEvento()">GUARDAR EN LA NUBE</button>
-        <button class="btn btn-sec" onclick="resetForm(); switchTab('agenda')">CANCELAR</button>
-    </div>
-
-    <div id="contratos" class="tab-content">
-        <h2>GENERAR CONTRATO</h2>
-        <input type="text" id="c-cliente" placeholder="Nombre del Cliente">
-        <input type="text" id="c-lugar" placeholder="Lugar exacto del evento">
-        <input type="number" id="c-precio" placeholder="Precio Total $">
-        <input type="number" id="c-anticipo" placeholder="Anticipo $">
-        <textarea id="c-clausulas" rows="3">El grupo se compromete a llegar 1 hora antes. El saldo se liquidará al finalizar la segunda tanda.</textarea>
-        <p>Firma del Cliente:</p>
-        <canvas id="pad-cliente" class="sig-canvas"></canvas>
-        <button class="btn" onclick="generarContratoPDF()">DESCARGAR Y FIRMAR PDF</button>
-        <hr>
-        <h3>ARCHIVO / PAPELERA</h3>
-        <div id="lista-contratos"></div>
-    </div>
-
-    <div id="flyer" class="tab-content">
-        <h2>GENERADOR 3D</h2>
-        <div id="flyer-preview">
-            <div id="text-render" class="text-3d-oro" style="font-size: 40px;">ANGAMACUTIRO</div>
+<main>
+    <section id="calendario" class="section active">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+            <h1 style="color:var(--oro); margin:0;">AGENDA DEL GRUPO</h1>
+            <button onclick="shareAll()" style="background:var(--oro); border:none; padding:8px 15px; font-weight:bold; border-radius:4px;">COMPARTIR LISTA</button>
         </div>
-        <input type="text" id="f-texto" placeholder="Texto (Lugar/Evento)" oninput="document.getElementById('text-render').innerText = this.value">
-        <select onchange="document.getElementById('text-render').className = this.value">
-            <option value="text-3d-oro">Efecto Oro Pulido 24k</option>
-            <option value="text-3d-cromo">Efecto Cromo Líquido</option>
+        <div id="lista-fechas">Cargando libreta...</div>
+    </section>
+
+    <section id="agregar" class="section">
+        <h1>REGISTRAR JALE</h1>
+        <div style="display:flex; gap:10px;">
+            <input type="number" id="dia" placeholder="Día">
+            <select id="mes">
+                <option value="1">Enero</option><option value="2">Febrero</option><option value="3">Marzo</option>
+                <option value="4">Abril</option><option value="5">Mayo</option><option value="6">Junio</option>
+                <option value="7">Julio</option><option value="8">Agosto</option><option value="9">Septiembre</option>
+                <option value="10">Octubre</option><option value="11">Noviembre</option><option value="12">Diciembre</option>
+            </select>
+            <input type="number" id="anio" value="2026">
+        </div>
+        <select id="rep">
+            <option value="">¿Quién agendó?</option>
+            <option value="JOSÉ">JOSÉ</option><option value="CHAVA">CHAVA</option><option value="TOÑO">TOÑO</option><option value="JAPO">JAPO</option><option value="OTROS">OTROS</option>
         </select>
-        <button class="btn" onclick="descargarFlyer()">GUARDAR IMAGEN EN CEL</button>
-    </div>
+        <input type="text" id="lugar" placeholder="Lugar">
+        <input type="text" id="hora" placeholder="Hora">
+        <input type="text" id="tiempo" placeholder="Tiempo de jale">
+        <button class="btn-main" onclick="saveJale()">GUARDAR EN DRIVE</button>
+    </section>
 
-    <div id="galeria" class="tab-content">
-        <h2>BODEGA PACHUCO</h2>
-        <h3>🎧 OPENINGS / AUDIOS</h3>
-        <div class="card">Opening Oficial 2026 <br><small>Link: bit.ly/opening-pachucos</small></div>
-        <h3>🖼️ FONDOS PARA PANTALLAS</h3>
-        <div class="card">Video Loop - Logo Oro <br><small>Descargar para el VJ</small></div>
-        <h3>📅 CALENDARIO RÁPIDO</h3>
-        <div id="mini-cal"></div>
-    </div>
+    <section id="galeria" class="section">
+        <h1>GALERÍA (INGENIERO)</h1>
+        <div id="lista-galeria" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap:10px;"></div>
+    </section>
 
-    <nav class="navbar">
-        <div class="nav-item active" onclick="switchTab('agenda')">📅 Agenda</div>
-        <div class="nav-item" onclick="switchTab('nuevo')">➕ Nueva</div>
-        <div class="nav-item" onclick="switchTab('contratos')">📄 Contratos</div>
-        <div class="nav-item" onclick="switchTab('flyer')">🎨 Flyers</div>
-        <div class="nav-item" onclick="switchTab('galeria')">📦 Bodega</div>
-    </nav>
+    <section id="flyers" class="section">
+        <h1>DISEÑADOR DE FLYERS</h1>
+        <div id="flyer-canvas"></div>
+        <input type="text" id="flyer-txt" placeholder="Nombre del evento/pueblo">
+        <p>Selecciona estilo de imagen:</p>
+        <div id="estilos-list" style="display:flex; gap:10px; overflow-x:auto; padding-bottom:10px;"></div>
+        <button class="btn-main" onclick="generateText()">APLICAR ESTILO Y CREAR</button>
+    </section>
 
-    <script>
-        // CONFIGURACIÓN FIREBASE (Ya trae tus llaves)
-        const firebaseConfig = {
-            apiKey: "AIzaSyBtZHmeBSCMAAsGLm1ADxoNvhdusw-BlkM",
-            authDomain: "pachucosapp.firebaseapp.com",
-            databaseURL: "https://pachucosapp-default-rtdb.firebaseio.com",
-            projectId: "pachucosapp",
-            storageBucket: "pachucosapp.firebasestorage.app",
-            messagingSenderId: "573811803303",
-            appId: "1:573811803303:web:0ceaa831d13f0e0ada8782"
+    <section id="contratos" class="section">
+        <h1>CONTRATOS DIGITALES</h1>
+        <button class="btn-main" style="background:#444; color:white;" onclick="window.print()">IMPRIMIR MACHOTE VACÍO</button>
+        <input type="text" id="ct-cliente" placeholder="Nombre del Cliente">
+        <input type="text" id="ct-pago" placeholder="Monto Total $">
+        <div style="display:flex; gap:15px;">
+            <div style="flex:1;">
+                <small>Firma Representante:</small>
+                <div class="pad-box"><canvas id="sig-rep" class="sig-pad"></canvas></div>
+            </div>
+            <div style="flex:1;">
+                <small>Firma Cliente:</small>
+                <div class="pad-box"><canvas id="sig-cli" class="sig-pad"></canvas></div>
+            </div>
+        </div>
+        <button class="btn-main" style="background:#25D366;" onclick="sendWA()">GENERAR Y ENVIAR WHATSAPP</button>
+    </section>
+</main>
+
+<script>
+    const URL_APPS = 'https://script.google.com/macros/s/AKfycbuW-UQvGgP2BsRBJUTSBcsh02qXQagGB3XhXDIU6_rt3YAN1RRU3UF_LEXeQz7KjxA/exec';
+    let agendaData = [];
+
+    function nav(id) {
+        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        if(id === 'calendario') loadAgenda();
+        if(id === 'galeria') loadFiles('BODEGA', 'lista-galeria');
+        if(id === 'flyers') loadFiles('03_ESTILOS_TITULO', 'estilos-list');
+    }
+
+    // AGENDA Y CALENDARIO
+    async function loadAgenda() {
+        const res = await fetch(`${URL_APPS}?action=getAgenda`);
+        agendaData = await res.json();
+        agendaData.sort((a, b) => new Date(a.anio, a.mes-1, a.dia) - new Date(b.anio, b.mes-1, b.dia));
+        
+        const container = document.getElementById('lista-fechas');
+        container.innerHTML = agendaData.map((f, i) => `
+            <div class="fecha-card">
+                <div>
+                    <h3>${f.dia}/${f.mes}/${f.anio}</h3>
+                    <p>📍 ${f.lugar} | 🤵 ${f.representante}</p>
+                </div>
+                <div class="btn-group">
+                    <button class="btn-action" onclick="editJale(${i})">EDITAR</button>
+                    <button class="btn-action del" onclick="deleteJale(${i})">BORRAR</button>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    async function saveJale() {
+        const dia = document.getElementById('dia').value;
+        const mes = document.getElementById('mes').value;
+        const anio = document.getElementById('anio').value;
+        const rep = document.getElementById('rep').value;
+
+        if(!dia || !mes || !anio || !rep) return alert("¡RELLENA LOS 4 DATOS OBLIGATORIOS!");
+
+        const jale = { dia, mes, anio, representante: rep, lugar: document.getElementById('lugar').value || '?', hora: document.getElementById('hora').value || '?', tiempo: document.getElementById('tiempo').value || '?' };
+        agendaData.push(jale);
+        await fetch(URL_APPS, { method: 'POST', body: JSON.stringify(agendaData) });
+        nav('calendario');
+    }
+
+    async function deleteJale(i) {
+        if(confirm("¿Borrar jale?")) {
+            agendaData.splice(i, 1);
+            await fetch(URL_APPS, { method: 'POST', body: JSON.stringify(agendaData) });
+            loadAgenda();
+        }
+    }
+
+    // ARCHIVOS DRIVE (GALERÍA Y ESTILOS)
+    async function loadFiles(folder, targetId) {
+        const res = await fetch(`${URL_APPS}?action=getFiles&folder=${folder}`);
+        const files = await res.json();
+        const container = document.getElementById(targetId);
+        container.innerHTML = files.map(f => folder === 'BODEGA' ? `
+            <div style="background:#222; padding:10px; border-radius:5px; text-align:center;">
+                <small>${f.nombre}</small><br>
+                <a href="${f.url}" target="_blank" style="color:var(--oro); font-size:11px;">DESCARGAR</a>
+            </div>` : `<img src="${f.url}" class="item-style" onclick="selectStyle('${f.url}')">`
+        ).join('');
+    }
+
+    // FLYERS Y ESTILOS
+    let currentStyleUrl = '';
+    function selectStyle(url) { currentStyleUrl = url; alert("Estilo de imagen seleccionado"); }
+
+    function generateText() {
+        const val = document.getElementById('flyer-txt').value;
+        if(!val) return;
+        const div = document.createElement('div');
+        div.className = 'text-overlay';
+        div.innerText = val.toUpperCase();
+        div.style.color = currentStyleUrl.includes('ORO') ? '#d4af37' : '#e5e5e5';
+        div.style.left = "50px"; div.style.top = "50px";
+        setupDrag(div);
+        document.getElementById('flyer-canvas').appendChild(div);
+    }
+
+    function setupDrag(el) {
+        let x=0, y=0, mx=0, my=0;
+        el.onmousedown = (e) => { 
+            mx=e.clientX; my=e.clientY; 
+            document.onmousemove = (e) => { x=mx-e.clientX; y=my-e.clientY; mx=e.clientX; my=e.clientY; el.style.top=(el.offsetTop-y)+"px"; el.style.left=(el.offsetLeft-x)+"px"; };
+            document.onmouseup = () => document.onmousemove = null;
         };
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
-        const sigPad = new SignaturePad(document.getElementById('pad-cliente'));
+    }
 
-        // Navegación
-        function switchTab(id) {
-            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-            event.currentTarget.classList.add('active');
-        }
+    // WHATSAPP
+    function shareAll() {
+        let t = "*AGENDA PACHUCOS MEN*\n\n";
+        agendaData.forEach(f => t += `📅 ${f.dia}/${f.mes}/${f.anio} - ${f.lugar}\n`);
+        window.open(`https://wa.me/?text=${encodeURIComponent(t)}`);
+    }
 
-        // Agenda en tiempo real con Auto-Limpieza
-        db.ref('agenda/').on('value', (snap) => {
-            const list = document.getElementById('lista-eventos');
-            list.innerHTML = "";
-            let currentMonth = "";
-            if(!snap.exists()) { cargarDatosIniciales(); return; }
-
-            const items = [];
-            const hoy = new Date(); hoy.setHours(0,0,0,0);
-
-            snap.forEach(c => { items.push({id: c.key, ...c.val()}); });
-            items.sort((a,b) => (new Date(`${a.mes} ${a.dia}, ${a.anio}`)) - (new Date(`${b.mes} ${b.dia}, ${b.anio}`)));
-
-            items.forEach(d => {
-                const fechaEvento = new Date(`${d.mes} ${d.dia}, ${d.anio}`);
-                if(fechaEvento < hoy) return; // AUTO-LIMPIEZA: Oculta fechas pasadas
-
-                if(d.mes !== currentMonth) {
-                    currentMonth = d.mes;
-                    list.innerHTML += `<div class="month-label">${currentMonth.toUpperCase()}</div>`;
-                }
-                list.innerHTML += `
-                    <div class="card">
-                        <strong>${d.dia}: ${d.lugar}</strong><br>
-                        <small>${d.quien} | ${d.horas} | ${d.horario}</small>
-                        <div style="margin-top:10px;">
-                            <button onclick="editarEvento('${d.id}')" style="background:#2e7d32; color:white; border:none; padding:5px 10px; border-radius:3px;">Editar</button>
-                            <button onclick="borrarEvento('${d.id}')" style="background:#b30000; color:white; border:none; padding:5px 10px; border-radius:3px;">Borrar</button>
-                        </div>
-                    </div>`;
-            });
-        });
-
-        function guardarEvento() {
-            const id = document.getElementById('edit-id').value;
-            const data = {
-                dia: document.getElementById('dia').value,
-                mes: document.getElementById('mes').value,
-                anio: document.getElementById('anio').value,
-                lugar: document.getElementById('lugar').value,
-                quien: document.getElementById('quien').value,
-                horario: document.getElementById('horario').value || "?",
-                horas: document.getElementById('horas').value || "?"
+    // INICIAR FIRMAS
+    function initPads() {
+        [document.getElementById('sig-rep'), document.getElementById('sig-cli')].forEach(canvas => {
+            const ctx = canvas.getContext('2d');
+            let drawing = false;
+            canvas.onmousedown = canvas.ontouchstart = () => drawing = true;
+            canvas.onmouseup = canvas.ontouchend = () => { drawing = false; ctx.beginPath(); };
+            canvas.onmousemove = canvas.ontouchmove = (e) => {
+                if(!drawing) return;
+                const rect = canvas.getBoundingClientRect();
+                const x = (e.clientX || e.touches[0].clientX) - rect.left;
+                const y = (e.clientY || e.touches[0].clientY) - rect.top;
+                ctx.lineWidth = 2; ctx.lineTo(x, y); ctx.stroke();
             };
-            if(!data.dia || !data.lugar) return alert("Pon el día y el lugar");
-            
-            const ref = id ? db.ref('agenda/' + id) : db.ref('agenda/').push();
-            ref.set(data).then(() => {
-                alert("Agenda actualizada");
-                resetForm();
-                switchTab('agenda');
-            });
-        }
+        });
+    }
 
-        function borrarEvento(id) { if(confirm("¿Seguro que quieres cancelar esta fecha?")) db.ref('agenda/' + id).remove(); }
-
-        function editarEvento(id) {
-            db.ref('agenda/' + id).once('value', s => {
-                const d = s.val();
-                document.getElementById('edit-id').value = id;
-                document.getElementById('dia').value = d.dia;
-                document.getElementById('mes').value = d.mes;
-                document.getElementById('lugar').value = d.lugar;
-                document.getElementById('quien').value = d.quien;
-                document.getElementById('horario').value = d.horario;
-                document.getElementById('horas').value = d.horas;
-                document.getElementById('form-title').innerText = "CORREGIR FECHA";
-                switchTab('nuevo');
-            });
-        }
-
-        function resetForm() {
-            document.getElementById('edit-id').value = "";
-            document.getElementById('form-title').innerText = "AGREGAR TOCADA";
-            document.querySelectorAll('#nuevo input').forEach(i => i.value = "");
-        }
-
-        function compartirAgenda() {
-            let texto = "*AGENDA PACHUCOS MEN 2026*%0A%0A";
-            document.querySelectorAll('.card').forEach(c => {
-                texto += "✅ " + c.innerText.replace(/\n/g, " ") + "%0A";
-            });
-            window.open(`https://wa.me/?text=${texto}`);
-        }
-
-        function cargarDatosIniciales() {
-            const iniciales = [
-                {dia:29, mes:"Marzo", anio:2026, lugar:"Santiago Conguripo", quien:"José", horario:"?", horas:"?"},
-                {dia:10, mes:"Abril", anio:2026, lugar:"Pendiente", quien:"Chava", horario:"?", horas:"2 HRS"},
-                {dia:3, mes:"Mayo", anio:2026, lugar:"Sin batería", quien:"Chava", horario:"?", horas:"?"},
-                {dia:16, mes:"Mayo", anio:2026, lugar:"Pendiente", quien:"Toño", horario:"?", horas:"?"},
-                {dia:22, mes:"Mayo", anio:2026, lugar:"Puruandiro", quien:"Chava", horario:"?", horas:"1 hora"},
-                {dia:23, mes:"Mayo", anio:2026, lugar:"Potrerillos", quien:"Toño", horario:"?", horas:"?"},
-                {dia:20, mes:"Junio", anio:2026, lugar:"Pendiente", quien:"Toño", horario:"?", horas:"?"},
-                {dia:5, mes:"Diciembre", anio:2026, lugar:"La Palma", quien:"Toño", horario:"?", horas:"?"},
-                {dia:13, mes:"Diciembre", anio:2026, lugar:"Potrerillos", quien:"Toño", horario:"?", horas:"?"},
-                {dia:24, mes:"Diciembre", anio:2026, lugar:"Casas Viejas", quien:"Chava", horario:"?", horas:"?"},
-                {dia:27, mes:"Diciembre", anio:2026, lugar:"Salón Eclipse", quien:"José", horario:"?", horas:"?"},
-                {dia:28, mes:"Diciembre", anio:2026, lugar:"Santiago", quien:"Chava", horario:"?", horas:"?"},
-                {dia:29, mes:"Diciembre", anio:2026, lugar:"Pendiente", quien:"José", horario:"?", horas:"3 horas"}
-            ];
-            iniciales.forEach(f => db.ref('agenda/').push(f));
-        }
-
-        function generarContratoPDF() {
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
-            const cliente = document.getElementById('c-cliente').value;
-            doc.setFontSize(22); doc.setTextColor(212, 175, 55); doc.text("CONTRATO DE SERVICIO MUSICAL", 20, 20);
-            doc.setFontSize(12); doc.setTextColor(0, 0, 0);
-            doc.text(`Cliente: ${cliente}`, 20, 40);
-            doc.text(`Lugar: ${document.getElementById('c-lugar').value}`, 20, 50);
-            doc.text(`Precio: $${document.getElementById('c-precio').value}`, 20, 60);
-            doc.text(`Anticipo: $${document.getElementById('c-anticipo').value}`, 20, 70);
-            doc.text("CLAUSULAS:", 20, 90);
-            doc.text(doc.splitTextToSize(document.getElementById('c-clausulas').value, 160), 20, 100);
-            const img = sigPad.toDataURL();
-            doc.addImage(img, 'PNG', 20, 140, 60, 40);
-            doc.text("Firma de Conformidad", 20, 185);
-            doc.save(`Contrato_${cliente}.pdf`);
-            alert("PDF Guardado. Se guardará copia en el historial.");
-        }
-
-        function descargarFlyer() {
-            html2canvas(document.getElementById('flyer-preview')).then(canvas => {
-                const link = document.createElement('a');
-                link.download = 'Flyer_Pachucos.png';
-                link.href = canvas.toDataURL();
-                link.click();
-            });
-        }
-    </script>
+    window.onload = () => { loadAgenda(); initPads(); };
+</script>
 </body>
 </html>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pachucos Men - Control Total</title>
+    <style>
+        :root { --oro: #d4af37; --cromo: #e5e5e5; --fondo: #0a0a0a; --rojo: #cc0000; }
+        body { background: var(--fondo); color: white; font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; height: 100vh; overflow: hidden; }
+        
+        /* SIDEBAR IZQUIERDO */
+        #sidebar { width: 230px; background: #111; border-right: 1px solid #333; display: flex; flex-direction: column; padding-top: 20px; flex-shrink: 0; }
+        .nav-btn { background: transparent; border: none; color: #888; padding: 15px 25px; text-align: left; font-size: 15px; cursor: pointer; border-left: 4px solid transparent; transition: 0.3s; font-weight: bold; }
+        .nav-btn:hover, .nav-btn.active { color: var(--oro); border-left: 4px solid var(--oro); background: #1a1a1a; }
+        
+        main { flex: 1; padding: 30px; overflow-y: auto; background: radial-gradient(circle at top, #1a1a1a, #0a0a0a); }
+        .section { display: none; max-width: 900px; margin: 0 auto; }
+        .section.active { display: block; }
+        
+        /* CALENDARIO Y LISTA */
+        .fecha-card { background: #1a1a1a; border: 1px solid #333; border-radius: 8px; padding: 15px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
+        .fecha-info h3 { margin: 0; color: var(--oro); text-transform: uppercase; letter-spacing: 1px; }
+        .btn-group { display: flex; gap: 8px; }
+        .btn-action { background: none; border: 1px solid #444; color: white; padding: 5px 10px; cursor: pointer; border-radius: 4px; font-size: 12px; }
+        .btn-action.del { border-color: var(--rojo); color: var(--rojo); }
+
+        /* FORMULARIOS */
+        input, select, textarea { width: 100%; padding: 12px; margin: 8px 0; background: #1a1a1a; border: 1px solid #444; color: white; border-radius: 5px; box-sizing: border-box; }
+        .btn-main { background: var(--oro); color: black; border: none; padding: 15px; width: 100%; font-weight: bold; font-size: 16px; border-radius: 5px; cursor: pointer; margin-top: 10px; }
+
+        /* FLYER LIENZO */
+        #flyer-canvas { width: 100%; height: 450px; background: #222; position: relative; overflow: hidden; border: 2px solid var(--oro); }
+        .item-style { width: 80px; height: 80px; border: 1px solid #444; cursor: pointer; object-fit: cover; }
+        .text-overlay { position: absolute; cursor: move; font-size: 40px; font-weight: bold; white-space: nowrap; text-shadow: 3px 3px 5px #000; }
+
+        /* CONTRATOS - FIRMAS */
+        .pad-box { background: white; border-radius: 5px; margin-top: 5px; }
+        canvas.sig-pad { width: 100%; height: 120px; touch-action: none; cursor: crosshair; }
+    </style>
+</head>
+<body>
+
+<nav id="sidebar">
+    <div style="text-align:center; padding-bottom:30px;"><h2 style="color:var(--oro); margin:0; letter-spacing:2px;">PACHUCOS</h2></div>
+    <button class="nav-btn active" onclick="nav('calendario')">📅 CALENDARIO</button>
+    <button class="nav-btn" onclick="nav('agregar')">➕ AGREGAR FECHA</button>
+    <button class="nav-btn" onclick="nav('galeria')">🖼️ GALERÍA</button>
+    <button class="nav-btn" onclick="nav('flyers')">🎨 FLYERS</button>
+    <button class="nav-btn" onclick="nav('contratos')">📜 CONTRATOS</button>
+</nav>
+
+<main>
+    <section id="calendario" class="section active">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+            <h1 style="color:var(--oro); margin:0;">AGENDA DEL GRUPO</h1>
+            <button onclick="shareAll()" style="background:var(--oro); border:none; padding:8px 15px; font-weight:bold; border-radius:4px;">COMPARTIR LISTA</button>
+        </div>
+        <div id="lista-fechas">Cargando libreta...</div>
+    </section>
+
+    <section id="agregar" class="section">
+        <h1>REGISTRAR JALE</h1>
+        <div style="display:flex; gap:10px;">
+            <input type="number" id="dia" placeholder="Día">
+            <select id="mes">
+                <option value="1">Enero</option><option value="2">Febrero</option><option value="3">Marzo</option>
+                <option value="4">Abril</option><option value="5">Mayo</option><option value="6">Junio</option>
+                <option value="7">Julio</option><option value="8">Agosto</option><option value="9">Septiembre</option>
+                <option value="10">Octubre</option><option value="11">Noviembre</option><option value="12">Diciembre</option>
+            </select>
+            <input type="number" id="anio" value="2026">
+        </div>
+        <select id="rep">
+            <option value="">¿Quién agendó?</option>
+            <option value="JOSÉ">JOSÉ</option><option value="CHAVA">CHAVA</option><option value="TOÑO">TOÑO</option><option value="JAPO">JAPO</option><option value="OTROS">OTROS</option>
+        </select>
+        <input type="text" id="lugar" placeholder="Lugar">
+        <input type="text" id="hora" placeholder="Hora">
+        <input type="text" id="tiempo" placeholder="Tiempo de jale">
+        <button class="btn-main" onclick="saveJale()">GUARDAR EN DRIVE</button>
+    </section>
+
+    <section id="galeria" class="section">
+        <h1>GALERÍA (INGENIERO)</h1>
+        <div id="lista-galeria" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap:10px;"></div>
+    </section>
+
+    <section id="flyers" class="section">
+        <h1>DISEÑADOR DE FLYERS</h1>
+        <div id="flyer-canvas"></div>
+        <input type="text" id="flyer-txt" placeholder="Nombre del evento/pueblo">
+        <p>Selecciona estilo de imagen:</p>
+        <div id="estilos-list" style="display:flex; gap:10px; overflow-x:auto; padding-bottom:10px;"></div>
+        <button class="btn-main" onclick="generateText()">APLICAR ESTILO Y CREAR</button>
+    </section>
+
+    <section id="contratos" class="section">
+        <h1>CONTRATOS DIGITALES</h1>
+        <button class="btn-main" style="background:#444; color:white;" onclick="window.print()">IMPRIMIR MACHOTE VACÍO</button>
+        <input type="text" id="ct-cliente" placeholder="Nombre del Cliente">
+        <input type="text" id="ct-pago" placeholder="Monto Total $">
+        <div style="display:flex; gap:15px;">
+            <div style="flex:1;">
+                <small>Firma Representante:</small>
+                <div class="pad-box"><canvas id="sig-rep" class="sig-pad"></canvas></div>
+            </div>
+            <div style="flex:1;">
+                <small>Firma Cliente:</small>
+                <div class="pad-box"><canvas id="sig-cli" class="sig-pad"></canvas></div>
+            </div>
+        </div>
+        <button class="btn-main" style="background:#25D366;" onclick="sendWA()">GENERAR Y ENVIAR WHATSAPP</button>
+    </section>
+</main>
+
+<script>
+    const URL_APPS = 'https://script.google.com/macros/s/AKfycbuW-UQvGgP2BsRBJUTSBcsh02qXQagGB3XhXDIU6_rt3YAN1RRU3UF_LEXeQz7KjxA/exec';
+    let agendaData = [];
+
+    function nav(id) {
+        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        if(id === 'calendario') loadAgenda();
+        if(id === 'galeria') loadFiles('BODEGA', 'lista-galeria');
+        if(id === 'flyers') loadFiles('03_ESTILOS_TITULO', 'estilos-list');
+    }
+
+    // AGENDA Y CALENDARIO
+    async function loadAgenda() {
+        const res = await fetch(`${URL_APPS}?action=getAgenda`);
+        agendaData = await res.json();
+        agendaData.sort((a, b) => new Date(a.anio, a.mes-1, a.dia) - new Date(b.anio, b.mes-1, b.dia));
+        
+        const container = document.getElementById('lista-fechas');
+        container.innerHTML = agendaData.map((f, i) => `
+            <div class="fecha-card">
+                <div>
+                    <h3>${f.dia}/${f.mes}/${f.anio}</h3>
+                    <p>📍 ${f.lugar} | 🤵 ${f.representante}</p>
+                </div>
+                <div class="btn-group">
+                    <button class="btn-action" onclick="editJale(${i})">EDITAR</button>
+                    <button class="btn-action del" onclick="deleteJale(${i})">BORRAR</button>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    async function saveJale() {
+        const dia = document.getElementById('dia').value;
+        const mes = document.getElementById('mes').value;
+        const anio = document.getElementById('anio').value;
+        const rep = document.getElementById('rep').value;
+
+        if(!dia || !mes || !anio || !rep) return alert("¡RELLENA LOS 4 DATOS OBLIGATORIOS!");
+
+        const jale = { dia, mes, anio, representante: rep, lugar: document.getElementById('lugar').value || '?', hora: document.getElementById('hora').value || '?', tiempo: document.getElementById('tiempo').value || '?' };
+        agendaData.push(jale);
+        await fetch(URL_APPS, { method: 'POST', body: JSON.stringify(agendaData) });
+        nav('calendario');
+    }
+
+    async function deleteJale(i) {
+        if(confirm("¿Borrar jale?")) {
+            agendaData.splice(i, 1);
+            await fetch(URL_APPS, { method: 'POST', body: JSON.stringify(agendaData) });
+            loadAgenda();
+        }
+    }
+
+    // ARCHIVOS DRIVE (GALERÍA Y ESTILOS)
+    async function loadFiles(folder, targetId) {
+        const res = await fetch(`${URL_APPS}?action=getFiles&folder=${folder}`);
+        const files = await res.json();
+        const container = document.getElementById(targetId);
+        container.innerHTML = files.map(f => folder === 'BODEGA' ? `
+            <div style="background:#222; padding:10px; border-radius:5px; text-align:center;">
+                <small>${f.nombre}</small><br>
+                <a href="${f.url}" target="_blank" style="color:var(--oro); font-size:11px;">DESCARGAR</a>
+            </div>` : `<img src="${f.url}" class="item-style" onclick="selectStyle('${f.url}')">`
+        ).join('');
+    }
+
+    // FLYERS Y ESTILOS
+    let currentStyleUrl = '';
+    function selectStyle(url) { currentStyleUrl = url; alert("Estilo de imagen seleccionado"); }
+
+    function generateText() {
+        const val = document.getElementById('flyer-txt').value;
+        if(!val) return;
+        const div = document.createElement('div');
+        div.className = 'text-overlay';
+        div.innerText = val.toUpperCase();
+        div.style.color = currentStyleUrl.includes('ORO') ? '#d4af37' : '#e5e5e5';
+        div.style.left = "50px"; div.style.top = "50px";
+        setupDrag(div);
+        document.getElementById('flyer-canvas').appendChild(div);
+    }
+
+    function setupDrag(el) {
+        let x=0, y=0, mx=0, my=0;
+        el.onmousedown = (e) => { 
+            mx=e.clientX; my=e.clientY; 
+            document.onmousemove = (e) => { x=mx-e.clientX; y=my-e.clientY; mx=e.clientX; my=e.clientY; el.style.top=(el.offsetTop-y)+"px"; el.style.left=(el.offsetLeft-x)+"px"; };
+            document.onmouseup = () => document.onmousemove = null;
+        };
+    }
+
+    // WHATSAPP
+    function shareAll() {
+        let t = "*AGENDA PACHUCOS MEN*\n\n";
+        agendaData.forEach(f => t += `📅 ${f.dia}/${f.mes}/${f.anio} - ${f.lugar}\n`);
+        window.open(`https://wa.me/?text=${encodeURIComponent(t)}`);
+    }
+
+    // INICIAR FIRMAS
+    function initPads() {
+        [document.getElementById('sig-rep'), document.getElementById('sig-cli')].forEach(canvas => {
+            const ctx = canvas.getContext('2d');
+            let drawing = false;
+            canvas.onmousedown = canvas.ontouchstart = () => drawing = true;
+            canvas.onmouseup = canvas.ontouchend = () => { drawing = false; ctx.beginPath(); };
+            canvas.onmousemove = canvas.ontouchmove = (e) => {
+                if(!drawing) return;
+                const rect = canvas.getBoundingClientRect();
+                const x = (e.clientX || e.touches[0].clientX) - rect.left;
+                const y = (e.clientY || e.touches[0].clientY) - rect.top;
+                ctx.lineWidth = 2; ctx.lineTo(x, y); ctx.stroke();
+            };
+        });
+    }
+
+    window.onload = () => { loadAgenda(); initPads(); };
+</script>
+</body>
+</html>
+
