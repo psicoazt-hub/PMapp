@@ -3,59 +3,71 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pachucos Men - Control Total</title>
+    <title>Pachucos Men - App Oficial</title>
     <style>
-        :root { --oro: #d4af37; --cromo: #e5e5e5; --fondo: #0a0a0a; --rojo: #cc0000; }
+        :root { --oro: #d4af37; --fondo: #0a0a0a; --rojo: #cc0000; --gris: #1a1a1a; }
         * { box-sizing: border-box; }
         body { background: var(--fondo); color: white; font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; height: 100vh; overflow: hidden; }
         
-        /* SIDEBAR (Menú a la izquierda) */
-        #sidebar { width: 230px; background: #111; border-right: 1px solid #333; display: flex; flex-direction: column; padding-top: 20px; flex-shrink: 0; }
-        .nav-btn { background: transparent; border: none; color: #888; padding: 15px 25px; text-align: left; font-size: 15px; cursor: pointer; border-left: 4px solid transparent; transition: 0.3s; font-weight: bold; }
-        .nav-btn:hover, .nav-btn.active { color: var(--oro); border-left: 4px solid var(--oro); background: #1a1a1a; }
+        /* SIDEBAR IZQUIERDO */
+        #sidebar { width: 220px; background: #111; border-right: 1px solid #333; display: flex; flex-direction: column; padding-top: 20px; flex-shrink: 0; }
+        .nav-btn { background: transparent; border: none; color: #888; padding: 15px 20px; text-align: left; font-size: 14px; cursor: pointer; border-left: 4px solid transparent; transition: 0.3s; font-weight: bold; text-transform: uppercase; }
+        .nav-btn:hover, .nav-btn.active { color: var(--oro); border-left: 4px solid var(--oro); background: var(--gris); }
         
-        main { flex: 1; padding: 30px; overflow-y: auto; background: radial-gradient(circle at top, #1a1a1a, #0a0a0a); }
+        main { flex: 1; padding: 25px; overflow-y: auto; background: radial-gradient(circle at top, #222, #0a0a0a); }
         .section { display: none; max-width: 900px; margin: 0 auto; }
         .section.active { display: block; }
         
-        /* LISTA MINIMALISTA (CALENDARIO) */
-        .card { background: #1a1a1a; border: 1px solid #333; border-radius: 8px; padding: 15px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
-        .card h3 { margin: 0; color: var(--oro); font-size: 18px; text-transform: uppercase; }
-        .btn-action { background: none; border: 1px solid #444; color: white; padding: 5px 10px; cursor: pointer; border-radius: 4px; font-size: 12px; }
-        .btn-action.del { border-color: var(--rojo); color: var(--rojo); }
+        /* CALENDARIO REAL */
+        .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; margin-top: 10px; }
+        .cal-day { background: var(--gris); border: 1px solid #333; aspect-ratio: 1; padding: 5px; font-size: 12px; position: relative; }
+        .cal-day.today { border-color: var(--oro); }
+        .has-event { background: #332b00; border: 1px solid var(--oro); }
+        .dot { width: 6px; height: 6px; background: var(--oro); border-radius: 50%; margin: 2px auto; }
 
-        /* FLYERS (Estilos por imagen) */
-        #flyer-canvas { width: 100%; height: 400px; background: #222; position: relative; overflow: hidden; border: 2px solid var(--oro); }
-        .thumb-estilo { width: 90px; height: 90px; object-fit: cover; border: 2px solid #444; cursor: pointer; border-radius: 5px; }
-        .thumb-estilo.selected { border-color: var(--oro); }
-        .text-drag { position: absolute; cursor: move; font-size: 45px; font-weight: bold; text-shadow: 3px 3px 6px #000; white-space: nowrap; user-select: none; }
+        /* LISTA AGENDA */
+        .card { background: var(--gris); border: 1px solid #333; border-radius: 8px; padding: 15px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+        .card h3 { margin: 0; color: var(--oro); font-size: 18px; }
+        .btn-del { color: var(--rojo); background: none; border: 1px solid var(--rojo); padding: 5px 10px; border-radius: 4px; cursor: pointer; }
 
-        /* CONTRATOS (Doble Pad Firma Digital) */
-        .pad-wrap { background: white; border-radius: 5px; margin-top: 5px; border: 1px solid var(--oro); }
-        canvas.sig-pad { width: 100%; height: 130px; touch-action: none; cursor: crosshair; }
+        /* FLYERS */
+        #canvas-area { width: 100%; height: 400px; background: #222; border: 2px solid var(--oro); position: relative; overflow: hidden; }
+        .asset-box { display: flex; gap: 10px; overflow-x: auto; padding: 10px 0; }
+        .thumb { width: 70px; height: 70px; object-fit: cover; border: 2px solid #444; cursor: pointer; }
+        .thumb.selected { border-color: var(--oro); }
+        .drag-text { position: absolute; cursor: move; font-size: 40px; font-weight: bold; text-shadow: 2px 2px 5px #000; white-space: nowrap; user-select: none; }
+
+        /* CONTRATOS */
+        canvas.sig-pad { background: white; width: 100%; height: 120px; border-radius: 5px; touch-action: none; }
         
-        input, select { width: 100%; padding: 12px; margin: 8px 0; background: #1a1a1a; border: 1px solid #444; color: white; border-radius: 5px; }
-        .btn-japo { background: var(--oro); color: black; border: none; padding: 16px; width: 100%; font-weight: bold; font-size: 17px; border-radius: 5px; cursor: pointer; margin-top: 10px; }
+        input, select { width: 100%; padding: 12px; margin: 8px 0; background: #111; border: 1px solid #444; color: white; border-radius: 5px; }
+        .btn-japo { background: var(--oro); color: black; border: none; padding: 16px; width: 100%; font-weight: bold; border-radius: 5px; cursor: pointer; margin-top: 10px; }
     </style>
 </head>
 <body>
 
 <nav id="sidebar">
-    <div style="text-align:center; padding-bottom:30px;"><h2 style="color:var(--oro); margin:0; letter-spacing:2px;">PACHUCOS</h2></div>
-    <button class="nav-btn active" onclick="nav('calendario')">📅 CALENDARIO</button>
-    <button class="nav-btn" onclick="nav('agregar')">➕ AGREGAR FECHA</button>
-    <button class="nav-btn" onclick="nav('galeria')">🖼️ GALERÍA</button>
-    <button class="nav-btn" onclick="nav('flyers')">🎨 FLYERS</button>
-    <button class="nav-btn" onclick="nav('contratos')">📜 CONTRATOS</button>
+    <div style="text-align:center; padding-bottom:20px;"><h2 style="color:var(--oro); margin:0;">PACHUCOS</h2></div>
+    <button class="nav-btn active" onclick="ver('calendario')">📅 CALENDARIO</button>
+    <button class="nav-btn" onclick="ver('agenda')">📝 AGENDA</button>
+    <button class="nav-btn" onclick="ver('agregar')">➕ AGREGAR</button>
+    <button class="nav-btn" onclick="ver('galeria')">🖼️ GALERÍA</button>
+    <button class="nav-btn" onclick="ver('flyers')">🎨 FLYERS</button>
+    <button class="nav-btn" onclick="ver('contratos')">📜 CONTRATOS</button>
 </nav>
 
 <main>
     <section id="calendario" class="section active">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-            <h1 style="color:var(--oro); margin:0;">AGENDA PACHUCOS</h1>
-            <button onclick="shareAgenda()" style="background:var(--oro); border:none; padding:8px 15px; font-weight:bold; border-radius:4px;">COMPARTIR TODO</button>
+        <h1 style="color:var(--oro)">CALENDARIO VISUAL</h1>
+        <div class="cal-grid" id="cal-visual"></div>
+    </section>
+
+    <section id="agenda" class="section">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <h1>LISTA DE FECHAS</h1>
+            <button onclick="share()" style="background:var(--oro); border:none; padding:8px 15px; font-weight:bold; border-radius:4px;">COMPARTIR</button>
         </div>
-        <div id="lista-fechas">Cargando jales...</div>
+        <div id="lista-agenda">Cargando libreta...</div>
     </section>
 
     <section id="agregar" class="section">
@@ -70,140 +82,120 @@
             </select>
             <input type="number" id="a" value="2026">
         </div>
-        <select id="vende">
+        <select id="v">
             <option value="">¿Quién agendó?</option>
             <option value="JOSÉ">JOSÉ</option><option value="TOÑO">TOÑO</option><option value="CHAVA">CHAVA</option><option value="JAPO">JAPO</option><option value="OTROS">OTROS</option>
         </select>
-        <input type="text" id="lug" placeholder="Lugar/Pueblo">
-        <input type="text" id="hor" placeholder="Hora de inicio">
-        <input type="text" id="tiem" placeholder="Tiempo (Ej. 5 hrs)">
-        <button class="btn-japo" onclick="guardarJale()">GUARDAR EN DRIVE</button>
+        <input type="text" id="lug" placeholder="Lugar">
+        <input type="text" id="hor" placeholder="Hora">
+        <input type="text" id="tie" placeholder="Tiempo contratado">
+        <button class="btn-japo" onclick="guardar()">GUARDAR FECHA</button>
     </section>
 
     <section id="galeria" class="section">
-        <h1>GALERÍA DE ARCHIVOS</h1>
-        <div id="lista-galeria" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap:15px;"></div>
+        <h1>GALERÍA (BODEGA DRIVE)</h1>
+        <div id="galeria-grid" style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;"></div>
     </section>
 
     <section id="flyers" class="section">
-        <h1>DISEÑADOR DE FLYERS</h1>
-        <div id="flyer-canvas"></div>
-        <input type="text" id="flyer-txt" placeholder="Escribe el nombre del evento">
-        <p>Pícale a una imagen para jalar su estilo (Oro/Cromo):</p>
-        <div id="estilos-drive" style="display:flex; gap:10px; overflow-x:auto; padding-bottom:15px;"></div>
-        <button class="btn-japo" onclick="crearTitulo()">APLICAR ESTILO Y CREAR</button>
+        <h1>DISEÑADOR DE FLYER</h1>
+        <div id="canvas-area"></div>
+        <input type="text" id="txt-f" placeholder="Escribe el pueblo/evento">
+        <p>Fondos:</p><div id="fnd-list" class="asset-box"></div>
+        <p>Estilos:</p><div id="est-list" class="asset-box"></div>
+        <button class="btn-japo" onclick="crearText()">CREAR TÍTULO</button>
     </section>
 
     <section id="contratos" class="section">
         <h1>CONTRATOS DIGITALES</h1>
-        <button class="btn-japo" style="background:#333; color:white; margin-bottom:15px;" onclick="window.print()">IMPRIMIR MACHOTE VACÍO</button>
-        <input type="text" id="c-nom" placeholder="Nombre del Cliente">
-        <div style="display:flex; gap:15px; margin-top:10px;">
-            <div style="flex:1; text-align:center;">
-                <small>FIRMA REPRESENTANTE</small>
-                <div class="pad-wrap"><canvas id="p-rep" class="sig-pad"></canvas></div>
-            </div>
-            <div style="flex:1; text-align:center;">
-                <small>FIRMA CLIENTE</small>
-                <div class="pad-wrap"><canvas id="p-cli" class="sig-pad"></canvas></div>
-            </div>
+        <button class="btn-japo" style="background:#444; color:white;" onclick="window.print()">IMPRIMIR MACHOTE VACÍO</button>
+        <input type="text" id="c-cli" placeholder="Nombre del Cliente">
+        <div style="display:flex; gap:10px; margin-top:10px;">
+            <div style="flex:1; text-align:center;"><small>FIRMA REP.</small><canvas id="p-rep" class="sig-pad"></canvas></div>
+            <div style="flex:1; text-align:center;"><small>FIRMA CLIENTE</small><canvas id="p-cli" class="sig-pad"></canvas></div>
         </div>
-        <button class="btn-japo" style="background:#25D366; margin-top:15px;" onclick="mandarWhatsApp()">GENERAR Y MANDAR WHATSAPP</button>
+        <button class="btn-japo" style="background:#25D366;">MANDAR WHATSAPP</button>
     </section>
 </main>
 
 <script>
-    const API_URL = 'https://script.google.com/macros/s/AKfycbuW-UQvGgP2BsRBJUTSBcsh02qXQagGB3XhXDIU6_rt3YAN1RRU3UF_LEXeQz7KjxA/exec';
-    let dataAgenda = [];
+    const URL = 'https://script.google.com/macros/s/AKfycbuW-UQvGgP2BsRBJUTSBcsh02qXQagGB3XhXDIU6_rt3YAN1RRU3UF_LEXeQz7KjxA/exec';
+    let agenda = [];
 
-    function nav(id) {
+    function ver(id) {
         document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
         document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
         document.getElementById(id).classList.add('active');
-        if(id === 'calendario') cargarAgenda();
-        if(id === 'galeria') cargarFiles('BODEGA', 'lista-galeria');
-        if(id === 'flyers') cargarFiles('03_ESTILOS_TITULO', 'estilos-drive');
+        if(id === 'calendario' || id === 'agenda') loadAgenda();
+        if(id === 'galeria') loadFiles('BODEGA', 'galeria-grid');
+        if(id === 'flyers') { loadFiles('01_FONDOS', 'fnd-list'); loadFiles('03_ESTILOS_TITULO', 'est-list'); }
     }
 
-    // CALENDARIO CON ORDEN REAL DE MESES
-    async function cargarAgenda() {
-        const res = await fetch(`${API_URL}?action=getAgenda`);
-        dataAgenda = await res.json();
-        dataAgenda.sort((a, b) => new Date(a.anio, a.mes-1, a.dia) - new Date(b.anio, b.mes-1, b.dia));
+    async function loadAgenda() {
+        const res = await fetch(`${URL}?action=getAgenda`);
+        agenda = await res.json();
+        agenda.sort((a,b) => new Date(a.anio, a.mes-1, a.dia) - new Date(b.anio, b.mes-1, b.dia));
         
-        const container = document.getElementById('lista-fechas');
-        container.innerHTML = dataAgenda.map((f, i) => `
+        // Lista
+        document.getElementById('lista-agenda').innerHTML = agenda.map((f, i) => `
             <div class="card">
-                <div>
-                    <h3>${f.dia}/${f.mes}/${f.anio}</h3>
-                    <p>📍 ${f.lugar} | 🤵 ${f.representante}</p>
-                </div>
-                <div class="btn-group">
-                    <button class="btn-action" onclick="editarJale(${i})">EDITAR</button>
-                    <button class="btn-action del" onclick="borrarJale(${i})">BORRAR</button>
-                </div>
+                <div><h3>${f.dia}/${f.mes}/${f.anio}</h3><p>${f.lugar} - ${f.representante}</p></div>
+                <button class="btn-del" onclick="borrar(${i})">BORRAR</button>
             </div>
         `).join('');
-    }
 
-    async function guardarJale() {
-        const dia = document.getElementById('d').value;
-        const mes = document.getElementById('m').value;
-        const anio = document.getElementById('a').value;
-        const rep = document.getElementById('vende').value;
-
-        if(!dia || !mes || !anio || !rep) return alert("¡Día, Mes, Año y Vendedor son obligatorios!");
-
-        const jale = { dia, mes, anio, representante: rep, lugar: document.getElementById('lug').value || '?', hora: document.getElementById('hor').value || '?', tiempo: document.getElementById('tiem').value || '?' };
-        dataAgenda.push(jale);
-        await fetch(API_URL, { method: 'POST', body: JSON.stringify(dataAgenda) });
-        nav('calendario');
-    }
-
-    async function borrarJale(i) {
-        if(confirm("¿Seguro que quieres borrar esta fecha?")) {
-            dataAgenda.splice(i, 1);
-            await fetch(API_URL, { method: 'POST', body: JSON.stringify(dataAgenda) });
-            cargarAgenda();
+        // Calendario
+        const grid = document.getElementById('cal-visual'); grid.innerHTML = '';
+        for(let i=1; i<=31; i++) {
+            const ev = agenda.find(e => e.dia == i && e.mes == 3); // Ejemplo Marzo
+            grid.innerHTML += `<div class="cal-day ${ev?'has-event':''}"><b>${i}</b>${ev?'<div class="dot"></div>':''}</div>`;
         }
     }
 
-    // GALERÍA Y ESTILOS
-    async function cargarFiles(folder, target) {
-        const res = await fetch(`${API_URL}?action=getFiles&folder=${folder}`);
+    async function guardar() {
+        const dia = document.getElementById('d').value, mes = document.getElementById('m').value, anio = document.getElementById('a').value, rep = document.getElementById('v').value;
+        if(!dia || !mes || !anio || !rep) return alert("¡Día, Mes, Año y Rep son ley!");
+        const jale = { dia, mes, anio, representante: rep, lugar: document.getElementById('lug').value || '?', hora: document.getElementById('hor').value || '?', tiempo: document.getElementById('tie').value || '?' };
+        agenda.push(jale);
+        await fetch(URL, { method: 'POST', body: JSON.stringify(agenda) });
+        ver('agenda');
+    }
+
+    async function borrar(i) {
+        if(confirm("¿Borrar?")) { agenda.splice(i, 1); await fetch(URL, { method: 'POST', body: JSON.stringify(agenda) }); loadAgenda(); }
+    }
+
+    async function loadFiles(folder, target) {
+        const res = await fetch(`${URL}?action=getFiles&folder=${folder}`);
         const files = await res.json();
-        const div = document.getElementById(target);
-        div.innerHTML = files.map(f => folder === 'BODEGA' ? `
-            <div style="background:#222; padding:10px; border-radius:5px; text-align:center;">
-                <small>${f.nombre}</small><br>
-                <a href="${f.url}" target="_blank" style="color:var(--oro); font-size:11px;">VER/BAJAR</a>
-            </div>` : `<img src="${f.url}" class="thumb-estilo" onclick="pickStyle('${f.url}', this)">`
-        ).join('');
+        document.getElementById(target).innerHTML = files.map(f => `
+            <img src="${f.url}" class="thumb" onclick="selectAsset('${f.url}', '${target}')" title="${f.nombre}">
+        `).join('');
     }
 
-    let urlEstilo = '';
-    function pickStyle(url, el) {
-        document.querySelectorAll('.thumb-estilo').forEach(i => i.classList.remove('selected'));
-        el.classList.add('selected');
-        urlEstilo = url;
+    let estilo = '';
+    function selectAsset(url, target) {
+        if(target === 'fnd-list') {
+            document.getElementById('canvas-area').style.backgroundImage = `url(${url})`;
+            document.getElementById('canvas-area').style.backgroundSize = 'cover';
+        } else { estilo = url; alert("Estilo listo"); }
     }
 
-    function crearTitulo() {
-        const txt = document.getElementById('flyer-txt').value;
-        if(!txt || !urlEstilo) return alert("Escribe el nombre y elige una imagen de estilo");
+    function crearText() {
+        const val = document.getElementById('txt-f').value;
+        if(!val) return;
         const div = document.createElement('div');
-        div.className = 'text-drag';
-        div.innerText = txt.toUpperCase();
-        div.style.color = urlEstilo.toUpperCase().includes('ORO') ? '#d4af37' : '#e5e5e5';
-        div.style.left = "40px"; div.style.top = "40px";
-        setDrag(div);
-        document.getElementById('flyer-canvas').appendChild(div);
+        div.className = 'drag-text';
+        div.innerText = val.toUpperCase();
+        div.style.color = estilo.toUpperCase().includes('ORO') ? '#d4af37' : '#e5e5e5';
+        div.style.left = '50px'; div.style.top = '50px';
+        drag(div);
+        document.getElementById('canvas-area').appendChild(div);
     }
 
-    function setDrag(el) {
-        let x=0, y=0, mx=0, my=0;
-        el.onmousedown = (e) => {
-            mx=e.clientX; my=e.clientY;
+    function drag(el) {
+        let x=0,y=0,mx=0,my=0;
+        el.onmousedown = (e) => { mx=e.clientX; my=e.clientY;
             document.onmousemove = (e) => { x=mx-e.clientX; y=my-e.clientY; mx=e.clientX; my=e.clientY; el.style.top=(el.offsetTop-y)+"px"; el.style.left=(el.offsetLeft-x)+"px"; };
             document.onmouseup = () => document.onmousemove = null;
         };
@@ -212,27 +204,26 @@
     function initPads() {
         [document.getElementById('p-rep'), document.getElementById('p-cli')].forEach(c => {
             const ctx = c.getContext('2d');
-            let draw = false;
-            c.onmousedown = c.ontouchstart = () => draw = true;
-            c.onmouseup = c.ontouchend = () => { draw = false; ctx.beginPath(); };
+            let d = false;
+            c.onmousedown = c.ontouchstart = () => d = true;
+            c.onmouseup = c.ontouchend = () => { d = false; ctx.beginPath(); };
             c.onmousemove = c.ontouchmove = (e) => {
-                if(!draw) return;
+                if(!d) return;
                 const r = c.getBoundingClientRect();
                 const x = (e.clientX || e.touches[0].clientX) - r.left;
                 const y = (e.clientY || e.touches[0].clientY) - r.top;
-                ctx.lineWidth = 2; ctx.lineTo(x, y); ctx.stroke();
+                ctx.lineTo(x,y); ctx.stroke();
             };
         });
     }
 
-    function shareAgenda() {
-        let t = "*AGENDA OFICIAL PACHUCOS MEN*\n\n";
-        dataAgenda.forEach(f => t += `📅 ${f.dia}/${f.mes}/${f.anio} - ${f.lugar}\n`);
+    function share() {
+        let t = "*AGENDA PACHUCOS MEN*\n\n";
+        agenda.forEach(f => t += `📅 ${f.dia}/${f.mes}/${f.anio} - ${f.lugar}\n`);
         window.open(`https://wa.me/?text=${encodeURIComponent(t)}`);
     }
 
-    window.onload = () => { cargarAgenda(); initPads(); };
+    window.onload = () => { loadAgenda(); initPads(); };
 </script>
 </body>
 </html>
-
