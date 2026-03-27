@@ -3,46 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PACHUCOS MEN 2026</title>
+    <title>PACHUCOS MEN - APP</title>
     <style>
-        :root { --oro: #d4af37; --fondo: #000; --gris: #111; --rojo: #cc0000; }
+        :root { --oro: #d4af37; --fondo: #000; --gris: #121212; --rojo: #cc0000; }
         * { box-sizing: border-box; }
         body { background: var(--fondo); color: white; font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; height: 100vh; overflow: hidden; }
-        
-        /* SIDEBAR AL COSTADO */
-        #sidebar { width: 240px; background: #0a0a0a; border-right: 1px solid #222; display: flex; flex-direction: column; padding-top: 20px; flex-shrink: 0; }
-        .nav-btn { background: transparent; border: none; color: #555; padding: 18px 25px; text-align: left; font-size: 14px; cursor: pointer; border-left: 4px solid transparent; transition: 0.3s; font-weight: bold; text-transform: uppercase; }
+        #sidebar { width: 220px; background: #0a0a0a; border-right: 1px solid #222; display: flex; flex-direction: column; padding-top: 20px; flex-shrink: 0; }
+        .nav-btn { background: transparent; border: none; color: #555; padding: 18px 25px; text-align: left; font-size: 13px; cursor: pointer; border-left: 4px solid transparent; transition: 0.3s; font-weight: bold; text-transform: uppercase; }
         .nav-btn.active { color: var(--oro); border-left: 4px solid var(--oro); background: #111; }
-        
         main { flex: 1; padding: 25px; overflow-y: auto; background: radial-gradient(circle at top, #111, #000); }
         .section { display: none; max-width: 900px; margin: 0 auto; }
         .section.active { display: block; }
-        
-        /* AGENDA MINIMALISTA */
-        .mes-header { color: var(--oro); font-size: 22px; border-bottom: 1px solid #333; margin: 25px 0 10px; padding-bottom: 5px; text-transform: uppercase; }
+        .year-header { color: var(--oro); font-size: 26px; text-align: center; margin: 40px 0 20px; font-weight: 900; letter-spacing: 3px; }
+        .mes-header { color: #888; font-size: 18px; border-bottom: 1px solid #333; margin: 20px 0 10px; padding-bottom: 5px; text-transform: uppercase; }
         .jale-card { background: var(--gris); border: 1px solid #222; padding: 15px; margin-bottom: 8px; border-radius: 5px; display: flex; justify-content: space-between; align-items: center; }
-        .jale-card h3 { margin: 0; font-size: 18px; color: #fff; }
-        .btn-del { color: var(--rojo); background: none; border: 1px solid var(--rojo); padding: 5px 10px; cursor: pointer; border-radius: 4px; }
-
-        /* FORMULARIOS */
-        input, select { width: 100%; padding: 14px; margin: 8px 0; background: #0a0a0a; border: 1px solid #333; color: white; border-radius: 5px; font-size: 16px; }
+        .btn-op { background: none; border: 1px solid #444; color: white; padding: 6px 10px; cursor: pointer; border-radius: 4px; font-size: 11px; margin-left: 5px; }
+        input, select { width: 100%; padding: 14px; margin: 8px 0; background: #0a0a0a; border: 1px solid #333; color: white; border-radius: 5px; }
         .btn-japo { background: var(--oro); color: black; border: none; padding: 18px; width: 100%; font-weight: bold; cursor: pointer; border-radius: 5px; margin-top: 10px; }
-        .btn-cancel { background: #333; color: white; }
-
-        /* FLYER */
         #canvas { width: 100%; height: 500px; border: 2px solid var(--oro); position: relative; overflow: hidden; background: white; border-radius: 5px; }
         .asset-row { display: flex; gap: 10px; overflow-x: auto; padding: 10px 0; border-bottom: 1px solid #222; }
-        .thumb { width: 75px; height: 75px; object-fit: cover; border: 1px solid #444; cursor: pointer; flex-shrink: 0; }
-        .drag { position: absolute; cursor: move; user-select: none; white-space: nowrap; }
-
-        /* CONTRATOS */
-        canvas.sig { background: white; width: 100%; height: 130px; border-radius: 5px; touch-action: none; border: 1px solid var(--oro); }
+        .thumb { width: 80px; height: 80px; object-fit: cover; border: 1px solid #444; cursor: pointer; flex-shrink: 0; }
+        .drag { position: absolute; cursor: move; user-select: none; }
+        canvas.sig { background: white; width: 100%; height: 130px; border-radius: 5px; border: 1px solid var(--oro); }
     </style>
 </head>
 <body>
 
 <nav id="sidebar">
-    <div style="text-align:center; padding-bottom:30px;"><h2 style="color:var(--oro); letter-spacing:2px; margin:0;">PACHUCOS</h2><small style="color:#555">2026</small></div>
+    <div style="text-align:center; padding-bottom:30px;"><h2 style="color:var(--oro); margin:0;">PACHUCOS</h2><small style="color:#555">STAFF</small></div>
     <button class="nav-btn active" onclick="ver('age')">📝 AGENDA</button>
     <button class="nav-btn" onclick="ver('add')">➕ AGREGAR FECHA</button>
     <button class="nav-btn" onclick="ver('cal')">📅 CALENDARIO</button>
@@ -53,36 +41,31 @@
 
 <main>
     <section id="age" class="section active">
-        <h1 style="color:var(--oro); margin:0;">PACHUCOS 2026</h1>
-        <div id="lista-agenda">Sincronizando...</div>
+        <h1 style="color:var(--oro); margin:0;">AGENDA ACTUAL</h1>
+        <div id="lista-agenda">Conectando...</div>
+        <button class="btn-japo" style="background:#25D366; color:white;" onclick="compartir()">COMPARTIR AGENDA (WA)</button>
     </section>
 
     <section id="add" class="section">
-        <h1>AGREGAR TOCADA</h1>
+        <h1 id="f-tit">NUEVO REGISTRO</h1>
         <div style="display:flex; gap:10px;">
             <input type="number" id="f-anio" value="2026">
             <select id="f-mes">
-                <option value="1">Enero</option><option value="2">Febrero</option><option value="3">Marzo</option>
-                <option value="4">Abril</option><option value="5">Mayo</option><option value="6">Junio</option>
-                <option value="7">Julio</option><option value="8">Agosto</option><option value="9">Septiembre</option>
-                <option value="10">Octubre</option><option value="11">Noviembre</option><option value="12">Diciembre</option>
+                <option value="1">Enero</option><option value="2">Febrero</option><option value="3">Marzo</option><option value="4">Abril</option><option value="5">Mayo</option><option value="6">Junio</option>
+                <option value="7">Julio</option><option value="8">Agosto</option><option value="9">Septiembre</option><option value="10">Octubre</option><option value="11">Noviembre</option><option value="12">Diciembre</option>
             </select>
             <input type="number" id="f-dia" placeholder="Día">
         </div>
-        <select id="f-rep">
-            <option value="">¿Quién agendó?</option>
-            <option value="JOSÉ">JOSÉ</option><option value="CHAVA">CHAVA</option><option value="TOÑO">TOÑO</option><option value="OTROS">OTROS</option>
-        </select>
-        <input type="text" id="f-lug" placeholder="¿Dónde? (Lugar)">
-        <input type="text" id="f-hor" placeholder="Hora de inicio">
-        <input type="text" id="f-tie" placeholder="Cantidad de horas">
-        <button class="btn-japo" onclick="confirmar('guardar')">GUARDAR FECHA</button>
-        <button class="btn-japo btn-cancel" onclick="confirmar('cancelar')">CANCELAR</button>
+        <select id="f-rep"><option value="">¿Quién agendó?</option><option value="JOSÉ">JOSÉ</option><option value="CHAVA">CHAVA</option><option value="TOÑO">TOÑO</option><option value="OTROS">OTROS</option></select>
+        <input type="text" id="f-lug" placeholder="Lugar"><input type="text" id="f-hor" placeholder="Hora de inicio"><input type="text" id="f-tie" placeholder="Hrs de tocada">
+        <input type="hidden" id="edit-idx" value="-1">
+        <button class="btn-japo" id="save-btn" onclick="confirmar('save')">ACEPTAR / GUARDAR</button>
+        <button class="btn-japo" style="background:#333;" onclick="confirmar('cancel')">CANCELAR</button>
     </section>
 
     <section id="cal" class="section">
-        <h1 id="cal-tit" style="color:var(--oro);">CALENDARIO</h1>
-        <div id="calendario-visual" style="background:#111; padding:20px; border-radius:10px;"></div>
+        <h1>CALENDARIO</h1>
+        <div id="cal-box" style="background:#111; padding:15px; border-radius:8px;"></div>
     </section>
 
     <section id="gal" class="section">
@@ -91,20 +74,18 @@
     </section>
 
     <section id="fly" class="section">
-        <h1>DISEÑADOR</h1>
+        <h1>FLYERS</h1>
         <div id="canvas"></div>
-        <input type="text" id="fly-txt" placeholder="Escribe aquí el texto" style="margin-top:10px;">
-        <p>Fondos:</p><div class="asset-row" id="l-fnd"></div>
-        <p>Logos:</p><div class="asset-row" id="l-log"></div>
-        <p>Títulos:</p><div class="asset-row" id="l-tit"></div>
-        <p>Fechas:</p><div class="asset-row" id="l-fec"></div>
-        <p>Eslogan:</p><div class="asset-row" id="l-esl"></div>
-        <button class="btn-japo" onclick="crearTxt()">GENERAR TEXTO</button>
+        <input type="text" id="fly-txt" placeholder="Texto aquí" style="margin-top:10px;">
+        <p>Logos Pachucos:</p><div class="asset-row" id="l-log"></div>
+        <p>Estilos Títulos:</p><div class="asset-row" id="l-tit"></div>
+        <p>Estilos Fechas:</p><div class="asset-row" id="l-fec"></div>
+        <button class="btn-japo" onclick="crearElemento()">GENERAR TEXTO</button>
     </section>
 
     <section id="con" class="section">
         <h1>CONTRATOS</h1>
-        <input type="text" placeholder="Representante / Cliente">
+        <input type="text" placeholder="Datos del Evento">
         <div style="display:flex; gap:15px; margin-top:20px;">
             <div style="flex:1; text-align:center;"><small>FIRMA REP.</small><canvas id="p1" class="sig"></canvas></div>
             <div style="flex:1; text-align:center;"><small>FIRMA CLIENTE</small><canvas id="p2" class="sig"></canvas></div>
@@ -113,151 +94,93 @@
 </main>
 
 <script>
-    // --- DATOS GITHUB ---
-    const USER = 'antoniozavalatolentino';
-    const REPO = 'PMapp';
-    const TOKEN = 'ghp_42y7mHwXwH6vXwHwH6vHwH6vXwHwH6vHw'; // YA PUESTO
-    // --------------------
-
-    let agenda = [];
-    let estiloAct = { color: 'white' };
+    const USER = 'psicoazt-hub', REPO = 'PMapp', TOKEN = 'ghp_42y7mHwXwH6vXwHwH6vHwH6vXwHwH6vHw';
+    let agenda = [], estiloAct = { color: 'white' };
     const MESES = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
 
-    async function ver(id) {
+    const ASSETS = {
+        BODEGA: ["VN20251209_045334.mp4", "download_20251208_090855_0000.mp4", "Diseño sin título_20251208_090215_0000.mp4", "VID-20250304-WA0067.mp4", "origin_1768640677638.png", "Black White Torn Paper Photography Portfolio Cover Page_20260317_084528_0000.png", "1768678330738.jpg", "1768678132856.jpg", "BackgroundEraser_20251218_105209714.png", "BackgroundEraser_20260117_134437259.png"],
+        LOGOS: ["origin_1768640677638.png", "Black White Torn Paper Photography Portfolio Cover Page_20260317_084528_0000.png", "1768678330738.jpg", "1768678132856.jpg", "BackgroundEraser_20251218_105209714.png", "BackgroundEraser_20260117_134437259.png"],
+        TITULOS: ["retouch_1768231909098.JPEG", "retouch_1768073937394.JPEG", "BackgroundEraser_20260131_134229105.png", "BackgroundEraser_20260125_144756957.png", "BackgroundEraser_20260117_110254725.png"],
+        FECHAS: ["BackgroundEraser_20260131_140230680.png", "BackgroundEraser_20260125_150551659.png", "BackgroundEraser_20260122_111651520.png"]
+    };
+
+    function ver(id) {
         document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
         document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
         document.getElementById(id).classList.add('active');
-        document.querySelector(`[onclick="ver('${id}')"]`).classList.add('active');
-        if(id === 'age') loadAgenda();
+        const btn = Array.from(document.querySelectorAll('.nav-btn')).find(b => b.innerText.includes(id.toUpperCase().substring(0,3)));
+        if(btn) btn.classList.add('active');
+        if(id === 'age') load();
         if(id === 'cal') renderCal();
-        if(id === 'gal') loadAssets('BODEGA', 'gal-grid');
-        if(id === 'fly') {
-            loadAssets('Flyers/01_FONDOS_Y_ESTILOS', 'l-fnd');
-            loadAssets('Flyers/02_LOGOS_Y_PNGS', 'l-log');
-            loadAssets('Flyers/03_ESTILO_TITULO', 'l-tit');
-            loadAssets('Flyers/04_FECHAS_Y_ESTILOS', 'l-fec');
-            loadAssets('Flyers/05_ESLOGAN_Y_FOT_GRUPO', 'l-esl');
-        }
+        if(id === 'gal') loadAssets(ASSETS.BODEGA, 'gal-grid');
+        if(id === 'fly') { loadAssets(ASSETS.LOGOS, 'l-log'); loadAssets(ASSETS.TITULOS, 'l-tit'); loadAssets(ASSETS.FECHAS, 'l-fec'); }
     }
 
-    async function loadAgenda() {
-        const r = await fetch(`https://api.github.com/repos/${USER}/${REPO}/contents/agenda.json`, { headers: { Authorization: `token ${TOKEN}` } });
-        const d = await r.json(); 
-        const nueva = JSON.parse(atob(d.content));
-        
-        // Alerta de nuevo registro
+    async function load() {
+        const r = await fetch(`https://api.github.com/repos/${USER}/${REPO}/contents/agenda.json`, { headers: { Authorization: `token ${TOKEN}`, 'Cache-Control': 'no-cache' } });
+        const d = await r.json(); const nueva = JSON.parse(atob(d.content));
         if(agenda.length > 0 && nueva.length > agenda.length) {
-            const u = nueva[nueva.length-1];
-            alert(`📢 ¡${u.representante} agregó nueva tocada para Pachucos Men!`);
+            new Audio('https://www.soundjay.com/buttons/beep-01a.mp3').play();
+            alert(`📢 ¡Nuevo registro de ${nueva[nueva.length-1].representante}!`);
         }
-
         const hoy = new Date(); hoy.setHours(0,0,0,0);
-        // BORRADO AUTOMÁTICO: Solo deja fechas del día actual en adelante
-        agenda = nueva.filter(f => new Date(f.anio, f.mes-1, f.dia) >= hoy);
-        if(agenda.length !== nueva.length) await sync("Auto-limpieza");
-
-        agenda.sort((a,b) => new Date(a.anio, a.mes-1, a.dia) - new Date(b.anio, b.mes-1, b.dia));
-        
-        let html = ""; let mes = "";
-        agenda.forEach((f, i) => {
-            if(mes !== `${f.mes}-${f.anio}`) {
-                mes = `${f.mes}-${f.anio}`;
-                html += `<div class="mes-header">${MESES[f.mes-1]} ${f.anio}</div>`;
-            }
-            html += `<div class="jale-card">
-                <div><h3>${f.dia}/${f.mes} - ${f.representante}</h3><p>${f.lugar || '?'} | ${f.hora || '?'}</p></div>
-                <button class="btn-del" onclick="borrar(${i})">BORRAR</button>
-            </div>`;
+        agenda = nueva.filter(f => { const fv = new Date(f.anio, f.mes-1, f.dia); fv.setDate(fv.getDate() + 1); return fv >= hoy; });
+        if(agenda.length !== nueva.length) await sync("Limpieza");
+        agenda.sort((a,b) => {
+            const da = new Date(a.anio, a.mes-1, a.dia), db = new Date(b.anio, b.mes-1, b.dia);
+            if(da - db !== 0) return da - db;
+            return (a.hora.match(/(\d+)/)||["99"])[0] - (b.hora.match(/(\d+)/)||["99"])[0];
         });
-        document.getElementById('lista-agenda').innerHTML = html || "<p>Agenda vacía.</p>";
+        renderUI();
     }
 
-    function confirmar(accion) {
-        if(accion === 'cancelar') {
-            if(confirm("¿Seguro que quieres cancelar? Se borrarán los datos escritos.")) ver('age');
-        } else {
-            const d=document.getElementById('f-dia').value, m=document.getElementById('f-mes').value, r=document.getElementById('f-rep').value;
-            if(!d || !m || !r) return alert("Año, Mes, Día y Representante son obligatorios.");
-            if(confirm("¿Guardar esta tocada en la agenda?")) guardar();
-        }
-    }
-
-    async function guardar() {
-        const j = { dia:document.getElementById('f-dia').value, mes:document.getElementById('f-mes').value, anio:document.getElementById('f-anio').value, representante:document.getElementById('f-rep').value, lugar:document.getElementById('f-lug').value||'?', hora:document.getElementById('f-hor').value||'?', tiempo:document.getElementById('f-tie').value||'?' };
-        agenda.push(j);
-        await sync("Nuevo jale"); alert("¡Guardado!"); ver('age');
+    function renderUI() {
+        let h = "", y = "", m = "";
+        agenda.forEach((f, i) => {
+            if(y !== f.anio) { y = f.anio; h += `<div class="year-header">🔥 PACHUCOS ${y} 🔥</div>`; }
+            if(m !== f.mes) { m = f.mes; h += `<div class="mes-header">${MESES[m-1]}</div>`; }
+            h += `<div class="jale-card"><div><h3>${f.dia} - ${f.representante}</h3><p>${f.lugar} | ${f.hora} | ${f.tiempo}</p></div>
+                  <div><button class="btn-op" onclick="editar(${i})">✏️</button><button class="btn-op" onclick="borrar(${i})">🗑️</button></div></div>`;
+        });
+        document.getElementById('lista-agenda').innerHTML = h || "<p>Sin fechas.</p>";
     }
 
     async function sync(msg) {
         const res = await fetch(`https://api.github.com/repos/${USER}/${REPO}/contents/agenda.json`, { headers: { Authorization: `token ${TOKEN}` } });
         const json = await res.json();
         await fetch(`https://api.github.com/repos/${USER}/${REPO}/contents/agenda.json`, {
-            method: 'PUT', headers: { Authorization: `token ${TOKEN}`, 'Content-Type': 'application/json' },
+            method: 'PUT', headers: { Authorization: `token ${TOKEN}` },
             body: JSON.stringify({ message: msg, content: btoa(JSON.stringify(agenda)), sha: json.sha })
         });
     }
 
-    async function borrar(i) { if(confirm("¿Borrar jale?")) { agenda.splice(i,1); await sync("Eliminado"); loadAgenda(); } }
-
-    function renderCal() {
-        const hoy = new Date();
-        document.getElementById('cal-tit').innerText = `${MESES[hoy.getMonth()]} ${hoy.getFullYear()}`;
-        document.getElementById('calendario-visual').innerHTML = `<iframe src="https://calendar.google.com/calendar/embed?height=400&wkst=1&bgcolor=%23000000&ctz=America%2FMexico_City&showTitle=0&showNav=1&showDate=1&showPrint=0&showTabs=0&showCalendars=0&showTz=0&src=ZXMubWV4aWNhbiNob2xpZGF5QGdyb3VwLnYuY2FsZW5kYXIuZ29vZ2xlLmNvbQ&color=%230B8043" style="border:0" width="100%" height="400" frameborder="0" scrolling="no"></iframe>`;
-    }
-
-    async function loadAssets(folder, target) {
-        const r = await fetch(`https://api.github.com/repos/${USER}/${REPO}/contents/${folder}`, { headers: { Authorization: `token ${TOKEN}` } });
-        const files = await r.json();
-        document.getElementById(target).innerHTML = files.map(f => `<img src="${f.download_url}" class="thumb" onclick="pick('${f.download_url}', '${folder}')">`).join('');
-    }
-
-    function pick(u, f) {
-        if(f.includes('01_FONDOS')) {
-            document.getElementById('canvas').style.backgroundImage = `url(${u})`;
-            document.getElementById('canvas').style.backgroundSize = 'cover';
-        } else if(f.includes('03_ESTILO') || f.includes('04_FECHAS')) {
-            estiloAct.color = u.toUpperCase().includes('ORO') ? '#d4af37' : '#e5e5e5';
-            alert("Estilo capturado. Escribe el texto y dale a generar.");
-        } else {
-            const img = document.createElement('img'); img.src = u; img.className = 'drag'; img.style.width = "120px";
-            drag(img); document.getElementById('canvas').appendChild(img);
+    function confirmar(t) {
+        if(t === 'cancel') { if(confirm("¿Cancelar?")) ver('age'); }
+        else {
+            if(!document.getElementById('f-dia').value || !document.getElementById('f-rep').value) return alert("Faltan datos.");
+            if(confirm("¿Guardar?")) guardar();
         }
     }
 
-    function crearTxt() {
-        const v = document.getElementById('fly-txt').value; if(!v) return;
-        const d = document.createElement('div'); d.className = 'drag'; d.innerText = v.toUpperCase();
-        d.style.color = estiloAct.color; d.style.fontSize = "40px"; d.style.fontWeight = "bold"; d.style.textShadow = "2px 2px 5px #000";
-        drag(d); document.getElementById('canvas').appendChild(d);
+    async function guardar() {
+        const j = { anio:document.getElementById('f-anio').value, mes:document.getElementById('f-mes').value, dia:document.getElementById('f-dia').value, representante:document.getElementById('f-rep').value, lugar:document.getElementById('f-lug').value||"?", hora:document.getElementById('f-hor').value||"?", tiempo:document.getElementById('f-tie').value||"?" };
+        const idx = parseInt(document.getElementById('edit-idx').value);
+        if(idx > -1) agenda[idx] = j; else agenda.push(j);
+        await sync("Update"); alert("¡Hecho!"); ver('age');
     }
 
-    function drag(el) {
-        let x=0,y=0,mx=0,my=0;
-        el.onmousedown = el.ontouchstart = (e) => {
-            const ev = e.touches ? e.touches[0] : e; mx=ev.clientX; my=ev.clientY;
-            document.onmousemove = document.ontouchmove = (e) => {
-                const ev2 = e.touches ? e.touches[0] : e;
-                x=mx-ev2.clientX; y=my-ev2.clientY; mx=ev2.clientX; my=ev2.clientY;
-                el.style.top=(el.offsetTop-y)+"px"; el.style.left=(el.offsetLeft-x)+"px";
-            };
-            document.onmouseup = document.ontouchend = () => document.onmousemove = document.ontouchmove = null;
-        };
-    }
+    function borrar(i) { if(confirm("¿Eliminar?")) { agenda.splice(i,1); sync("Del"); load(); } }
+    function editar(i) { const f=agenda[i]; document.getElementById('f-anio').value=f.anio; document.getElementById('f-mes').value=f.mes; document.getElementById('f-dia').value=f.dia; document.getElementById('f-rep').value=f.representante; document.getElementById('f-lug').value=f.lugar; document.getElementById('f-hor').value=f.hora; document.getElementById('f-tie').value=f.tiempo; document.getElementById('edit-idx').value=i; ver('add'); }
 
-    function initPads() {
-        [document.getElementById('p1'), document.getElementById('p2')].forEach(c => {
-            const ctx = c.getContext('2d'); let d = false;
-            c.onmousedown = c.ontouchstart = () => d = true;
-            c.onmouseup = c.ontouchend = () => { d = false; ctx.beginPath(); };
-            c.onmousemove = c.ontouchmove = (e) => {
-                if(!d) return; const ev = e.touches ? e.touches[0] : e;
-                const r = c.getBoundingClientRect(); ctx.lineTo(ev.clientX-r.left, ev.clientY-r.top); ctx.stroke();
-            };
-        });
-    }
-
-    setInterval(loadAgenda, 30000);
-    window.onload = () => { initPads(); ver('age'); };
+    function loadAssets(l, t) { document.getElementById(t).innerHTML = l.map(n => `<img src="https://raw.githubusercontent.com/${USER}/${REPO}/main/${n}" class="thumb" onclick="pick('https://raw.githubusercontent.com/${USER}/${REPO}/main/${n}')">`).join(''); }
+    function pick(u) { if(u.includes('retouch') || u.includes('Eraser')) { estiloAct.color = u.includes('ORO') ? '#d4af37' : '#fff'; alert("Estilo cargado."); } else { const i=document.createElement('img'); i.src=u; i.className='drag'; i.style.width="130px"; drag(i); document.getElementById('canvas').appendChild(i); } }
+    function crearElemento() { const v=document.getElementById('fly-txt').value; if(!v) return; const d=document.createElement('div'); d.className='drag'; d.innerText=v.toUpperCase(); d.style.color=estiloAct.color; d.style.fontSize="40px"; d.style.fontWeight="bold"; drag(d); document.getElementById('canvas').appendChild(d); }
+    function drag(el) { let x=0,y=0,mx=0,my=0; el.onmousedown=el.ontouchstart=(e)=>{ const ev=e.touches?e.touches[0]:e; mx=ev.clientX; my=ev.clientY; document.onmousemove=document.ontouchmove=(e)=>{ const ev2=e.touches?e.touches[0]:e; x=mx-ev2.clientX; y=my-ev2.clientY; mx=ev2.clientX; my=ev2.clientY; el.style.top=(el.offsetTop-y)+"px"; el.style.left=(el.offsetLeft-x)+"px"; }; document.onmouseup=document.ontouchend=()=>document.onmousemove=document.ontouchmove=null; }; }
+    function renderCal() { document.getElementById('cal-box').innerHTML = `<iframe src="https://calendar.google.com/calendar/embed?height=300&wkst=1&bgcolor=%23000000&src=ZXMubWV4aWNhbiNob2xpZGF5QGdyb3VwLnYuY2FsZW5kYXIuZ29vZ2xlLmNvbQ" style="border:0" width="100%" height="400" frameborder="0"></iframe>`; }
+    function compartir() { let t="*AGENDA PACHUCOS MEN*\n\n"; agenda.forEach(f=>t+=`🔥 ${f.dia}/${f.mes}/${f.anio} - ${f.lugar}\n`); window.open(`https://wa.me/?text=${encodeURIComponent(t)}`); }
+    function initPads() { [document.getElementById('p1'), document.getElementById('p2')].forEach(c => { const ctx=c.getContext('2d'); let d=false; c.onmousedown=c.ontouchstart=()=>d=true; c.onmouseup=c.ontouchend=()=>{ d=false; ctx.beginPath(); }; c.onmousemove=c.ontouchmove=(e)=>{ if(!d) return; const ev=e.touches?e.touches[0]:e; const r=c.getBoundingClientRect(); ctx.lineTo(ev.clientX-r.left, ev.clientY-r.top); ctx.stroke(); }; }); }
+    setInterval(load, 30000); window.onload = () => { initPads(); ver('age'); };
 </script>
 </body>
 </html>
