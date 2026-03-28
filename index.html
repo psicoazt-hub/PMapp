@@ -33,7 +33,9 @@
 
 <div id="modal">
     <div id="modal-content" style="max-width:90%; max-height:80%;"></div>
-    <div style="margin-top:20px;"><button class="btn-japo" onclick="document.getElementById('modal').style.display='none'">CERRAR</button></div>
+    <div style="margin-top:20px;">
+        <button class="btn-japo" onclick="document.getElementById('modal').style.display='none'">CERRAR</button>
+    </div>
 </div>
 
 <nav id="sidebar">
@@ -81,18 +83,19 @@
     </section>
 
     <section id="fly" class="section">
-        <h1>DISEÑADOR DE FLYER</h1>
+        <h1>FLYERS</h1>
         <div id="canvas"></div>
         <input type="text" id="fly-txt" placeholder="Escribe el texto aquí" style="margin-top:10px;">
         <p>Assets:</p><div class="asset-row" id="l-log"></div>
         <p>Títulos:</p><div class="asset-row" id="l-tit"></div>
         <p>Fechas:</p><div class="asset-row" id="l-fec"></div>
         <button class="btn-japo" onclick="crearTextoFlyer()">GENERAR TEXTO</button>
-        <button class="btn-japo" style="background:white; color:black;" onclick="exportarFlyer()">DESCARGAR PNG</button>
+        <button class="btn-japo" style="background:white; color:black;" onclick="exportarFlyer()">DESCARGAR FLYER (PNG)</button>
     </section>
 
     <section id="con" class="section">
         <h1>CONTRATOS</h1>
+        <input type="text" placeholder="Datos del Evento">
         <div style="display:flex; gap:15px; margin-top:20px;">
             <div style="flex:1; text-align:center;"><small>FIRMA REP.</small><canvas id="p1" class="sig"></canvas></div>
             <div style="flex:1; text-align:center;"><small>FIRMA CLIENTE</small><canvas id="p2" class="sig"></canvas></div>
@@ -101,7 +104,7 @@
 </main>
 
 <script>
-    const p1 = 'ghp_';
+    const p1 = 'ghp_'; 
     const p2 = 'mJchPuyZG02IgagsFkXSQAPdDyF6Qv3Z2YuL';
     const TOKEN = p1 + p2;
     const USER = 'psicoazt-hub', REPO = 'PMapp';
@@ -119,5 +122,135 @@
     function ver(id) {
         document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
         document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-        document
+        document.getElementById(id).classList.add('active');
+        const btns = document.querySelectorAll('.nav-btn');
+        btns.forEach(b => { if(b.getAttribute('onclick').includes(id)) b.classList.add('active'); });
+
+        if(id === 'age') loadAgenda();
+        if(id === 'cal') renderCal();
+        if(id === 'gal') loadAssets(ASSETS.BODEGA, 'gal-grid', 'gal');
+        if(id === 'fly') { loadAssets(ASSETS.LOGOS, 'l-log', 'fly'); loadAssets(ASSETS.TITULOS, 'l-tit', 'fly'); loadAssets(ASSETS.FECHAS, 'l-fec', 'fly'); }
+    }
+
+    async function loadAgenda() {
+        try {
+            const r = await fetch(`https://api.github.com/repos/${USER}/${REPO}/contents/agenda.json?t=${Date.now()}`, {
+                headers: { 'Authorization': `token ${TOKEN}` }
+            });
+            const d = await r.json();
+            agenda = JSON.parse(decodeURIComponent(escape(atob(d.content.replace(/\s/g, '')))));
+            renderAgendaUI();
+        } catch(e) {
+            const rRaw = await fetch(`https://raw.githubusercontent.com/${USER}/${REPO}/main/agenda.json?t=${Date.now()}`);
+            agenda = await rRaw.json();
+            renderAgendaUI();
+        }
+    }
+
+    function renderAgendaUI() {
+        let h = "", y = "", m = "";
+        agenda.sort((a,b) => (new Date(a.anio, a.mes-1, a.dia)) - (new Date(b.anio, b.mes-1, b.dia)));
+        agenda.forEach((f, i) => {
+            if(y !== f.anio) { y = f.anio; h += `<div class="year-header">🔥 PACHUCOS ${y} 🔥</div>`; }
+            if(m !== f.mes) { m = f.mes; h += `<div class="mes-header">${MESES[f.mes-1]}</div>`; }
+            h += `<div class="jale-card">
+                    <div><h3>${f.dia} - ${f.representante}</h3><p>${f.lugar} | ${f.hora} | ${f.tiempo}</p></div>
+                    <div><button class="btn-op" onclick="editarRegistro(${i})">✏️</button><button class="btn-op" style="color:red" onclick="borrarRegistro(${i})">🗑️</button></div>
+                  </div>`;
+        });
+        document.getElementById('lista-agenda').innerHTML = h || "<p>Sin fechas agendadas.</p>";
+    }
+
+    async function syncAgenda(msg) {
+        try {
+            const res = await fetch(`https://api.github.com/repos/${USER}/${REPO}/contents/agenda.json`, { 
+                headers: { Authorization: `token ${TOKEN}` } 
+            });
+            const json = await res.json();
+            const content = btoa(unescape(encodeURIComponent(JSON.stringify(agenda))));
+            const putR = await fetch(`https://api.github.com/repos/${USER}/${REPO}/contents/agenda.json`, {
+                method: 'PUT', headers: { Authorization: `token ${TOKEN}`, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: msg, content: content, sha: json.sha })
+            });
+            if(putR.ok) alert("¡Guardado!"); else alert("Error al sincronizar con GitHub.");
+        } catch(e) { alert("Error de conexión al guardar."); }
+    }
+
+    function confirmarRegistro() { if(!document.getElementById('f-dia').value || !document.getElementById('f-rep').value) return alert("Faltan datos."); guardarRegistro(); }
+
+    async function guardarRegistro() {
+        const j = { anio:document.getElementById('f-anio').value, mes:document.getElementById('f-mes').value, dia:document.getElementById('f-dia').value, representante:document.getElementById('f-rep').value, lugar:document.getElementById('f-lug').value||"?", hora:document.getElementById('f-hor').value||"?", tiempo:document.getElementById('f-tie').value||"?" };
+        const idx = parseInt(document.getElementById('edit-idx').value);
+        if(idx > -1) agenda[idx] = j; else agenda.push(j);
+        await syncAgenda("Update");
+        resetForm(); ver('age');
+    }
+
+    function resetForm() {
+        document.getElementById('edit-idx').value = "-1"; document.getElementById('f-tit').innerText = "NUEVO REGISTRO";
+        document.getElementById('f-dia').value = ""; document.getElementById('f-lug').value = "";
+        document.getElementById('f-hor').value = ""; document.getElementById('f-tie').value = "";
+        document.getElementById('f-rep').value = "";
+    }
+
+    function borrarRegistro(i) { if(confirm("¿Eliminar?")) { agenda.splice(i,1); syncAgenda("Del"); loadAgenda(); } }
+    function editarRegistro(i) { 
+        const f = agenda[i]; document.getElementById('f-anio').value=f.anio; document.getElementById('f-mes').value=f.mes; 
+        document.getElementById('f-dia').value=f.dia; document.getElementById('f-rep').value=f.representante; 
+        document.getElementById('f-lug').value=f.lugar; document.getElementById('f-hor').value=f.hora; 
+        document.getElementById('f-tie').value=f.tiempo; document.getElementById('edit-idx').value=i; ver('add'); 
+    }
+
+    function loadAssets(list, target, mode) {
+        document.getElementById(target).innerHTML = list.map(n => {
+            const url = `https://raw.githubusercontent.com/${USER}/${REPO}/main/${n}`;
+            const isVid = n.toLowerCase().endsWith('.mp4');
+            const click = mode === 'gal' ? `abrirGal('${url}', ${isVid})` : `pickFlyer('${url}')`;
+            if(isVid) return `<video src="${url}" class="thumb" muted onclick="${click}"></video>`;
+            return `<img src="${url}" class="thumb" onclick="${click}">`;
+        }).join('');
+    }
+
+    function abrirGal(u, isVid) {
+        const mod = document.getElementById('modal'); const cont = document.getElementById('modal-content');
+        cont.innerHTML = isVid ? `<video src="${u}" controls autoplay style="width:100%"></video>` : `<img src="${u}" style="width:100%">`;
+        mod.style.display = 'flex';
+    }
+
+    function pickFlyer(u) {
+        const i = document.createElement('img'); i.src = u; i.className = 'drag'; i.style.width = "150px"; 
+        makeDraggable(i); document.getElementById('canvas').appendChild(i);
+    }
+
+    function crearTextoFlyer() {
+        const txt = document.getElementById('fly-txt').value; if(!txt) return;
+        const d = document.createElement('div'); d.className = 'drag'; d.innerText = txt.toUpperCase();
+        d.style.color = "black"; d.style.fontSize = "40px"; d.style.fontWeight = "bold"; makeDraggable(d);
+        document.getElementById('canvas').appendChild(d);
+    }
+
+    function makeDraggable(el) {
+        let x=0,y=0,mx=0,my=0; el.onmousedown=el.ontouchstart=(e)=>{
+            const ev = e.touches ? e.touches[0] : e; mx = ev.clientX; my = ev.clientY;
+            document.onmousemove = document.ontouchmove = (e) => {
+                const ev2 = e.touches ? e.touches[0] : e; x = mx - ev2.clientX; y = my - ev2.clientY; 
+                mx = ev2.clientX; my = ev2.clientY; el.style.top = (el.offsetTop - y) + "px"; el.style.left = (el.offsetLeft - x) + "px";
+            };
+            document.onmouseup = document.ontouchend = () => document.onmousemove = document.ontouchmove = null;
+        };
+    }
+
+    function exportarFlyer() {
+        html2canvas(document.getElementById("canvas"), { useCORS: true }).then(canvas => {
+            const link = document.createElement('a'); link.download = 'Flyer_Pachucos.png';
+            link.href = canvas.toDataURL(); link.click();
+        });
+    }
+
+    function renderCal() { document.getElementById('cal-box').innerHTML = `<iframe src="https://calendar.google.com/calendar/embed?wkst=1&bgcolor=%23000000&src=ZXMubWV4aWNhbiNob2xpZGF5QGdyb3VwLnYuY2FsZW5kYXIuZ29vZ2xlLmNvbQ" style="border:0" width="100%" height="400" frameborder="0"></iframe>`; }
+    function compartirAgenda() { let t = "*AGENDA PACHUCOS MEN*\n\n"; agenda.forEach(f => t += `🔥 ${f.dia}/${f.mes} - ${f.lugar}\n`); window.open(`https://wa.me/?text=${encodeURIComponent(t)}`); }
     
+    window.onload = () => { ver('age'); };
+</script>
+</body>
+</html>
