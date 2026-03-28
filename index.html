@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PACHUCOS MEN - APP</title>
+    <title>PACHUCOS MEN 2026</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         :root { --oro: #d4af37; --fondo: #000; --gris: #121212; --rojo: #cc0000; }
@@ -21,13 +21,12 @@
         .btn-op { background: none; border: 1px solid #444; color: white; padding: 8px 12px; cursor: pointer; border-radius: 4px; font-size: 11px; margin-left: 5px; }
         input, select { width: 100%; padding: 14px; margin: 8px 0; background: #0a0a0a; border: 1px solid #333; color: white; border-radius: 5px; font-size: 16px; }
         .btn-japo { background: var(--oro); color: black; border: none; padding: 18px; width: 100%; font-weight: bold; cursor: pointer; border-radius: 5px; font-size: 16px; margin-top: 10px; }
-        #canvas-wrap { background: #222; padding: 10px; border-radius: 8px; display: inline-block; width: 100%; position: relative; }
         #canvas { width: 100%; height: 500px; border: 2px solid var(--oro); position: relative; overflow: hidden; background: white; border-radius: 5px; }
         .asset-row { display: flex; gap: 10px; overflow-x: auto; padding: 10px 0; border-bottom: 1px solid #222; }
         .thumb { width: 85px; height: 85px; object-fit: cover; border: 1px solid #444; cursor: pointer; flex-shrink: 0; background: #000; border-radius: 5px; }
         .drag { position: absolute; cursor: move; user-select: none; white-space: nowrap; }
         #modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:1000; align-items:center; justify-content:center; flex-direction:column; padding: 20px; }
-        #modal-content { max-width: 90%; max-height: 80%; text-align: center; }
+        #modal-content { max-width: 90%; max-height: 80%; }
         canvas.sig { background: white; width: 100%; height: 130px; border-radius: 5px; border: 1px solid var(--oro); touch-action: none; }
     </style>
 </head>
@@ -53,8 +52,8 @@
 
 <main>
     <section id="age" class="section active">
-        <h1 style="color:var(--oro); margin:0;">AGENDA PACHUCOS MEN</h1>
-        <div id="lista-agenda">Sincronizando...</div>
+        <h1 style="color:var(--oro); margin:0;">AGENDA ACTUAL</h1>
+        <div id="lista-agenda">Conectando...</div>
         <button class="btn-japo" style="background:#25D366; color:white;" onclick="compartirAgenda()">COMPARTIR AGENDA (WA)</button>
     </section>
 
@@ -68,15 +67,18 @@
             </select>
             <input type="number" id="f-dia" placeholder="Día">
         </div>
-        <select id="f-rep"><option value="">¿Quién agendó?</option><option value="JOSÉ">JOSÉ</option><option value="CHAVA">CHAVA</option><option value="TOÑO">TOÑO</option><option value="OTROS">OTROS</option></select>
-        <input type="text" id="f-lug" placeholder="Lugar"><input type="text" id="f-hor" placeholder="Hora de inicio"><input type="text" id="f-tie" placeholder="Hrs de tocada">
+        <select id="f-rep">
+            <option value="">¿Quién agendó?</option>
+            <option value="JOSÉ">JOSÉ</option><option value="CHAVA">CHAVA</option><option value="TOÑO">TOÑO</option><option value="OTROS">OTROS</option>
+        </select>
+        <input type="text" id="f-lug" placeholder="Lugar (Pueblo/Salón)"><input type="text" id="f-hor" placeholder="Hora de inicio"><input type="text" id="f-tie" placeholder="Hrs de tocada">
         <input type="hidden" id="edit-idx" value="-1">
         <button class="btn-japo" id="save-btn" onclick="confirmarRegistro()">ACEPTAR / GUARDAR</button>
         <button class="btn-japo" style="background:#333;" onclick="cancelarRegistro()">CANCELAR</button>
     </section>
 
     <section id="cal" class="section">
-        <h1>CONSULTA DE CALENDARIO</h1>
+        <h1>CALENDARIO</h1>
         <div id="cal-box" style="background:#111; padding:15px; border-radius:10px;"></div>
     </section>
 
@@ -87,13 +89,15 @@
 
     <section id="fly" class="section">
         <h1>DISEÑADOR DE FLYER</h1>
-        <div id="canvas-wrap"><div id="canvas"></div></div>
-        <input type="text" id="fly-txt" placeholder="Escribe el texto aquí" style="margin-top:10px;">
-        <p>Logos y PNGs:</p><div class="asset-row" id="l-log"></div>
+        <div id="canvas-wrap" style="padding:10px; background:#222; border-radius:5px;">
+            <div id="canvas"></div>
+        </div>
+        <input type="text" id="fly-txt" placeholder="Texto aquí" style="margin-top:10px;">
+        <p>Logos Pachucos:</p><div class="asset-row" id="l-log"></div>
         <p>Estilos Títulos:</p><div class="asset-row" id="l-tit"></div>
         <p>Estilos Fechas:</p><div class="asset-row" id="l-fec"></div>
         <button class="btn-japo" onclick="crearTextoFlyer()">GENERAR TEXTO</button>
-        <button class="btn-japo" style="background:white; color:black;" onclick="exportarFlyer()">DESCARGAR FLYER (IMAGEN)</button>
+        <button class="btn-japo" style="background:white; color:black;" onclick="exportarFlyer()">DESCARGAR FLYER (PNG)</button>
     </section>
 
     <section id="con" class="section">
@@ -132,8 +136,8 @@
         try {
             const r = await fetch(`https://api.github.com/repos/${USER}/${REPO}/contents/agenda.json?t=${Date.now()}`, { headers: { Authorization: `token ${TOKEN}` } });
             const d = await r.json(); 
-            const base64 = d.content.replace(/\s/g, '');
-            const decoded = new TextDecoder().decode(Uint8Array.from(atob(base64), c => c.charCodeAt(0)));
+            const cleanBase64 = d.content.replace(/[\n\r\s]/g, '');
+            const decoded = decodeURIComponent(escape(window.atob(cleanBase64)));
             agenda = JSON.parse(decoded);
             
             const hoy = new Date(); hoy.setHours(0,0,0,0);
@@ -142,14 +146,16 @@
                 fv.setDate(fv.getDate() + 1);
                 return fv >= hoy;
             });
-            
             agenda.sort((a,b) => {
                 const da = new Date(a.anio, a.mes-1, a.dia), db = new Date(b.anio, b.mes-1, b.dia);
                 if(da - db !== 0) return da - db;
                 return (parseInt(a.hora) || 99) - (parseInt(b.hora) || 99);
             });
             renderAgendaUI();
-        } catch(e) { document.getElementById('lista-agenda').innerHTML = "<p style='color:red'>Error al conectar con la agenda.</p>"; }
+        } catch(e) { 
+            console.error(e);
+            document.getElementById('lista-agenda').innerHTML = "<p style='color:red'>Error al conectar con la agenda.</p>"; 
+        }
     }
 
     function renderAgendaUI() {
@@ -168,17 +174,16 @@
     async function syncAgenda(msg) {
         const res = await fetch(`https://api.github.com/repos/${USER}/${REPO}/contents/agenda.json`, { headers: { Authorization: `token ${TOKEN}` } });
         const json = await res.json();
-        const bytes = new TextEncoder().encode(JSON.stringify(agenda));
-        const base64 = btoa(String.fromCharCode(...bytes));
+        const content = btoa(unescape(encodeURIComponent(JSON.stringify(agenda))));
         await fetch(`https://api.github.com/repos/${USER}/${REPO}/contents/agenda.json`, {
             method: 'PUT', headers: { Authorization: `token ${TOKEN}` },
-            body: JSON.stringify({ message: msg, content: base64, sha: json.sha })
+            body: JSON.stringify({ message: msg, content: content, sha: json.sha })
         });
     }
 
     function confirmarRegistro() {
         if(!document.getElementById('f-dia').value || !document.getElementById('f-rep').value) return alert("Faltan datos obligatorios.");
-        if(confirm("¿Guardar este jale?")) guardarRegistro();
+        if(confirm("¿Guardar este registro?")) guardarRegistro();
     }
 
     async function guardarRegistro() {
@@ -194,7 +199,7 @@
         const idx = parseInt(document.getElementById('edit-idx').value);
         if(idx > -1) agenda[idx] = j; else agenda.push(j);
         
-        await syncAgenda("Actualización Agenda");
+        await syncAgenda("Update");
         alert("¡Guardado!");
         resetForm();
         ver('age');
@@ -209,7 +214,7 @@
     }
 
     function cancelarRegistro() { if(confirm("¿Cancelar?")) { resetForm(); ver('age'); } }
-    function borrarRegistro(i) { if(confirm("¿Eliminar definitivamente?")) { agenda.splice(i,1); syncAgenda("Borrado"); loadAgenda(); } }
+    function borrarRegistro(i) { if(confirm("¿Eliminar definitivamente?")) { agenda.splice(i,1); syncAgenda("Del"); loadAgenda(); } }
     function editarRegistro(i) { 
         const f = agenda[i]; 
         document.getElementById('f-anio').value=f.anio; document.getElementById('f-mes').value=f.mes; 
@@ -223,24 +228,24 @@
     function loadAssets(list, target, mode) {
         document.getElementById(target).innerHTML = list.map(n => {
             const url = `https://raw.githubusercontent.com/${USER}/${REPO}/main/${n}`;
-            const isVid = n.toLowerCase().endsWith('.mp4');
-            const action = mode === 'gal' ? `abrirGal('${url}', ${isVid})` : `pickFlyer('${url}')`;
-            if(isVid) return `<video src="${url}" class="thumb" muted preload="metadata" onclick="${action}"></video>`;
-            return `<img src="${url}" class="thumb" onclick="${action}">`;
+            const isVideo = n.toLowerCase().endsWith('.mp4');
+            const click = mode === 'gal' ? `abrirGal('${url}', ${isVideo})` : `pickFlyer('${url}')`;
+            if(isVideo) return `<video src="${url}" class="thumb" muted preload="metadata" onclick="${click}"></video>`;
+            return `<img src="${url}" class="thumb" onclick="${click}">`;
         }).join('');
     }
 
     function abrirGal(u, isVid) {
         const mod = document.getElementById('modal'); const cont = document.getElementById('modal-content');
         cont.innerHTML = isVid ? `<video src="${u}" controls autoplay style="width:100%"></video>` : `<img src="${u}" style="width:100%">`;
-        document.getElementById('btn-share-gal').onclick = () => window.open(`https://wa.me/?text=${encodeURIComponent('Mira este material de Pachucos Men: ' + u)}`);
+        document.getElementById('btn-share-gal').onclick = () => window.open(`https://wa.me/?text=${encodeURIComponent('Material Pachucos Men: ' + u)}`);
         mod.style.display = 'flex';
     }
 
     function pickFlyer(u) {
         if(u.includes('retouch') || u.includes('Eraser')) {
             estiloFlyer.color = u.includes('ORO') ? '#d4af37' : '#fff';
-            alert("Estilo cargado: " + (u.includes('ORO') ? 'ORO' : 'CROMO'));
+            alert("Estilo cargado.");
         } else {
             const i = document.createElement('img'); i.src = u; i.className = 'drag'; i.style.width = "150px"; 
             makeDraggable(i); document.getElementById('canvas').appendChild(i);
