@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PACHUCOS MEN 2026</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
@@ -10,48 +10,44 @@
         * { box-sizing: border-box; }
         body { background: var(--fondo); color: white; font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; height: 100vh; overflow: hidden; }
         
-        /* SIDEBAR REDUCIDO A 1/4 aprox (140px) */
-        #sidebar { width: 140px; background: #0a0a0a; border-right: 1px solid #222; display: flex; flex-direction: column; padding-top: 15px; flex-shrink: 0; }
-        #sidebar h2 { font-size: 14px; margin: 0; color: var(--oro); }
-        #sidebar small { font-size: 9px; color: #555; }
+        /* SIDEBAR REDUCIDO A 140PX */
+        #sidebar { width: 140px; background: #0a0a0a; border-right: 1px solid #222; display: flex; flex-direction: column; padding-top: 20px; flex-shrink: 0; }
+        .nav-btn { background: transparent; border: none; color: #666; padding: 15px 10px; text-align: left; font-size: 11px; cursor: pointer; border-left: 4px solid transparent; transition: 0.3s; font-weight: bold; text-transform: uppercase; }
+        .nav-btn.active { color: var(--oro); border-left: 4px solid var(--oro); background: #111; }
         
-        /* BOTONES MÁS PEQUEÑOS */
-        .nav-btn { background: transparent; border: none; color: #666; padding: 12px 10px; text-align: left; font-size: 10px; cursor: pointer; border-left: 3px solid transparent; transition: 0.3s; font-weight: bold; text-transform: uppercase; }
-        .nav-btn.active { color: var(--oro); border-left: 3px solid var(--oro); background: #111; }
-        
-        /* MAIN OCUPANDO EL RESTO (3/4 de la pantalla) */
-        main { flex: 1; padding: 15px; overflow-y: auto; background: radial-gradient(circle at top, #111, #000); }
-        .section { display: none; width: 100%; margin: 0 auto; }
+        /* MAIN CON 3/4 DE PANTALLA */
+        main { flex: 1; padding: 20px; overflow-y: auto; background: radial-gradient(circle at top, #111, #000); }
+        .section { display: none; max-width: 900px; margin: 0 auto; }
         .section.active { display: block; }
         
-        /* TEXTOS Y ELEMENTOS REDUCIDOS */
-        h1 { font-size: 18px !important; margin-bottom: 10px !important; }
-        .year-header { color: var(--oro); font-size: 18px; text-align: center; margin: 20px 0 10px; font-weight: 900; border-top: 1px solid #333; padding-top: 10px; }
-        .mes-header { color: #888; font-size: 14px; border-bottom: 1px solid #333; margin: 10px 0 5px; padding-bottom: 3px; text-transform: uppercase; }
+        .year-header { color: var(--oro); font-size: 20px; text-align: center; margin: 30px 0 15px; font-weight: 900; letter-spacing: 2px; border-top: 1px double #333; padding-top: 15px; }
+        .mes-header { color: #888; font-size: 16px; border-bottom: 1px solid #333; margin: 15px 0 8px; padding-bottom: 5px; text-transform: uppercase; }
         
-        .jale-card { background: var(--gris); border: 1px solid #222; padding: 10px; margin-bottom: 6px; border-radius: 5px; display: flex; justify-content: space-between; align-items: center; font-size: 12px; }
-        .jale-card h3 { font-size: 13px; margin: 0; }
-        .jale-card p { margin: 2px 0 0; color: #aaa; }
+        .jale-card { background: var(--gris); border: 1px solid #222; padding: 12px; margin-bottom: 8px; border-radius: 5px; display: flex; justify-content: space-between; align-items: center; }
+        .btn-op { background: none; border: 1px solid #444; color: white; padding: 8px 10px; cursor: pointer; border-radius: 4px; font-size: 11px; margin-left: 5px; }
         
-        input, select { width: 100%; padding: 10px; margin: 5px 0; background: #0a0a0a; border: 1px solid #333; color: white; border-radius: 5px; font-size: 13px; }
-        .btn-japo { background: var(--oro); color: black; border: none; padding: 12px; width: 100%; font-weight: bold; cursor: pointer; border-radius: 5px; font-size: 13px; margin-top: 8px; }
+        input, select { width: 100%; padding: 12px; margin: 6px 0; background: #0a0a0a; border: 1px solid #333; color: white; border-radius: 5px; font-size: 14px; }
+        .btn-japo { background: var(--oro); color: black; border: none; padding: 15px; width: 100%; font-weight: bold; cursor: pointer; border-radius: 5px; font-size: 14px; margin-top: 10px; }
         
-        #canvas { width: 100%; height: 300px; border: 2px solid var(--oro); position: relative; overflow: hidden; background: white; border-radius: 5px; }
-        .thumb { width: 60px; height: 60px; object-fit: cover; border: 1px solid #444; background: #000; border-radius: 5px; }
-        #modal-content img, #modal-content video { max-width: 100%; }
+        #canvas { width: 100%; height: 450px; border: 2px solid var(--oro); position: relative; overflow: hidden; background: white; border-radius: 5px; }
+        .asset-row { display: flex; gap: 10px; overflow-x: auto; padding: 10px 0; border-bottom: 1px solid #222; }
+        .thumb { width: 75px; height: 75px; object-fit: cover; border: 1px solid #444; cursor: pointer; flex-shrink: 0; background: #000; border-radius: 5px; }
+        .drag { position: absolute; cursor: move; user-select: none; white-space: nowrap; }
+        #modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:1000; align-items:center; justify-content:center; flex-direction:column; padding: 20px; }
+        canvas.sig { background: white; width: 100%; height: 130px; border-radius: 5px; border: 1px solid var(--oro); touch-action: none; }
     </style>
 </head>
 <body>
 
 <div id="modal">
-    <div id="modal-content"></div>
+    <div id="modal-content" style="max-width:90%; max-height:80%;"></div>
     <div style="margin-top:20px;"><button class="btn-japo" onclick="document.getElementById('modal').style.display='none'">CERRAR</button></div>
 </div>
 
 <nav id="sidebar">
-    <div style="text-align:center; padding-bottom:20px;"><h2>PACHUCOS</h2><small>MEN 2026</small></div>
+    <div style="text-align:center; padding-bottom:25px;"><h2 style="font-size:14px; color:var(--oro); margin:0;">PACHUCOS</h2><small style="font-size:9px; color:#555">2026</small></div>
     <button class="nav-btn active" onclick="ver('age')">📝 AGENDA</button>
-    <button class="nav-btn" onclick="ver('add')">➕ REGISTRO</button>
+    <button class="nav-btn" onclick="ver('add')">➕ AGREGAR</button>
     <button class="nav-btn" onclick="ver('cal')">📅 CALENDARIO</button>
     <button class="nav-btn" onclick="ver('gal')">🖼️ GALERÍA</button>
     <button class="nav-btn" onclick="ver('fly')">🎨 FLYERS</button>
@@ -60,14 +56,14 @@
 
 <main>
     <section id="age" class="section active">
-        <h1>AGENDA</h1>
+        <h1 style="color:var(--oro); margin:0; font-size:18px;">AGENDA PACHUCOS MEN</h1>
         <div id="lista-agenda">Cargando...</div>
-        <button class="btn-japo" style="background:#25D366; color:white;" onclick="compartirAgenda()">WHATSAPP</button>
+        <button class="btn-japo" style="background:#25D366; color:white;" onclick="compartirAgenda()">COMPARTIR (WA)</button>
     </section>
 
     <section id="add" class="section">
-        <h1>NUEVO REGISTRO</h1>
-        <div style="display:flex; gap:5px;">
+        <h1 id="f-tit" style="font-size:18px;">NUEVO REGISTRO</h1>
+        <div style="display:flex; gap:8px;">
             <input type="number" id="f-anio" value="2026">
             <select id="f-mes">
                 <option value="1">Ene</option><option value="2">Feb</option><option value="3">Mar</option><option value="4">Abr</option><option value="5">May</option><option value="6">Jun</option>
@@ -78,37 +74,27 @@
         <select id="f-rep"><option value="">¿Quién agendó?</option><option value="JOSÉ">JOSÉ</option><option value="CHAVA">CHAVA</option><option value="TOÑO">TOÑO</option></select>
         <input type="text" id="f-lug" placeholder="Lugar"><input type="text" id="f-hor" placeholder="Hora"><input type="text" id="f-tie" placeholder="Tiempo">
         <input type="hidden" id="edit-idx" value="-1">
-        <button class="btn-japo" id="save-btn" onclick="confirmarRegistro()">GUARDAR</button>
-        <button class="btn-japo" style="background:#333;" onclick="ver('age');">VOLVER</button>
+        <button class="btn-japo" id="save-btn" onclick="confirmarRegistro()">ACEPTAR / GUARDAR</button>
+        <button class="btn-japo" style="background:#333;" onclick="resetForm(); ver('age');">CANCELAR</button>
     </section>
 
-    <section id="cal" class="section">
-        <div id="cal-box" style="background:#111; padding:5px; border-radius:10px;"></div>
-    </section>
-
-    <section id="gal" class="section">
-        <div id="gal-grid" style="display:grid; grid-template-columns: 1fr 1fr; gap:5px;"></div>
-    </section>
-
+    <section id="cal" class="section"><h1>CALENDARIO</h1><div id="cal-box" style="background:#111; padding:10px; border-radius:10px;"></div></section>
+    <section id="gal" class="section"><h1>GALERÍA</h1><div id="gal-grid" style="display:grid; grid-template-columns: 1fr 1fr; gap:8px;"></div></section>
     <section id="fly" class="section">
+        <h1>FLYERS</h1>
         <div id="canvas"></div>
-        <input type="text" id="fly-txt" placeholder="Texto aquí">
+        <input type="text" id="fly-txt" placeholder="Escribe el texto aquí" style="margin-top:10px;">
         <div class="asset-row" id="l-log"></div>
-        <button class="btn-japo" onclick="crearTextoFlyer()">TEXTO</button>
-        <button class="btn-japo" style="background:white; color:black;" onclick="exportarFlyer()">DESCARGAR</button>
-    </section>
-
-    <section id="con" class="section">
-        <div style="display:flex; gap:10px; margin-top:10px;">
-            <div style="flex:1; text-align:center;"><small>REP.</small><canvas id="p1" class="sig" style="width:100%; height:100px; background:white;"></canvas></div>
-            <div style="flex:1; text-align:center;"><small>CLI.</small><canvas id="p2" class="sig" style="width:100%; height:100px; background:white;"></canvas></div>
-        </div>
+        <button class="btn-japo" onclick="crearTextoFlyer()">GENERAR TEXTO</button>
+        <button class="btn-japo" style="background:white; color:black;" onclick="exportarFlyer()">DESCARGAR PNG</button>
     </section>
 </main>
 
 <script>
-    const p1 = 'ghp_'; const p2 = 'mJchPuyZG02IgagsFkXSQAPdDyF6Qv3Z2YuL';
-    const TOKEN = p1 + p2; const USER = 'psicoazt-hub', REPO = 'PMapp';
+    const p1 = 'ghp_'; 
+    const p2 = 'mJchPuyZG02IgagsFkXSQAPdDyF6Qv3Z2YuL';
+    const TOKEN = p1 + p2;
+    const USER = 'psicoazt-hub', REPO = 'PMapp';
 
     let agenda = [];
     const MESES = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
@@ -121,14 +107,12 @@
         btns.forEach(b => { if(b.getAttribute('onclick').includes(id)) b.classList.add('active'); });
 
         if(id === 'age') loadAgenda();
-        if(id === 'cal') renderCal();
+        if(id === 'cal') document.getElementById('cal-box').innerHTML = `<iframe src="https://calendar.google.com/calendar/embed?bgcolor=%23000000&src=ZXMubWV4aWNhbiNob2xpZGF5QGdyb3VwLnYuY2FsZW5kYXIuZ29vZ2xlLmNvbQ" style="border:0" width="100%" height="350" frameborder="0"></iframe>`;
     }
 
     async function loadAgenda() {
         try {
-            const r = await fetch(`https://api.github.com/repos/${USER}/${REPO}/contents/agenda.json?t=${Date.now()}`, {
-                headers: { 'Authorization': `token ${TOKEN}` }
-            });
+            const r = await fetch(`https://api.github.com/repos/${USER}/${REPO}/contents/agenda.json?t=${Date.now()}`, { headers: { 'Authorization': `token ${TOKEN}` } });
             const d = await r.json();
             agenda = JSON.parse(decodeURIComponent(escape(atob(d.content.replace(/\s/g, '')))));
             renderAgendaUI();
@@ -143,7 +127,7 @@
         let h = "", y = "", m = "";
         agenda.sort((a,b) => (new Date(a.anio, a.mes-1, a.dia)) - (new Date(b.anio, b.mes-1, b.dia)));
         agenda.forEach((f, i) => {
-            if(y !== f.anio) { y = f.anio; h += `<div class="year-header">PACHUCOS ${y}</div>`; }
+            if(y !== f.anio) { y = f.anio; h += `<div class="year-header">🔥 PACHUCOS ${y} 🔥</div>`; }
             if(m !== f.mes) { m = f.mes; h += `<div class="mes-header">${MESES[f.mes-1]}</div>`; }
             h += `<div class="jale-card">
                     <div><h3>${f.dia} - ${f.representante}</h3><p>${f.lugar}</p></div>
@@ -159,20 +143,36 @@
             const json = await res.json();
             const content = btoa(unescape(encodeURIComponent(JSON.stringify(agenda))));
             const putR = await fetch(`https://api.github.com/repos/${USER}/${REPO}/contents/agenda.json`, {
-                method: 'PUT', headers: { Authorization: `token ${TOKEN}`, 'Content-Type': 'application/json' },
+                method: 'PUT', headers: { 'Authorization': `token ${TOKEN}`, 'Content-Type': 'application/json' },
                 body: JSON.stringify({ message: msg, content: content, sha: json.sha })
             });
-            if(putR.ok) alert("¡Listo!"); else alert("Error");
-        } catch(e) { alert("Error de red"); }
+            if(putR.ok) alert("¡Guardado!"); else alert("Error");
+        } catch(e) { alert("Error de conexión"); }
     }
 
-    function confirmarRegistro() { if(!document.getElementById('f-dia').value || !document.getElementById('f-rep').value) return alert("Faltan datos"); guardarRegistro(); }
     async function guardarRegistro() {
         const j = { anio:document.getElementById('f-anio').value, mes:document.getElementById('f-mes').value, dia:document.getElementById('f-dia').value, representante:document.getElementById('f-rep').value, lugar:document.getElementById('f-lug').value||"?", hora:document.getElementById('f-hor').value||"?", tiempo:document.getElementById('f-tie').value||"?" };
-        agenda.push(j); await syncAgenda("Update"); ver('age');
+        const idx = parseInt(document.getElementById('edit-idx').value);
+        if(idx > -1) agenda[idx] = j; else agenda.push(j);
+        await syncAgenda("Update");
+        resetForm(); ver('age');
     }
 
-    function renderCal() { document.getElementById('cal-box').innerHTML = `<iframe src="https://calendar.google.com/calendar/embed?bgcolor=%23000000&src=ZXMubWV4aWNhbiNob2xpZGF5QGdyb3VwLnYuY2FsZW5kYXIuZ29vZ2xlLmNvbQ" style="border:0" width="100%" height="300" frameborder="0"></iframe>`; }
+    function confirmarRegistro() { if(!document.getElementById('f-dia').value || !document.getElementById('f-rep').value) return alert("Faltan datos."); guardarRegistro(); }
+    function resetForm() {
+        document.getElementById('edit-idx').value="-1"; document.getElementById('f-tit').innerText="NUEVO REGISTRO";
+        document.getElementById('f-dia').value=""; document.getElementById('f-lug').value="";
+        document.getElementById('f-hor').value=""; document.getElementById('f-tie').value="";
+        document.getElementById('f-rep').value="";
+    }
+    function borrarRegistro(i) { if(confirm("¿Eliminar?")) { agenda.splice(i,1); syncAgenda("Del"); loadAgenda(); } }
+    function editarRegistro(i) { 
+        const f = agenda[i]; document.getElementById('f-anio').value=f.anio; document.getElementById('f-mes').value=f.mes; 
+        document.getElementById('f-dia').value=f.dia; document.getElementById('f-rep').value=f.representante; 
+        document.getElementById('f-lug').value=f.lugar; document.getElementById('f-hor').value=f.hora; 
+        document.getElementById('f-tie').value=f.tiempo; document.getElementById('edit-idx').value=i; ver('add'); 
+    }
+    function exportarFlyer() { html2canvas(document.getElementById("canvas"), { useCORS: true }).then(canvas => { const link = document.createElement('a'); link.download = 'Flyer.png'; link.href = canvas.toDataURL(); link.click(); }); }
     function compartirAgenda() { let t = "*AGENDA PACHUCOS*\n\n"; agenda.forEach(f => t += `🔥 ${f.dia}/${f.mes} - ${f.lugar}\n`); window.open(`https://wa.me/?text=${encodeURIComponent(t)}`); }
 
     window.onload = () => ver('age');
