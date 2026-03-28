@@ -21,13 +21,13 @@
         .btn-op { background: none; border: 1px solid #444; color: white; padding: 8px 12px; cursor: pointer; border-radius: 4px; font-size: 11px; margin-left: 5px; }
         input, select { width: 100%; padding: 14px; margin: 8px 0; background: #0a0a0a; border: 1px solid #333; color: white; border-radius: 5px; font-size: 16px; }
         .btn-japo { background: var(--oro); color: black; border: none; padding: 18px; width: 100%; font-weight: bold; cursor: pointer; border-radius: 5px; font-size: 16px; margin-top: 10px; }
-        #canvas-wrap { background: #222; padding: 10px; border-radius: 8px; display: inline-block; width: 100%; }
+        #canvas-wrap { background: #222; padding: 10px; border-radius: 8px; display: inline-block; width: 100%; position: relative; }
         #canvas { width: 100%; height: 500px; border: 2px solid var(--oro); position: relative; overflow: hidden; background: white; border-radius: 5px; }
         .asset-row { display: flex; gap: 10px; overflow-x: auto; padding: 10px 0; border-bottom: 1px solid #222; }
         .thumb { width: 85px; height: 85px; object-fit: cover; border: 1px solid #444; cursor: pointer; flex-shrink: 0; background: #000; border-radius: 5px; }
         .drag { position: absolute; cursor: move; user-select: none; white-space: nowrap; }
         #modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:1000; align-items:center; justify-content:center; flex-direction:column; padding: 20px; }
-        #modal-content { max-width: 90%; max-height: 80%; }
+        #modal-content { max-width: 90%; max-height: 80%; text-align: center; }
         canvas.sig { background: white; width: 100%; height: 130px; border-radius: 5px; border: 1px solid var(--oro); touch-action: none; }
     </style>
 </head>
@@ -36,7 +36,7 @@
 <div id="modal">
     <div id="modal-content"></div>
     <div style="margin-top:20px; display:flex; gap:10px;">
-        <button class="btn-japo" style="background:#25D366; color:white;" id="btn-share-gal">COMPARTIR</button>
+        <button class="btn-japo" style="background:#25D366; color:white;" id="btn-share-gal">COMPARTIR (WA)</button>
         <button class="btn-japo" onclick="document.getElementById('modal').style.display='none'">CERRAR</button>
     </div>
 </div>
@@ -53,8 +53,8 @@
 
 <main>
     <section id="age" class="section active">
-        <h1 style="color:var(--oro); margin:0;">AGENDA ACTUAL</h1>
-        <div id="lista-agenda">Cargando fechas...</div>
+        <h1 style="color:var(--oro); margin:0;">AGENDA PACHUCOS MEN</h1>
+        <div id="lista-agenda">Sincronizando...</div>
         <button class="btn-japo" style="background:#25D366; color:white;" onclick="compartirAgenda()">COMPARTIR AGENDA (WA)</button>
     </section>
 
@@ -76,7 +76,7 @@
     </section>
 
     <section id="cal" class="section">
-        <h1>CALENDARIO</h1>
+        <h1>CONSULTA DE CALENDARIO</h1>
         <div id="cal-box" style="background:#111; padding:15px; border-radius:10px;"></div>
     </section>
 
@@ -87,15 +87,13 @@
 
     <section id="fly" class="section">
         <h1>DISEÑADOR DE FLYER</h1>
-        <div id="canvas-wrap">
-            <div id="canvas"></div>
-        </div>
-        <input type="text" id="fly-txt" placeholder="Escribe aquí el texto" style="margin-top:10px;">
-        <p>Logos Pachucos:</p><div class="asset-row" id="l-log"></div>
+        <div id="canvas-wrap"><div id="canvas"></div></div>
+        <input type="text" id="fly-txt" placeholder="Escribe el texto aquí" style="margin-top:10px;">
+        <p>Logos y PNGs:</p><div class="asset-row" id="l-log"></div>
         <p>Estilos Títulos:</p><div class="asset-row" id="l-tit"></div>
         <p>Estilos Fechas:</p><div class="asset-row" id="l-fec"></div>
         <button class="btn-japo" onclick="crearTextoFlyer()">GENERAR TEXTO</button>
-        <button class="btn-japo" style="background:white; color:black;" onclick="exportarFlyer()">DESCARGAR FLYER</button>
+        <button class="btn-japo" style="background:white; color:black;" onclick="exportarFlyer()">DESCARGAR FLYER (IMAGEN)</button>
     </section>
 
     <section id="con" class="section">
@@ -124,9 +122,6 @@
         document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
         document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
         document.getElementById(id).classList.add('active');
-        const btn = Array.from(document.querySelectorAll('.nav-btn')).find(b => b.getAttribute('onclick').includes(id));
-        if(btn) btn.classList.add('active');
-        
         if(id === 'age') loadAgenda();
         if(id === 'cal') renderCal();
         if(id === 'gal') loadAssets(ASSETS.BODEGA, 'gal-grid', 'gal');
@@ -137,11 +132,12 @@
         try {
             const r = await fetch(`https://api.github.com/repos/${USER}/${REPO}/contents/agenda.json?t=${Date.now()}`, { headers: { Authorization: `token ${TOKEN}` } });
             const d = await r.json(); 
-            const decoded = decodeURIComponent(escape(atob(d.content)));
-            const nueva = JSON.parse(decoded);
+            const base64 = d.content.replace(/\s/g, '');
+            const decoded = new TextDecoder().decode(Uint8Array.from(atob(base64), c => c.charCodeAt(0)));
+            agenda = JSON.parse(decoded);
             
             const hoy = new Date(); hoy.setHours(0,0,0,0);
-            agenda = nueva.filter(f => {
+            agenda = agenda.filter(f => {
                 const fv = new Date(f.anio, f.mes-1, f.dia);
                 fv.setDate(fv.getDate() + 1);
                 return fv >= hoy;
@@ -153,7 +149,7 @@
                 return (parseInt(a.hora) || 99) - (parseInt(b.hora) || 99);
             });
             renderAgendaUI();
-        } catch(e) { console.error(e); document.getElementById('lista-agenda').innerHTML = "Error al conectar."; }
+        } catch(e) { document.getElementById('lista-agenda').innerHTML = "<p style='color:red'>Error al conectar con la agenda.</p>"; }
     }
 
     function renderAgendaUI() {
@@ -172,10 +168,11 @@
     async function syncAgenda(msg) {
         const res = await fetch(`https://api.github.com/repos/${USER}/${REPO}/contents/agenda.json`, { headers: { Authorization: `token ${TOKEN}` } });
         const json = await res.json();
-        const content = btoa(unescape(encodeURIComponent(JSON.stringify(agenda))));
+        const bytes = new TextEncoder().encode(JSON.stringify(agenda));
+        const base64 = btoa(String.fromCharCode(...bytes));
         await fetch(`https://api.github.com/repos/${USER}/${REPO}/contents/agenda.json`, {
             method: 'PUT', headers: { Authorization: `token ${TOKEN}` },
-            body: JSON.stringify({ message: msg, content: content, sha: json.sha })
+            body: JSON.stringify({ message: msg, content: base64, sha: json.sha })
         });
     }
 
@@ -198,7 +195,7 @@
         if(idx > -1) agenda[idx] = j; else agenda.push(j);
         
         await syncAgenda("Actualización Agenda");
-        alert("¡Hecho!");
+        alert("¡Guardado!");
         resetForm();
         ver('age');
     }
@@ -206,14 +203,12 @@
     function resetForm() {
         document.getElementById('edit-idx').value = "-1";
         document.getElementById('f-tit').innerText = "NUEVO REGISTRO";
-        document.getElementById('f-dia').value = "";
-        document.getElementById('f-lug').value = "";
-        document.getElementById('f-hor').value = "";
-        document.getElementById('f-tie').value = "";
+        document.getElementById('f-dia').value = ""; document.getElementById('f-lug').value = "";
+        document.getElementById('f-hor').value = ""; document.getElementById('f-tie').value = "";
         document.getElementById('f-rep').value = "";
     }
 
-    function cancelarRegistro() { if(confirm("¿Cancelar registro?")) { resetForm(); ver('age'); } }
+    function cancelarRegistro() { if(confirm("¿Cancelar?")) { resetForm(); ver('age'); } }
     function borrarRegistro(i) { if(confirm("¿Eliminar definitivamente?")) { agenda.splice(i,1); syncAgenda("Borrado"); loadAgenda(); } }
     function editarRegistro(i) { 
         const f = agenda[i]; 
@@ -228,27 +223,24 @@
     function loadAssets(list, target, mode) {
         document.getElementById(target).innerHTML = list.map(n => {
             const url = `https://raw.githubusercontent.com/${USER}/${REPO}/main/${n}`;
-            const isVideo = n.toLowerCase().endsWith('.mp4');
-            const clickAction = mode === 'gal' ? `abrirModalGal('${url}', ${isVideo})` : `seleccionarAssetFlyer('${url}', ${isVideo})`;
-            
-            if(isVideo) return `<video src="${url}" class="thumb" muted preload="metadata" onclick="${clickAction}"></video>`;
-            return `<img src="${url}" class="thumb" onclick="${clickAction}">`;
+            const isVid = n.toLowerCase().endsWith('.mp4');
+            const action = mode === 'gal' ? `abrirGal('${url}', ${isVid})` : `pickFlyer('${url}')`;
+            if(isVid) return `<video src="${url}" class="thumb" muted preload="metadata" onclick="${action}"></video>`;
+            return `<img src="${url}" class="thumb" onclick="${action}">`;
         }).join('');
     }
 
-    function abrirModalGal(u, isVid) {
-        const mod = document.getElementById('modal');
-        const cont = document.getElementById('modal-content');
+    function abrirGal(u, isVid) {
+        const mod = document.getElementById('modal'); const cont = document.getElementById('modal-content');
         cont.innerHTML = isVid ? `<video src="${u}" controls autoplay style="width:100%"></video>` : `<img src="${u}" style="width:100%">`;
         document.getElementById('btn-share-gal').onclick = () => window.open(`https://wa.me/?text=${encodeURIComponent('Mira este material de Pachucos Men: ' + u)}`);
         mod.style.display = 'flex';
     }
 
-    function seleccionarAssetFlyer(u, isVid) {
-        if(isVid) return alert("Los videos no se pueden usar en Flyers.");
+    function pickFlyer(u) {
         if(u.includes('retouch') || u.includes('Eraser')) {
             estiloFlyer.color = u.includes('ORO') ? '#d4af37' : '#fff';
-            alert("Estilo de texto cargado: " + (u.includes('ORO') ? 'ORO' : 'PLATA'));
+            alert("Estilo cargado: " + (u.includes('ORO') ? 'ORO' : 'CROMO'));
         } else {
             const i = document.createElement('img'); i.src = u; i.className = 'drag'; i.style.width = "150px"; 
             makeDraggable(i); document.getElementById('canvas').appendChild(i);
@@ -267,8 +259,7 @@
             const ev = e.touches ? e.touches[0] : e; mx = ev.clientX; my = ev.clientY;
             document.onmousemove = document.ontouchmove = (e) => {
                 const ev2 = e.touches ? e.touches[0] : e; x = mx - ev2.clientX; y = my - ev2.clientY; 
-                mx = ev2.clientX; my = ev2.clientY;
-                el.style.top = (el.offsetTop - y) + "px"; el.style.left = (el.offsetLeft - x) + "px";
+                mx = ev2.clientX; my = ev2.clientY; el.style.top = (el.offsetTop - y) + "px"; el.style.left = (el.offsetLeft - x) + "px";
             };
             document.onmouseup = document.ontouchend = () => document.onmousemove = document.ontouchmove = null;
         };
@@ -276,36 +267,15 @@
 
     function exportarFlyer() {
         html2canvas(document.getElementById("canvas"), { useCORS: true }).then(canvas => {
-            const link = document.createElement('a'); link.download = 'Flyer_Pachucos_Men.png';
+            const link = document.createElement('a'); link.download = 'Flyer_Pachucos.png';
             link.href = canvas.toDataURL(); link.click();
         });
     }
 
-    function renderCal() { 
-        document.getElementById('cal-box').innerHTML = `<iframe src="https://calendar.google.com/calendar/embed?wkst=1&bgcolor=%23000000&src=ZXMubWV4aWNhbiNob2xpZGF5QGdyb3VwLnYuY2FsZW5kYXIuZ29vZ2xlLmNvbQ" style="border:0" width="100%" height="400" frameborder="0"></iframe>`; 
-    }
-    
-    function compartirAgenda() {
-        let t = "*AGENDA OFICIAL PACHUCOS MEN*\n\n";
-        agenda.forEach(f => t += `🔥 ${f.dia}/${f.mes}/${f.anio} - ${f.lugar}\n`);
-        window.open(`https://wa.me/?text=${encodeURIComponent(t)}`);
-    }
-
-    function initSignaturePads() {
-        [document.getElementById('p1'), document.getElementById('p2')].forEach(c => {
-            const ctx = c.getContext('2d'); let drawing = false;
-            c.onmousedown = c.ontouchstart = () => drawing = true;
-            c.onmouseup = c.ontouchend = () => { drawing = false; ctx.beginPath(); };
-            c.onmousemove = c.ontouchmove = (e) => {
-                if(!drawing) return; const ev = e.touches ? e.touches[0] : e; const r = c.getBoundingClientRect();
-                ctx.lineTo(ev.clientX - r.left, ev.clientY - r.top); ctx.stroke();
-            };
-        });
-    }
-
-    setInterval(loadAgenda, 30000);
-    window.onload = () => { initSignaturePads(); ver('age'); };
+    function renderCal() { document.getElementById('cal-box').innerHTML = `<iframe src="https://calendar.google.com/calendar/embed?wkst=1&bgcolor=%23000000&src=ZXMubWV4aWNhbiNob2xpZGF5QGdyb3VwLnYuY2FsZW5kYXIuZ29vZ2xlLmNvbQ" style="border:0" width="100%" height="400" frameborder="0"></iframe>`; }
+    function compartirAgenda() { let t = "*AGENDA OFICIAL PACHUCOS MEN*\n\n"; agenda.forEach(f => t += `🔥 ${f.dia}/${f.mes}/${f.anio} - ${f.lugar}\n`); window.open(`https://wa.me/?text=${encodeURIComponent(t)}`); }
+    function initPads() { [document.getElementById('p1'), document.getElementById('p2')].forEach(c => { const ctx = c.getContext('2d'); let draw = false; c.onmousedown = c.ontouchstart = () => draw = true; c.onmouseup = c.ontouchend = () => { draw = false; ctx.beginPath(); }; c.onmousemove = c.ontouchmove = (e) => { if(!draw) return; const ev = e.touches ? e.touches[0] : e; const r = c.getBoundingClientRect(); ctx.lineTo(ev.clientX - r.left, ev.clientY - r.top); ctx.stroke(); }; }); }
+    setInterval(loadAgenda, 30000); window.onload = () => { initPads(); ver('age'); };
 </script>
 </body>
-    </html>
-    
+</html>
