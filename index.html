@@ -81,14 +81,14 @@
     </section>
 
     <section id="fly" class="section">
-        <h1>FLYERS</h1>
+        <h1>DISEÑADOR DE FLYER</h1>
         <div id="canvas"></div>
         <input type="text" id="fly-txt" placeholder="Escribe el texto aquí" style="margin-top:10px;">
         <p>Assets:</p><div class="asset-row" id="l-log"></div>
         <p>Títulos:</p><div class="asset-row" id="l-tit"></div>
         <p>Fechas:</p><div class="asset-row" id="l-fec"></div>
         <button class="btn-japo" onclick="crearTextoFlyer()">GENERAR TEXTO</button>
-        <button class="btn-japo" style="background:white; color:black;" onclick="exportarFlyer()">DESCARGAR FLYER (PNG)</button>
+        <button class="btn-japo" style="background:white; color:black;" onclick="exportarFlyer()">DESCARGAR PNG</button>
     </section>
 
     <section id="con" class="section">
@@ -101,10 +101,8 @@
 </main>
 
 <script>
-    // --- LLAVE PARTIDA PARA QUE GITHUB NO LA MATE ---
-    const p1 = 'ghp_'; 
-    const p2 = 'mJchPuyZG02IgagsFkXSQAPdDyF6Qv3Z2YuL'; 
-    
+    const p1 = 'ghp_';
+    const p2 = 'mJchPuyZG02IgagsFkXSQAPdDyF6Qv3Z2YuL';
     const TOKEN = p1 + p2;
     const USER = 'psicoazt-hub', REPO = 'PMapp';
 
@@ -121,7 +119,5 @@
     function ver(id) {
         document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
         document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-        document.getElementById(id).classList.add('active');
-        // Activar botón visualmente
-        const btn = Array.from(document.querySelectorAll('.nav-btn')).find(b => b.getAttribute('onclick').
-                                                                                                                                                                               
+        document
+    
