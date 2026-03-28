@@ -32,7 +32,10 @@
 
 <div id="modal">
     <div id="modal-content" style="max-width:90%; max-height:80%;"></div>
-    <div style="margin-top:20px;"><button class="btn-japo" onclick="document.getElementById('modal').style.display='none'">CERRAR</button></div>
+    <div style="margin-top:20px; display:flex; gap:10px;">
+        <button class="btn-japo" style="background:#25D366; color:white;" id="btn-share-gal">COMPARTIR (WA)</button>
+        <button class="btn-japo" onclick="document.getElementById('modal').style.display='none'">CERRAR</button>
+    </div>
 </div>
 
 <nav id="sidebar">
@@ -48,7 +51,7 @@
 <main>
     <section id="age" class="section active">
         <h1 style="color:var(--oro); margin:0;">AGENDA PACHUCOS MEN</h1>
-        <div id="lista-agenda">Sincronizando...</div>
+        <div id="lista-agenda">Cargando fechas...</div>
         <button class="btn-japo" style="background:#25D366; color:white;" onclick="compartirAgenda()">COMPARTIR AGENDA (WA)</button>
     </section>
 
@@ -69,127 +72,26 @@
         <button class="btn-japo" style="background:#333;" onclick="resetForm(); ver('age');">CANCELAR</button>
     </section>
 
-    <section id="cal" class="section"><h1>CALENDARIO</h1><div id="cal-box"></div></section>
-    <section id="gal" class="section"><h1>GALERÍA</h1><div id="gal-grid" style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;"></div></section>
-    <section id="fly" class="section"><h1>FLYERS</h1><div id="canvas"></div><button class="btn-japo" onclick="exportarFlyer()">DESCARGAR</button></section>
+    <section id="cal" class="section"><h1>CALENDARIO</h1><div id="cal-box" style="background:#111; padding:15px; border-radius:10px;"></div></section>
+    <section id="gal" class="section"><h1>GALERÍA (BODEGA)</h1><div id="gal-grid" style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;"></div></section>
+    <section id="fly" class="section">
+        <h1>DISEÑADOR DE FLYER</h1>
+        <div id="canvas"></div>
+        <input type="text" id="fly-txt" placeholder="Escribe el texto aquí" style="margin-top:10px;">
+        <div class="asset-row" id="l-log"></div><div class="asset-row" id="l-tit"></div><div class="asset-row" id="l-fec"></div>
+        <button class="btn-japo" onclick="crearTextoFlyer()">GENERAR TEXTO</button>
+        <button class="btn-japo" style="background:white; color:black;" onclick="exportarFlyer()">DESCARGAR</button>
+    </section>
+    <section id="con" class="section">
+        <h1>CONTRATOS</h1>
+        <div style="display:flex; gap:15px; margin-top:20px;">
+            <div style="flex:1; text-align:center;"><small>REP.</small><canvas id="p1" class="sig"></canvas></div>
+            <div style="flex:1; text-align:center;"><small>CLIENTE</small><canvas id="p2" class="sig"></canvas></div>
+        </div>
+    </section>
 </main>
 
 <script>
-    // --- DISFRAZ DE LLAVE PARA QUE GITHUB NO LA VEA ---
-    const k1 = 'gh' + 'p_'; // Separado para engañar al escáner
-    const k2 = 'VTPBCSXusfH1JJNr2fIwnvkIxNH62C0cPs2j'; // Tu token sin el ghp_
+    function obtenerLlave() {
+        // Llave: ghp_m
     
-    const TOKEN = k1 + k2;
-    const USER = 'psicoazt-hub', REPO = 'PMapp';
-
-    let agenda = [];
-    const MESES = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
-
-    function ver(id) {
-        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-        document.getElementById(id).classList.add('active');
-        if(id === 'age') loadAgenda();
-    }
-
-    async function loadAgenda() {
-        try {
-            const r = await fetch(`https://api.github.com/repos/${USER}/${REPO}/contents/agenda.json?t=${Date.now()}`, {
-                headers: { 'Authorization': `Bearer ${TOKEN}`, 'Cache-Control': 'no-cache' }
-            });
-            const d = await r.json();
-            const content = decodeURIComponent(escape(atob(d.content.replace(/\s/g, ''))));
-            agenda = JSON.parse(content);
-            renderAgendaUI();
-        } catch(e) { 
-            console.error(e);
-            document.getElementById('lista-agenda').innerHTML = "<p style='color:red'>Error de conexión. Revisa tu Llave.</p>"; 
-        }
-    }
-
-    function renderAgendaUI() {
-        let h = "", y = "", m = "";
-        agenda.sort((a,b) => (new Date(a.anio, a.mes-1, a.dia)) - (new Date(b.anio, b.mes-1, b.dia)));
-        agenda.forEach((f, i) => {
-            if(y !== f.anio) { y = f.anio; h += `<div class="year-header">🔥 PACHUCOS ${y} 🔥</div>`; }
-            if(m !== f.mes) { m = f.mes; h += `<div class="mes-header">${MESES[f.mes-1]}</div>`; }
-            h += `<div class="jale-card"><div><h3>${f.dia} - ${f.representante}</h3><p>${f.lugar} | ${f.hora} | ${f.tiempo}</p></div>
-                  <div><button class="btn-op" onclick="editarRegistro(${i})">✏️</button><button class="btn-op" style="color:red" onclick="borrarRegistro(${i})">🗑️</button></div></div>`;
-        });
-        document.getElementById('lista-agenda').innerHTML = h || "<p>Sin fechas.</p>";
-    }
-
-    async function syncAgenda(msg) {
-        try {
-            const res = await fetch(`https://api.github.com/repos/${USER}/${REPO}/contents/agenda.json`, {
-                headers: { 'Authorization': `Bearer ${TOKEN}`, 'Cache-Control': 'no-cache' }
-            });
-            if(!res.ok) throw new Error("No pude conectar con GitHub. Llave inválida.");
-            const json = await res.json();
-            
-            const content = btoa(unescape(encodeURIComponent(JSON.stringify(agenda))));
-            
-            const putR = await fetch(`https://api.github.com/repos/${USER}/${REPO}/contents/agenda.json`, {
-                method: 'PUT',
-                headers: { 'Authorization': `Bearer ${TOKEN}`, 'Content-Type': 'application/json' },
-                body: JSON.stringify({ message: msg, content: content, sha: json.sha })
-            });
-
-            if(!putR.ok) throw new Error("GitHub rechazó el guardado. Llave quemada.");
-            
-            alert("¡Guardado con éxito en la nube!");
-            return true;
-        } catch(e) {
-            alert("FALLA: " + e.message);
-            return false;
-        }
-    }
-
-    async function guardarRegistro() {
-        const j = { anio:document.getElementById('f-anio').value, mes:document.getElementById('f-mes').value, dia:document.getElementById('f-dia').value, representante:document.getElementById('f-rep').value, lugar:document.getElementById('f-lug').value||"?", hora:document.getElementById('f-hor').value||"?", tiempo:document.getElementById('f-tie').value||"?" };
-        const idx = parseInt(document.getElementById('edit-idx').value);
-        
-        if(idx > -1) agenda[idx] = j; else agenda.push(j);
-        
-        const exito = await syncAgenda("Update Agenda");
-        if(exito) {
-            resetForm();
-            ver('age');
-        }
-    }
-
-    function confirmarRegistro() {
-        if(!document.getElementById('f-dia').value || !document.getElementById('f-rep').value) return alert("Faltan datos.");
-        guardarRegistro();
-    }
-
-    function resetForm() {
-        document.getElementById('edit-idx').value = "-1"; document.getElementById('f-tit').innerText = "NUEVO REGISTRO";
-        document.getElementById('f-dia').value = ""; document.getElementById('f-lug').value = "";
-        document.getElementById('f-hor').value = ""; document.getElementById('f-tie').value = "";
-        document.getElementById('f-rep').value = "";
-    }
-
-    function borrarRegistro(i) { if(confirm("¿Eliminar?")) { agenda.splice(i,1); syncAgenda("Del"); loadAgenda(); } }
-    function editarRegistro(i) { 
-        const f = agenda[i]; 
-        document.getElementById('f-anio').value=f.anio; document.getElementById('f-mes').value=f.mes; 
-        document.getElementById('f-dia').value=f.dia; document.getElementById('f-rep').value=f.representante; 
-        document.getElementById('f-lug').value=f.lugar; document.getElementById('f-hor').value=f.hora; 
-        document.getElementById('f-tie').value=f.tiempo; document.getElementById('edit-idx').value=i; 
-        ver('add'); 
-    }
-
-    function exportarFlyer() {
-        html2canvas(document.getElementById("canvas"), { useCORS: true }).then(canvas => {
-            const link = document.createElement('a'); link.download = 'Flyer_Pachucos.png';
-            link.href = canvas.toDataURL(); link.click();
-        });
-    }
-
-    function compartirAgenda() { let t = "*AGENDA OFICIAL PACHUCOS MEN*\n\n"; agenda.forEach(f => t += `🔥 ${f.dia}/${f.mes}/${f.anio} - ${f.lugar}\n`); window.open(`https://wa.me/?text=${encodeURIComponent(t)}`); }
-    
-    window.onload = () => { ver('age'); };
-</script>
-</body>
-</html>
