@@ -2,68 +2,72 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>PACHUCOS MEN 2026</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         :root { --oro: #d4af37; --fondo: #000; --gris: #121212; --rojo: #cc0000; }
-        * { box-sizing: border-box; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { background: var(--fondo); color: white; font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; height: 100vh; overflow: hidden; }
         
-        /* SIDEBAR REDUCIDO A 140PX */
-        #sidebar { width: 140px; background: #0a0a0a; border-right: 1px solid #222; display: flex; flex-direction: column; padding-top: 20px; flex-shrink: 0; }
-        .nav-btn { background: transparent; border: none; color: #666; padding: 15px 10px; text-align: left; font-size: 11px; cursor: pointer; border-left: 4px solid transparent; transition: 0.3s; font-weight: bold; text-transform: uppercase; }
-        .nav-btn.active { color: var(--oro); border-left: 4px solid var(--oro); background: #111; }
-        
-        /* MAIN CON 3/4 DE PANTALLA */
-        main { flex: 1; padding: 20px; overflow-y: auto; background: radial-gradient(circle at top, #111, #000); }
-        .section { display: none; max-width: 900px; margin: 0 auto; }
+        /* SIDEBAR 20% COMPACTO */
+        #sidebar { width: 20%; max-width: 130px; background: #0a0a0a; border-right: 1px solid #222; display: flex; flex-direction: column; padding-top: 15px; flex-shrink: 0; }
+        .nav-btn { background: transparent; border: none; color: #555; padding: 12px 5px; text-align: center; font-size: 9px; cursor: pointer; border-left: 3px solid transparent; transition: 0.3s; font-weight: bold; text-transform: uppercase; }
+        .nav-btn.active { color: var(--oro); border-left: 3px solid var(--oro); background: #111; }
+        .nav-btn i { display: block; font-size: 16px; margin-bottom: 4px; }
+
+        /* MAIN 80% */
+        main { flex: 1; padding: 10px; overflow-y: auto; background: radial-gradient(circle at top, #111, #000); }
+        .section { display: none; width: 100%; }
         .section.active { display: block; }
-        
-        .year-header { color: var(--oro); font-size: 20px; text-align: center; margin: 30px 0 15px; font-weight: 900; letter-spacing: 2px; border-top: 1px double #333; padding-top: 15px; }
-        .mes-header { color: #888; font-size: 16px; border-bottom: 1px solid #333; margin: 15px 0 8px; padding-bottom: 5px; text-transform: uppercase; }
-        
-        .jale-card { background: var(--gris); border: 1px solid #222; padding: 12px; margin-bottom: 8px; border-radius: 5px; display: flex; justify-content: space-between; align-items: center; }
-        .btn-op { background: none; border: 1px solid #444; color: white; padding: 8px 10px; cursor: pointer; border-radius: 4px; font-size: 11px; margin-left: 5px; }
-        
-        input, select { width: 100%; padding: 12px; margin: 6px 0; background: #0a0a0a; border: 1px solid #333; color: white; border-radius: 5px; font-size: 14px; }
-        .btn-japo { background: var(--oro); color: black; border: none; padding: 15px; width: 100%; font-weight: bold; cursor: pointer; border-radius: 5px; font-size: 14px; margin-top: 10px; }
-        
-        #canvas { width: 100%; height: 450px; border: 2px solid var(--oro); position: relative; overflow: hidden; background: white; border-radius: 5px; }
-        .asset-row { display: flex; gap: 10px; overflow-x: auto; padding: 10px 0; border-bottom: 1px solid #222; }
-        .thumb { width: 75px; height: 75px; object-fit: cover; border: 1px solid #444; cursor: pointer; flex-shrink: 0; background: #000; border-radius: 5px; }
-        .drag { position: absolute; cursor: move; user-select: none; white-space: nowrap; }
-        #modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:1000; align-items:center; justify-content:center; flex-direction:column; padding: 20px; }
-        canvas.sig { background: white; width: 100%; height: 130px; border-radius: 5px; border: 1px solid var(--oro); touch-action: none; }
+
+        /* AGENDA COMPACTA (Mitad de altura) */
+        h1 { font-size: 16px; color: var(--oro); text-align: center; margin: 5px 0 10px; }
+        .jale-card { background: var(--gris); border: 1px solid #222; padding: 8px 10px; margin-bottom: 5px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; border-left: 3px solid var(--oro); }
+        .jale-info { flex: 1; }
+        .jale-info h3 { margin: 0; font-size: 13px; color: #fff; }
+        .jale-info p { margin: 1px 0; font-size: 10px; color: #888; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .btn-op { background: #222; border: 1px solid #444; color: white; padding: 6px; cursor: pointer; border-radius: 4px; font-size: 10px; margin-left: 4px; }
+
+        /* REGISTRO MEJORADO */
+        input, select { width: 100%; padding: 10px; margin: 4px 0; background: #0a0a0a; border: 1px solid #333; color: white; border-radius: 5px; font-size: 13px; }
+        .btn-japo { background: var(--oro); color: black; border: none; padding: 12px; width: 100%; font-weight: bold; cursor: pointer; border-radius: 5px; font-size: 13px; margin-top: 5px; }
+
+        /* GALERÍA PRO */
+        .gal-item { background: #111; border-radius: 5px; overflow: hidden; position: relative; margin-bottom: 10px; border: 1px solid #222; }
+        .gal-item video, .gal-item img { width: 100%; display: block; max-height: 200px; object-fit: cover; }
+        .gal-btns { display: flex; background: #0a0a0a; padding: 5px; gap: 5px; }
+        .btn-gal { flex: 1; padding: 8px; font-size: 10px; background: #222; color: var(--oro); border: 1px solid #333; border-radius: 3px; font-weight: bold; }
+
+        #modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); z-index:9999; align-items:center; justify-content:center; }
+        #modal-content { width: 95%; max-height: 80%; }
     </style>
 </head>
 <body>
 
-<div id="modal">
-    <div id="modal-content" style="max-width:90%; max-height:80%;"></div>
-    <div style="margin-top:20px;"><button class="btn-japo" onclick="document.getElementById('modal').style.display='none'">CERRAR</button></div>
+<div id="modal" onclick="this.style.display='none'">
+    <div id="modal-content" onclick="event.stopPropagation()"></div>
 </div>
 
 <nav id="sidebar">
-    <div style="text-align:center; padding-bottom:25px;"><h2 style="font-size:14px; color:var(--oro); margin:0;">PACHUCOS</h2><small style="font-size:9px; color:#555">2026</small></div>
-    <button class="nav-btn active" onclick="ver('age')">📝 AGENDA</button>
-    <button class="nav-btn" onclick="ver('add')">➕ AGREGAR</button>
-    <button class="nav-btn" onclick="ver('cal')">📅 CALENDARIO</button>
+    <div style="text-align:center; padding-bottom:15px;"><h2 style="font-size:10px; color:var(--oro); margin:0;">PACHUCOS</h2></div>
+    <button class="nav-btn active" onclick="ver('age')">📅 AGENDA</button>
+    <button class="nav-btn" onclick="ver('add')">➕ REGISTRO</button>
+    <button class="nav-btn" onclick="ver('cal')">🗓️ CAL</button>
     <button class="nav-btn" onclick="ver('gal')">🖼️ GALERÍA</button>
-    <button class="nav-btn" onclick="ver('fly')">🎨 FLYERS</button>
     <button class="nav-btn" onclick="ver('con')">📜 CONTRATOS</button>
 </nav>
 
 <main>
     <section id="age" class="section active">
-        <h1 style="color:var(--oro); margin:0; font-size:18px;">AGENDA PACHUCOS MEN</h1>
+        <h1>AGENDA PACHUCOS</h1>
         <div id="lista-agenda">Cargando...</div>
-        <button class="btn-japo" style="background:#25D366; color:white;" onclick="compartirAgenda()">COMPARTIR (WA)</button>
+        <button class="btn-japo" style="background:#25D366; color:white;" onclick="compartirAgenda()">WHATSAPP</button>
     </section>
 
     <section id="add" class="section">
-        <h1 id="f-tit" style="font-size:18px;">NUEVO REGISTRO</h1>
-        <div style="display:flex; gap:8px;">
+        <h1 id="f-tit">NUEVO REGISTRO</h1>
+        <div style="display:flex; gap:5px;">
             <input type="number" id="f-anio" value="2026">
             <select id="f-mes">
                 <option value="1">Ene</option><option value="2">Feb</option><option value="3">Mar</option><option value="4">Abr</option><option value="5">May</option><option value="6">Jun</option>
@@ -71,108 +75,151 @@
             </select>
             <input type="number" id="f-dia" placeholder="Día">
         </div>
-        <select id="f-rep"><option value="">¿Quién agendó?</option><option value="JOSÉ">JOSÉ</option><option value="CHAVA">CHAVA</option><option value="TOÑO">TOÑO</option></select>
-        <input type="text" id="f-lug" placeholder="Lugar"><input type="text" id="f-hor" placeholder="Hora"><input type="text" id="f-tie" placeholder="Tiempo">
+        <select id="f-rep">
+            <option value="">¿Quién agendó?</option>
+            <option value="JOSÉ">JOSÉ</option>
+            <option value="CHAVA">CHAVA</option>
+            <option value="TOÑO">TOÑO</option>
+            <option value="OTROS">OTROS</option>
+        </select>
+        <input type="text" id="f-lug" placeholder="Lugar (Pueblo/Salón)">
+        <div style="display:flex; gap:5px;">
+            <input type="text" id="f-hor" placeholder="Hora (Ej: 9 PM)">
+            <input type="text" id="f-tie" placeholder="Tiempo (Ej: 5h)">
+        </div>
         <input type="hidden" id="edit-idx" value="-1">
-        <button class="btn-japo" id="save-btn" onclick="confirmarRegistro()">ACEPTAR / GUARDAR</button>
+        <button class="btn-japo" id="save-btn" onclick="confirmarRegistro()">GUARDAR FECHA</button>
         <button class="btn-japo" style="background:#333;" onclick="resetForm(); ver('age');">CANCELAR</button>
     </section>
 
-    <section id="cal" class="section"><h1>CALENDARIO</h1><div id="cal-box" style="background:#111; padding:10px; border-radius:10px;"></div></section>
-    <section id="gal" class="section"><h1>GALERÍA</h1><div id="gal-grid" style="display:grid; grid-template-columns: 1fr 1fr; gap:8px;"></div></section>
-    <section id="fly" class="section">
-        <h1>FLYERS</h1>
-        <div id="canvas"></div>
-        <input type="text" id="fly-txt" placeholder="Escribe el texto aquí" style="margin-top:10px;">
-        <div class="asset-row" id="l-log"></div>
-        <button class="btn-japo" onclick="crearTextoFlyer()">GENERAR TEXTO</button>
-        <button class="btn-japo" style="background:white; color:black;" onclick="exportarFlyer()">DESCARGAR PNG</button>
+    <section id="gal" class="section">
+        <h1>BODEGA MULTIMEDIA</h1>
+        <div id="gal-grid"></div>
     </section>
+    
+    <section id="cal" class="section"><div id="cal-box"></div></section>
 </main>
 
 <script>
-    const p1 = 'ghp_'; 
-    const p2 = 'mJchPuyZG02IgagsFkXSQAPdDyF6Qv3Z2YuL';
-    const TOKEN = p1 + p2;
-    const USER = 'psicoazt-hub', REPO = 'PMapp';
+    const p1 = 'ghp_'; const p2 = 'mJchPuyZG02IgagsFkXSQAPdDyF6Qv3Z2YuL';
+    const TOKEN = p1 + p2; const USER = 'psicoazt-hub', REPO = 'PMapp';
 
     let agenda = [];
     const MESES = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
+
+    // ASSETS (Aquí mandé todo lo de Flyer)
+    const ASSETS = ["VN20251209_045334.mp4", "download_20251208_090855_0000.mp4", "Diseño sin título_20251208_090215_0000.mp4", "VID-20250304-WA0067.mp4", "origin_1768640677638.png", "BackgroundEraser_20251218_105209714.png"];
 
     function ver(id) {
         document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
         document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
         document.getElementById(id).classList.add('active');
-        const btns = document.querySelectorAll('.nav-btn');
-        btns.forEach(b => { if(b.getAttribute('onclick').includes(id)) b.classList.add('active'); });
+        const btn = Array.from(document.querySelectorAll('.nav-btn')).find(b => b.getAttribute('onclick').includes(id));
+        if(btn) btn.classList.add('active');
 
         if(id === 'age') loadAgenda();
-        if(id === 'cal') document.getElementById('cal-box').innerHTML = `<iframe src="https://calendar.google.com/calendar/embed?bgcolor=%23000000&src=ZXMubWV4aWNhbiNob2xpZGF5QGdyb3VwLnYuY2FsZW5kYXIuZ29vZ2xlLmNvbQ" style="border:0" width="100%" height="350" frameborder="0"></iframe>`;
+        if(id === 'gal') loadGal();
+        if(id === 'cal') document.getElementById('cal-box').innerHTML = `<iframe src="https://calendar.google.com/calendar/embed?bgcolor=%23000000&src=ZXMubWV4aWNhbiNob2xpZGF5QGdyb3VwLnYuY2FsZW5kYXIuZ29vZ2xlLmNvbQ" style="border:0" width="100%" height="400" frameborder="0"></iframe>`;
     }
 
     async function loadAgenda() {
         try {
             const r = await fetch(`https://api.github.com/repos/${USER}/${REPO}/contents/agenda.json?t=${Date.now()}`, { headers: { 'Authorization': `token ${TOKEN}` } });
             const d = await r.json();
-            agenda = JSON.parse(decodeURIComponent(escape(atob(d.content.replace(/\s/g, '')))));
+            const newAgenda = JSON.parse(decodeURIComponent(escape(atob(d.content.replace(/\s/g, '')))));
+            
+            // ALERTA DE NUEVA FECHA
+            if(agenda.length > 0 && newAgenda.length > agenda.length) alert("¡Aviso! Se agregó una nueva fecha.");
+            
+            agenda = newAgenda;
+            localStorage.setItem('agenda_cache', JSON.stringify(agenda)); // Guardar para offline
             renderAgendaUI();
         } catch(e) {
-            const rRaw = await fetch(`https://raw.githubusercontent.com/${USER}/${REPO}/main/agenda.json?t=${Date.now()}`);
-            agenda = await rRaw.json();
+            agenda = JSON.parse(localStorage.getItem('agenda_cache')) || [];
             renderAgendaUI();
         }
     }
 
     function renderAgendaUI() {
-        let h = "", y = "", m = "";
+        let h = "";
         agenda.sort((a,b) => (new Date(a.anio, a.mes-1, a.dia)) - (new Date(b.anio, b.mes-1, b.dia)));
         agenda.forEach((f, i) => {
-            if(y !== f.anio) { y = f.anio; h += `<div class="year-header">🔥 PACHUCOS ${y} 🔥</div>`; }
-            if(m !== f.mes) { m = f.mes; h += `<div class="mes-header">${MESES[f.mes-1]}</div>`; }
             h += `<div class="jale-card">
-                    <div><h3>${f.dia} - ${f.representante}</h3><p>${f.lugar}</p></div>
-                    <div><button class="btn-op" onclick="editarRegistro(${i})">✏️</button><button class="btn-op" style="color:red" onclick="borrarRegistro(${i})">🗑️</button></div>
+                    <div class="jale-info">
+                        <h3>${f.dia}/${f.mes} - ${f.representante}</h3>
+                        <p>${f.lugar} | ${f.hora || '?'} | ${f.tiempo || '?'}</p>
+                    </div>
+                    <div>
+                        <button class="btn-op" onclick="editarRegistro(${i})">✏️</button>
+                        <button class="btn-op" style="color:red" onclick="borrarRegistro(${i})">🗑️</button>
+                    </div>
                   </div>`;
         });
         document.getElementById('lista-agenda').innerHTML = h || "Sin fechas.";
     }
 
-    async function syncAgenda(msg) {
-        try {
-            const res = await fetch(`https://api.github.com/repos/${USER}/${REPO}/contents/agenda.json`, { headers: { Authorization: `token ${TOKEN}` } });
-            const json = await res.json();
-            const content = btoa(unescape(encodeURIComponent(JSON.stringify(agenda))));
-            const putR = await fetch(`https://api.github.com/repos/${USER}/${REPO}/contents/agenda.json`, {
-                method: 'PUT', headers: { 'Authorization': `token ${TOKEN}`, 'Content-Type': 'application/json' },
-                body: JSON.stringify({ message: msg, content: content, sha: json.sha })
-            });
-            if(putR.ok) alert("¡Guardado!"); else alert("Error");
-        } catch(e) { alert("Error de conexión"); }
-    }
-
-    async function guardarRegistro() {
-        const j = { anio:document.getElementById('f-anio').value, mes:document.getElementById('f-mes').value, dia:document.getElementById('f-dia').value, representante:document.getElementById('f-rep').value, lugar:document.getElementById('f-lug').value||"?", hora:document.getElementById('f-hor').value||"?", tiempo:document.getElementById('f-tie').value||"?" };
-        const idx = parseInt(document.getElementById('edit-idx').value);
-        if(idx > -1) agenda[idx] = j; else agenda.push(j);
-        await syncAgenda("Update");
-        resetForm(); ver('age');
+    async function syncAgenda() {
+        if(!navigator.onLine) { alert("Sin internet. Se guardará localmente."); return; }
+        const res = await fetch(`https://api.github.com/repos/${USER}/${REPO}/contents/agenda.json`, { headers: { Authorization: `token ${TOKEN}` } });
+        const json = await res.json();
+        const content = btoa(unescape(encodeURIComponent(JSON.stringify(agenda))));
+        await fetch(`https://api.github.com/repos/${USER}/${REPO}/contents/agenda.json`, {
+            method: 'PUT', headers: { Authorization: `token ${TOKEN}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ message: "Sync", content: content, sha: json.sha })
+        });
+        loadAgenda();
     }
 
     function confirmarRegistro() { if(!document.getElementById('f-dia').value || !document.getElementById('f-rep').value) return alert("Faltan datos."); guardarRegistro(); }
-    function resetForm() {
-        document.getElementById('edit-idx').value="-1"; document.getElementById('f-tit').innerText="NUEVO REGISTRO";
-        document.getElementById('f-dia').value=""; document.getElementById('f-lug').value="";
-        document.getElementById('f-hor').value=""; document.getElementById('f-tie').value="";
-        document.getElementById('f-rep').value="";
+    
+    async function guardarRegistro() {
+        const j = { anio:document.getElementById('f-anio').value, mes:document.getElementById('f-mes').value, dia:document.getElementById('f-dia').value, representante:document.getElementById('f-rep').value, lugar:document.getElementById('f-lug').value, hora:document.getElementById('f-hor').value, tiempo:document.getElementById('f-tie').value };
+        const idx = parseInt(document.getElementById('edit-idx').value);
+        if(idx > -1) agenda[idx] = j; else agenda.push(j);
+        await syncAgenda();
+        resetForm(); ver('age');
     }
-    function borrarRegistro(i) { if(confirm("¿Eliminar?")) { agenda.splice(i,1); syncAgenda("Del"); loadAgenda(); } }
+
+    function borrarRegistro(i) { if(confirm("¿Eliminar?")) { agenda.splice(i,1); syncAgenda(); } }
+    
     function editarRegistro(i) { 
         const f = agenda[i]; document.getElementById('f-anio').value=f.anio; document.getElementById('f-mes').value=f.mes; 
         document.getElementById('f-dia').value=f.dia; document.getElementById('f-rep').value=f.representante; 
         document.getElementById('f-lug').value=f.lugar; document.getElementById('f-hor').value=f.hora; 
-        document.getElementById('f-tie').value=f.tiempo; document.getElementById('edit-idx').value=i; ver('add'); 
+        document.getElementById('f-tie').value=f.tiempo; document.getElementById('edit-idx').value=i; 
+        document.getElementById('f-tit').innerText="MODIFICAR"; ver('add'); 
     }
-    function exportarFlyer() { html2canvas(document.getElementById("canvas"), { useCORS: true }).then(canvas => { const link = document.createElement('a'); link.download = 'Flyer.png'; link.href = canvas.toDataURL(); link.click(); }); }
+
+    function resetForm() { document.getElementById('edit-idx').value="-1"; document.getElementById('f-tit').innerText="NUEVO REGISTRO"; document.querySelectorAll('input').forEach(i => i.value=""); document.getElementById('f-anio').value="2026"; }
+
+    // GALERÍA CON DESCARGA Y COMPARTIR
+    function loadGal() {
+        document.getElementById('gal-grid').innerHTML = ASSETS.map(n => {
+            const url = `https://raw.githubusercontent.com/${USER}/${REPO}/main/${n}`;
+            const isVid = n.endsWith('.mp4');
+            return `<div class="gal-item">
+                ${isVid ? `<video src="${url}" preload="metadata"></video>` : `<img src="${url}">`}
+                <div class="gal-btns">
+                    <button class="btn-gal" onclick="playMedia('${url}', ${isVid})">VER</button>
+                    <button class="btn-gal" onclick="downloadMedia('${url}', '${n}')">BAJAR</button>
+                    <button class="btn-gal" onclick="shareMedia('${url}')">WA</button>
+                </div>
+            </div>`;
+        }).join('');
+    }
+
+    function playMedia(u, v) {
+        const m = document.getElementById('modal'); const c = document.getElementById('modal-content');
+        c.innerHTML = v ? `<video src="${u}" controls autoplay style="width:100%"></video>` : `<img src="${u}" style="width:100%">`;
+        m.style.display = 'flex';
+    }
+
+    async function downloadMedia(u, n) {
+        const r = await fetch(u); const b = await r.blob();
+        const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = n; a.click();
+    }
+
+    function shareMedia(u) { window.open(`https://wa.me/?text=${encodeURIComponent('Checa este material: ' + u)}`); }
     function compartirAgenda() { let t = "*AGENDA PACHUCOS*\n\n"; agenda.forEach(f => t += `🔥 ${f.dia}/${f.mes} - ${f.lugar}\n`); window.open(`https://wa.me/?text=${encodeURIComponent(t)}`); }
 
     window.onload = () => ver('age');
