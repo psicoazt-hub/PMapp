@@ -17,18 +17,17 @@
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { background: var(--fondo); color: var(--texto); font-family: 'Segoe UI', Roboto, sans-serif; margin: 0; display: flex; height: 100vh; overflow: hidden; }
         
-        /* SIDEBAR ESTILO CANVA (20%) */
         #sidebar { 
             width: 20%; 
             max-width: 110px; 
-            background: linear-gradient(180deg, var(--canva-purp) 0%, #5433ff 100%); 
+            background: linear-gradient(180deg, var(--canva-purp) 0%, #5433ff) 100%; 
             display: flex; 
             flex-direction: column; 
             padding-top: 15px; 
             flex-shrink: 0; 
             box-shadow: 2px 0 10px rgba(0,0,0,0.1);
         }
-        #sidebar h2 { font-size: 10px; color: white; text-align: center; margin-bottom: 20px; letter-spacing: 1px; }
+        #sidebar h2 { font-size: 9px; color: white; text-align: center; margin-bottom: 20px; letter-spacing: 1px; }
         
         .nav-btn { 
             background: transparent; 
@@ -51,11 +50,9 @@
 
         h1 { font-size: 18px; color: var(--canva-purp); text-align: center; margin: 0 0 15px; font-weight: 800; }
 
-        /* CABECERAS */
         .year-header { color: #5433ff; font-size: 15px; text-align: center; margin: 20px 0 8px; font-weight: 900; }
         .mes-header { color: #888; font-size: 11px; padding: 5px 0; margin: 10px 0; text-transform: uppercase; border-bottom: 1px solid var(--gris-suave); font-weight: bold; }
 
-        /* BLOQUE POR DÍA (DISEÑO LIMPIO) */
         .dia-bloque { background: var(--blanco); border-radius: 12px; margin-bottom: 8px; display: flex; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
         .dia-numero { background: #f0f2f5; width: 50px; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 800; color: var(--canva-purp); }
         .jales-lista { flex: 1; padding: 8px 12px; }
@@ -67,17 +64,13 @@
         .jale-btns { position: absolute; right: 0; top: 50%; transform: translateY(-50%); display: flex; gap: 5px; }
         .btn-op { background: var(--fondo); border: none; padding: 6px; cursor: pointer; border-radius: 6px; font-size: 11px; color: #54595f; }
 
-        /* REGISTRO CANVA STYLE */
         input, select { width: 100%; padding: 12px; margin: 5px 0; background: var(--blanco); border: 1.5px solid var(--gris-suave); color: var(--texto); border-radius: 8px; font-size: 14px; outline: none; }
-        input:focus { border-color: var(--canva-purp); }
         .btn-japo { background: linear-gradient(90deg, var(--canva-purp), #5433ff); color: white; border: none; padding: 15px; width: 100%; font-weight: bold; cursor: pointer; border-radius: 8px; font-size: 14px; margin-top: 10px; box-shadow: 0 4px 10px rgba(125, 42, 232, 0.3); }
 
-        /* GALERÍA MODERNA */
         .gal-item { background: var(--blanco); border-radius: 12px; overflow: hidden; margin-bottom: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); border: 1px solid var(--gris-suave); }
-        .gal-item video, .gal-item img { width: 100%; display: block; max-height: 200px; object-fit: cover; }
+        .gal-item video, .gal-item img { width: 100%; display: block; height: 180px; object-fit: cover; background: #000; }
         .gal-btns { display: flex; padding: 8px; gap: 8px; }
         .btn-gal { flex: 1; padding: 10px; font-size: 10px; background: #f0f2f5; color: var(--canva-purp); border: none; border-radius: 6px; font-weight: 800; text-transform: uppercase; }
-        .btn-gal.wa { background: #25D366; color: white; }
 
         #modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:9999; align-items:center; justify-content:center; }
     </style>
@@ -212,7 +205,9 @@
             method: 'PUT', headers: { Authorization: `token ${TOKEN}`, 'Content-Type': 'application/json' },
             body: JSON.stringify({ message: "Update", content: content, sha: json.sha })
         });
-        loadAgenda();
+        alert("¡Guardado!"); 
+        resetForm();
+        ver('age');
     }
 
     function confirmarRegistro() { 
@@ -225,7 +220,6 @@
         const idx = parseInt(document.getElementById('edit-idx').value);
         if(idx > -1) agenda[idx] = j; else agenda.push(j);
         await syncAgenda();
-        resetForm(); ver('age');
     }
 
     function borrarRegistro(i) { if(confirm("¿Eliminar este jale?")) { agenda.splice(i,1); syncAgenda(); } }
@@ -237,18 +231,26 @@
         document.getElementById('f-tit').innerText="Modificar Jale"; ver('add'); 
     }
 
-    function resetForm() { document.getElementById('edit-idx').value="-1"; document.getElementById('f-tit').innerText="Registrar Jale"; document.querySelectorAll('input').forEach(i => i.value=""); document.getElementById('f-anio').value="2026"; }
+    function resetForm() { 
+        document.getElementById('edit-idx').value="-1"; 
+        document.getElementById('f-tit').innerText="Registrar Jale"; 
+        document.getElementById('f-dia').value=""; 
+        document.getElementById('f-lug').value=""; 
+        document.getElementById('f-hor').value=""; 
+        document.getElementById('f-tie').value=""; 
+        document.getElementById('f-rep').value="";
+    }
 
     function loadGal() {
         document.getElementById('gal-grid').innerHTML = ASSETS.map(n => {
             const url = `https://raw.githubusercontent.com/${USER}/${REPO}/main/${n}`;
             const isVid = n.endsWith('.mp4');
             return `<div class="gal-item">
-                ${isVid ? `<video src="${url}" preload="metadata"></video>` : `<img src="${url}">`}
+                ${isVid ? `<video src="${url}#t=0.1" preload="metadata" playsinline></video>` : `<img src="${url}">`}
                 <div class="gal-btns">
                     <button class="btn-gal" onclick="playMedia('${url}', ${isVid})">VER</button>
                     <button class="btn-gal" onclick="downloadMedia('${url}', '${n}')">BAJAR</button>
-                    <button class="btn-gal wa" onclick="shareMedia('${url}')">WA</button>
+                    <button class="btn-gal" style="background:#25D366; color:white;" onclick="shareMedia('${url}')">WA</button>
                 </div>
             </div>`;
         }).join('');
@@ -265,7 +267,7 @@
         const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = n; a.click();
     }
 
-    function shareMedia(u) { window.open(`https://wa.me/?text=${encodeURIComponent('Pachucos Men Material: ' + u)}`); }
+    function shareMedia(u) { window.open(`https://wa.me/?text=${encodeURIComponent('Material Pachucos Men: ' + u)}`); }
     function compartirAgenda() { let t = "*AGENDA PACHUCOS MEN*\n\n"; agenda.forEach(f => t += `🔥 ${f.dia}/${f.mes} - ${f.lugar}\n`); window.open(`https://wa.me/?text=${encodeURIComponent(t)}`); }
 
     window.onload = () => ver('age');
