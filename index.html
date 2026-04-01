@@ -31,14 +31,20 @@
         .jale-item:last-child { border-bottom: none; }
         .jale-lugar { font-size: 13px; font-weight: 700; color: #1a1c1e; text-transform: uppercase; margin: 0; }
         .jale-sub { font-size: 10px; color: #6e767d; margin: 2px 0 0; }
-        
         .jale-btns { position: absolute; right: 0; top: 50%; transform: translateY(-50%); display: flex; gap: 5px; }
         .btn-op { background: var(--fondo); border: none; padding: 6px; cursor: pointer; border-radius: 6px; font-size: 11px; color: #54595f; }
 
         input, select { width: 100%; padding: 12px; margin: 5px 0; background: var(--blanco); border: 1.5px solid var(--gris-suave); color: var(--texto); border-radius: 8px; font-size: 14px; outline: none; }
         .btn-japo { background: linear-gradient(90deg, var(--canva-purp), #5433ff); color: white; border: none; padding: 15px; width: 100%; font-weight: bold; cursor: pointer; border-radius: 8px; font-size: 14px; margin-top: 10px; box-shadow: 0 4px 10px rgba(125, 42, 232, 0.3); }
 
+        /* GALERIA FIX */
+        .gal-item { background: var(--blanco); border-radius: 12px; overflow: hidden; margin-bottom: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); border: 1px solid var(--gris-suave); }
+        .gal-item video, .gal-item img { width: 100%; display: block; height: 180px; object-fit: cover; background: #000; }
+        .gal-btns { display: flex; padding: 8px; gap: 8px; }
+        .btn-gal { flex: 1; padding: 10px; font-size: 10px; background: #f0f2f5; color: var(--canva-purp); border: none; border-radius: 6px; font-weight: 800; text-transform: uppercase; }
+
         #modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:9999; align-items:center; justify-content:center; }
+        #modal-content { width: 95%; max-height: 80%; }
     </style>
 </head>
 <body>
@@ -84,6 +90,16 @@
         <button class="btn-japo" id="save-btn" onclick="confirmarRegistro()">GUARDAR EVENTO</button>
         <button class="btn-japo" style="background:#888;" onclick="resetForm(); ver('age');">CANCELAR</button>
     </section>
+
+    <section id="cal" class="section">
+        <h1>Calendario</h1>
+        <div id="cal-box"></div>
+    </section>
+
+    <section id="gal" class="section">
+        <h1>Galería Multimedia</h1>
+        <div id="gal-grid"></div>
+    </section>
 </main>
 
 <script>
@@ -92,6 +108,7 @@
 
     let agenda = [];
     const MESES = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
+    const ASSETS = ["VN20251209_045334.mp4", "download_20251208_090855_0000.mp4", "Diseño sin título_20251208_090215_0000.mp4", "VID-20250304-WA0067.mp4", "origin_1768640677638.png", "BackgroundEraser_20251218_105209714.png"];
 
     function ver(id) {
         document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
@@ -99,7 +116,10 @@
         document.getElementById(id).classList.add('active');
         const btn = Array.from(document.querySelectorAll('.nav-btn')).find(b => b.getAttribute('onclick').includes(id));
         if(btn) btn.classList.add('active');
+        
         if(id === 'age') loadAgenda();
+        if(id === 'cal') document.getElementById('cal-box').innerHTML = `<iframe src="https://calendar.google.com/calendar/embed?bgcolor=%23ffffff&src=ZXMubWV4aWNhbiNob2xpZGF5QGdyb3VwLnYuY2FsZW5kYXIuZ29vZ2xlLmNvbQ" style="border:0" width="100%" height="400" frameborder="0"></iframe>`;
+        if(id === 'gal') loadGal();
     }
 
     async function loadAgenda() {
@@ -171,6 +191,32 @@
         document.getElementById('f-hor').value=""; document.getElementById('f-tie').value=""; 
         document.getElementById('f-rep').value="";
     }
+
+    function loadGal() {
+        document.getElementById('gal-grid').innerHTML = ASSETS.map(n => {
+            const url = `https://raw.githubusercontent.com/${USER}/${REPO}/main/${n}`;
+            const isVid = n.endsWith('.mp4');
+            return `<div class="gal-item">
+                ${isVid ? `<video src="${url}#t=0.1" preload="metadata" playsinline></video>` : `<img src="${url}">`}
+                <div class="gal-btns">
+                    <button class="btn-gal" onclick="playMedia('${url}', ${isVid})">VER</button>
+                    <button class="btn-gal" onclick="downloadMedia('${url}', '${n}')">BAJAR</button>
+                </div>
+            </div>`;
+        }).join('');
+    }
+
+    function playMedia(u, v) {
+        const m = document.getElementById('modal'); const c = document.getElementById('modal-content');
+        c.innerHTML = v ? `<video src="${u}" controls autoplay style="width:100%; border-radius:12px;"></video>` : `<img src="${u}" style="width:100%; border-radius:12px;">`;
+        m.style.display = 'flex';
+    }
+
+    async function downloadMedia(u, n) {
+        const r = await fetch(u); const b = await r.blob();
+        const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = n; a.click();
+    }
+
     window.onload = () => ver('age');
 </script>
 </body>
