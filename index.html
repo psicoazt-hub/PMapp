@@ -6,41 +6,13 @@
     <title>PACHUCOS MEN 2026</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
-        :root { 
-            --canva-purp: #7d2ae8; 
-            --canva-blue: #00c4cc; 
-            --fondo: #f4f7f6; 
-            --blanco: #ffffff;
-            --texto: #2d3136;
-            --gris-suave: #e2e5e9;
-        }
+        :root { --canva-purp: #7d2ae8; --canva-blue: #00c4cc; --fondo: #f4f7f6; --blanco: #ffffff; --texto: #2d3136; --gris-suave: #e2e5e9; }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { background: var(--fondo); color: var(--texto); font-family: 'Segoe UI', Roboto, sans-serif; margin: 0; display: flex; height: 100vh; overflow: hidden; }
+        body { background: var(--fondo); color: var(--texto); font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; height: 100vh; overflow: hidden; }
         
-        #sidebar { 
-            width: 20%; 
-            max-width: 110px; 
-            background: linear-gradient(180deg, var(--canva-purp) 0%, #5433ff) 100%; 
-            display: flex; 
-            flex-direction: column; 
-            padding-top: 15px; 
-            flex-shrink: 0; 
-            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
-        }
-        #sidebar h2 { font-size: 9px; color: white; text-align: center; margin-bottom: 20px; letter-spacing: 1px; }
-        
-        .nav-btn { 
-            background: transparent; 
-            border: none; 
-            color: rgba(255,255,255,0.7); 
-            padding: 15px 5px; 
-            text-align: center; 
-            font-size: 9px; 
-            cursor: pointer; 
-            transition: 0.3s; 
-            font-weight: bold; 
-            text-transform: uppercase; 
-        }
+        #sidebar { width: 20%; max-width: 110px; background: linear-gradient(180deg, var(--canva-purp) 0%, #5433ff 100%); display: flex; flex-direction: column; padding-top: 15px; flex-shrink: 0; box-shadow: 2px 0 10px rgba(0,0,0,0.1); }
+        #sidebar h2 { font-size: 10px; color: white; text-align: center; margin-bottom: 20px; letter-spacing: 1px; }
+        .nav-btn { background: transparent; border: none; color: rgba(255,255,255,0.7); padding: 15px 5px; text-align: center; font-size: 9px; cursor: pointer; transition: 0.3s; font-weight: bold; text-transform: uppercase; }
         .nav-btn.active { color: white; background: rgba(255,255,255,0.15); border-left: 4px solid var(--canva-blue); }
 
         main { flex: 1; padding: 15px; overflow-y: auto; }
@@ -49,7 +21,6 @@
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
         h1 { font-size: 18px; color: var(--canva-purp); text-align: center; margin: 0 0 15px; font-weight: 800; }
-
         .year-header { color: #5433ff; font-size: 15px; text-align: center; margin: 20px 0 8px; font-weight: 900; }
         .mes-header { color: #888; font-size: 11px; padding: 5px 0; margin: 10px 0; text-transform: uppercase; border-bottom: 1px solid var(--gris-suave); font-weight: bold; }
 
@@ -67,11 +38,6 @@
         input, select { width: 100%; padding: 12px; margin: 5px 0; background: var(--blanco); border: 1.5px solid var(--gris-suave); color: var(--texto); border-radius: 8px; font-size: 14px; outline: none; }
         .btn-japo { background: linear-gradient(90deg, var(--canva-purp), #5433ff); color: white; border: none; padding: 15px; width: 100%; font-weight: bold; cursor: pointer; border-radius: 8px; font-size: 14px; margin-top: 10px; box-shadow: 0 4px 10px rgba(125, 42, 232, 0.3); }
 
-        .gal-item { background: var(--blanco); border-radius: 12px; overflow: hidden; margin-bottom: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); border: 1px solid var(--gris-suave); }
-        .gal-item video, .gal-item img { width: 100%; display: block; height: 180px; object-fit: cover; background: #000; }
-        .gal-btns { display: flex; padding: 8px; gap: 8px; }
-        .btn-gal { flex: 1; padding: 10px; font-size: 10px; background: #f0f2f5; color: var(--canva-purp); border: none; border-radius: 6px; font-weight: 800; text-transform: uppercase; }
-
         #modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:9999; align-items:center; justify-content:center; }
     </style>
 </head>
@@ -87,18 +53,16 @@
     <button class="nav-btn" onclick="ver('add')">➕ FECHA</button>
     <button class="nav-btn" onclick="ver('cal')">🗓️ CAL</button>
     <button class="nav-btn" onclick="ver('gal')">🖼️ GALERÍA</button>
-    <button class="nav-btn" onclick="ver('con')">📜 CONTRATO</button>
 </nav>
 
 <main>
     <section id="age" class="section active">
         <h1>Agenda de Eventos</h1>
         <div id="lista-agenda">Cargando...</div>
-        <button class="btn-japo" style="background:#25D366; box-shadow: 0 4px 10px rgba(37, 211, 102, 0.3);" onclick="compartirAgenda()">COMPARTIR AGENDA (WA)</button>
     </section>
 
     <section id="add" class="section">
-        <h1>Registrar Jale</h1>
+        <h1 id="f-tit">Registrar Jale</h1>
         <div style="display:flex; gap:5px;">
             <input type="number" id="f-anio" value="2026">
             <select id="f-mes">
@@ -111,23 +75,15 @@
             <option value="">¿Quién agendó?</option>
             <option value="JOSÉ">JOSÉ</option><option value="CHAVA">CHAVA</option><option value="TOÑO">TOÑO</option><option value="OTROS">OTROS</option>
         </select>
-        <input type="text" id="f-lug" placeholder="Lugar (Pueblo o Salón)">
+        <input type="text" id="f-lug" placeholder="Lugar">
         <div style="display:flex; gap:5px;">
-            <input type="text" id="f-hor" placeholder="Hora (Ej: 8:00 PM)">
-            <input type="text" id="f-tie" placeholder="Horas de jale (Ej: 5 hrs)">
+            <input type="text" id="f-hor" placeholder="Hora (Ej: 8 PM)">
+            <input type="text" id="f-tie" placeholder="Tiempo (Ej: 5h)">
         </div>
         <input type="hidden" id="edit-idx" value="-1">
         <button class="btn-japo" id="save-btn" onclick="confirmarRegistro()">GUARDAR EVENTO</button>
-        <button class="btn-japo" style="background:#888; box-shadow:none;" onclick="resetForm(); ver('age');">VOLVER</button>
+        <button class="btn-japo" style="background:#888;" onclick="resetForm(); ver('age');">CANCELAR</button>
     </section>
-
-    <section id="gal" class="section">
-        <h1>Galería Multimedia</h1>
-        <div id="gal-grid"></div>
-    </section>
-    
-    <section id="cal" class="section"><div id="cal-box"></div></section>
-    <section id="con" class="section"><h1>Módulo de Contratos</h1></section>
 </main>
 
 <script>
@@ -136,7 +92,6 @@
 
     let agenda = [];
     const MESES = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
-    const ASSETS = ["VN20251209_045334.mp4", "download_20251208_090855_0000.mp4", "Diseño sin título_20251208_090215_0000.mp4", "VID-20250304-WA0067.mp4", "origin_1768640677638.png", "BackgroundEraser_20251218_105209714.png"];
 
     function ver(id) {
         document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
@@ -145,8 +100,6 @@
         const btn = Array.from(document.querySelectorAll('.nav-btn')).find(b => b.getAttribute('onclick').includes(id));
         if(btn) btn.classList.add('active');
         if(id === 'age') loadAgenda();
-        if(id === 'gal') loadGal();
-        if(id === 'cal') document.getElementById('cal-box').innerHTML = `<iframe src="https://calendar.google.com/calendar/embed?bgcolor=%23ffffff&src=ZXMubWV4aWNhbiNob2xpZGF5QGdyb3VwLnYuY2FsZW5kYXIuZ29vZ2xlLmNvbQ" style="border:0" width="100%" height="400" frameborder="0"></iframe>`;
     }
 
     async function loadAgenda() {
@@ -161,7 +114,6 @@
     function renderAgendaUI() {
         let h = "", curY = "", curM = "";
         agenda.sort((a,b) => (new Date(a.anio, a.mes-1, a.dia)) - (new Date(b.anio, b.mes-1, b.dia)));
-        
         const grouped = {};
         agenda.forEach(f => {
             const key = `${f.anio}-${f.mes}-${f.dia}`;
@@ -172,29 +124,17 @@
         agenda.forEach((f) => {
             const key = `${f.anio}-${f.mes}-${f.dia}`;
             if(!grouped[key]) return;
-
             if(curY !== f.anio) { curY = f.anio; h += `<div class="year-header">🔥 PACHUCOS ${curY} 🔥</div>`; }
             if(curM !== f.mes) { curM = f.mes; h += `<div class="mes-header">${MESES[f.mes-1]}</div>`; }
-
-            h += `<div class="dia-bloque">
-                    <div class="dia-numero">${f.dia}</div>
-                    <div class="jales-lista">`;
-            
+            h += `<div class="dia-bloque"><div class="dia-numero">${f.dia}</div><div class="jales-lista">`;
             grouped[key].forEach((jale) => {
                 const globalIdx = agenda.indexOf(jale);
-                h += `<div class="jale-item">
-                        <p class="jale-lugar">📍 ${jale.lugar}</p>
-                        <p class="jale-sub">${jale.representante} • ${jale.hora || '?'} • ${jale.tiempo || '?'}</p>
-                        <div class="jale-btns">
-                            <button class="btn-op" onclick="editarRegistro(${globalIdx})">✏️</button>
-                            <button class="btn-op" style="color:#ff4d4d" onclick="borrarRegistro(${globalIdx})">🗑️</button>
-                        </div>
-                      </div>`;
+                h += `<div class="jale-item"><p class="jale-lugar">📍 ${jale.lugar}</p><p class="jale-sub">${jale.representante} • ${jale.hora || '?'} • ${jale.tiempo || '?'}</p><div class="jale-btns"><button class="btn-op" onclick="editarRegistro(${globalIdx})">✏️</button><button class="btn-op" style="color:#ff4d4d" onclick="borrarRegistro(${globalIdx})">🗑️</button></div></div>`;
             });
             h += `</div></div>`;
             delete grouped[key];
         });
-        document.getElementById('lista-agenda').innerHTML = h || "Sin fechas agendadas.";
+        document.getElementById('lista-agenda').innerHTML = h || "Sin fechas.";
     }
 
     async function syncAgenda() {
@@ -205,16 +145,10 @@
             method: 'PUT', headers: { Authorization: `token ${TOKEN}`, 'Content-Type': 'application/json' },
             body: JSON.stringify({ message: "Update", content: content, sha: json.sha })
         });
-        alert("¡Guardado!"); 
-        resetForm();
-        ver('age');
+        alert("¡Guardado!"); resetForm(); ver('age');
     }
 
-    function confirmarRegistro() { 
-        if(!document.getElementById('f-dia').value || !document.getElementById('f-rep').value || !document.getElementById('f-anio').value) return alert("Faltan datos obligatorios."); 
-        guardarRegistro(); 
-    }
-    
+    function confirmarRegistro() { if(!document.getElementById('f-dia').value || !document.getElementById('f-rep').value) return alert("Faltan datos."); guardarRegistro(); }
     async function guardarRegistro() {
         const j = { anio:document.getElementById('f-anio').value, mes:document.getElementById('f-mes').value, dia:document.getElementById('f-dia').value, representante:document.getElementById('f-rep').value, lugar:document.getElementById('f-lug').value || '?', hora:document.getElementById('f-hor').value, tiempo:document.getElementById('f-tie').value };
         const idx = parseInt(document.getElementById('edit-idx').value);
@@ -222,7 +156,7 @@
         await syncAgenda();
     }
 
-    function borrarRegistro(i) { if(confirm("¿Eliminar este jale?")) { agenda.splice(i,1); syncAgenda(); } }
+    function borrarRegistro(i) { if(confirm("¿Eliminar?")) { agenda.splice(i,1); syncAgenda(); } }
     function editarRegistro(i) { 
         const f = agenda[i]; document.getElementById('f-anio').value=f.anio; document.getElementById('f-mes').value=f.mes; 
         document.getElementById('f-dia').value=f.dia; document.getElementById('f-rep').value=f.representante; 
@@ -232,44 +166,11 @@
     }
 
     function resetForm() { 
-        document.getElementById('edit-idx').value="-1"; 
-        document.getElementById('f-tit').innerText="Registrar Jale"; 
-        document.getElementById('f-dia').value=""; 
-        document.getElementById('f-lug').value=""; 
-        document.getElementById('f-hor').value=""; 
-        document.getElementById('f-tie').value=""; 
+        document.getElementById('edit-idx').value="-1"; document.getElementById('f-tit').innerText="Registrar Jale"; 
+        document.getElementById('f-dia').value=""; document.getElementById('f-lug').value=""; 
+        document.getElementById('f-hor').value=""; document.getElementById('f-tie').value=""; 
         document.getElementById('f-rep').value="";
     }
-
-    function loadGal() {
-        document.getElementById('gal-grid').innerHTML = ASSETS.map(n => {
-            const url = `https://raw.githubusercontent.com/${USER}/${REPO}/main/${n}`;
-            const isVid = n.endsWith('.mp4');
-            return `<div class="gal-item">
-                ${isVid ? `<video src="${url}#t=0.1" preload="metadata" playsinline></video>` : `<img src="${url}">`}
-                <div class="gal-btns">
-                    <button class="btn-gal" onclick="playMedia('${url}', ${isVid})">VER</button>
-                    <button class="btn-gal" onclick="downloadMedia('${url}', '${n}')">BAJAR</button>
-                    <button class="btn-gal" style="background:#25D366; color:white;" onclick="shareMedia('${url}')">WA</button>
-                </div>
-            </div>`;
-        }).join('');
-    }
-
-    function playMedia(u, v) {
-        const m = document.getElementById('modal'); const c = document.getElementById('modal-content');
-        c.innerHTML = v ? `<video src="${u}" controls autoplay style="width:100%; border-radius:12px;"></video>` : `<img src="${u}" style="width:100%; border-radius:12px;">`;
-        m.style.display = 'flex';
-    }
-
-    async function downloadMedia(u, n) {
-        const r = await fetch(u); const b = await r.blob();
-        const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = n; a.click();
-    }
-
-    function shareMedia(u) { window.open(`https://wa.me/?text=${encodeURIComponent('Material Pachucos Men: ' + u)}`); }
-    function compartirAgenda() { let t = "*AGENDA PACHUCOS MEN*\n\n"; agenda.forEach(f => t += `🔥 ${f.dia}/${f.mes} - ${f.lugar}\n`); window.open(`https://wa.me/?text=${encodeURIComponent(t)}`); }
-
     window.onload = () => ver('age');
 </script>
 </body>
