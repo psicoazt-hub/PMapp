@@ -37,7 +37,6 @@
         input, select { width: 100%; padding: 12px; margin: 5px 0; background: var(--blanco); border: 1.5px solid var(--gris-suave); color: var(--texto); border-radius: 8px; font-size: 14px; outline: none; }
         .btn-japo { background: linear-gradient(90deg, var(--canva-purp), #5433ff); color: white; border: none; padding: 15px; width: 100%; font-weight: bold; cursor: pointer; border-radius: 8px; font-size: 14px; margin-top: 10px; box-shadow: 0 4px 10px rgba(125, 42, 232, 0.3); }
 
-        /* GALERIA FIX */
         .gal-item { background: var(--blanco); border-radius: 12px; overflow: hidden; margin-bottom: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); border: 1px solid var(--gris-suave); }
         .gal-item video, .gal-item img { width: 100%; display: block; height: 180px; object-fit: cover; background: #000; }
         .gal-btns { display: flex; padding: 8px; gap: 8px; }
@@ -108,6 +107,7 @@
 
     let agenda = [];
     const MESES = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
+    // LISTA DE ARCHIVOS DE GALERÍA
     const ASSETS = ["VN20251209_045334.mp4", "download_20251208_090855_0000.mp4", "Diseño sin título_20251208_090215_0000.mp4", "VID-20250304-WA0067.mp4", "origin_1768640677638.png", "BackgroundEraser_20251218_105209714.png"];
 
     function ver(id) {
@@ -192,6 +192,7 @@
         document.getElementById('f-rep').value="";
     }
 
+    // CARGAR GALERÍA
     function loadGal() {
         document.getElementById('gal-grid').innerHTML = ASSETS.map(n => {
             const url = `https://raw.githubusercontent.com/${USER}/${REPO}/main/${n}`;
