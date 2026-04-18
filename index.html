@@ -11,219 +11,232 @@
         body { background: var(--fondo); color: var(--texto); font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; height: 100vh; overflow: hidden; }
         
         #sidebar { width: 20%; max-width: 110px; background: linear-gradient(180deg, var(--canva-purp) 0%, #5433ff 100%); display: flex; flex-direction: column; padding-top: 15px; flex-shrink: 0; box-shadow: 2px 0 10px rgba(0,0,0,0.1); }
-        #sidebar h2 { font-size: 10px; color: white; text-align: center; margin-bottom: 20px; letter-spacing: 1px; }
-        .nav-btn { background: transparent; border: none; color: rgba(255,255,255,0.7); padding: 15px 5px; text-align: center; font-size: 9px; cursor: pointer; transition: 0.3s; font-weight: bold; text-transform: uppercase; }
-        .nav-btn.active { color: white; background: rgba(255,255,255,0.15); border-left: 4px solid var(--canva-blue); }
+        .nav-btn { background: transparent; border: none; color: white; text-align: center; margin-bottom: 20px; font-size: 9px; cursor: pointer; transition: 0.3s; font-weight: bold; text-transform: uppercase; padding: 10px 5px; }
+        .nav-btn.active { background: rgba(255,255,255,0.2); border-left: 4px solid white; }
 
         main { flex: 1; padding: 15px; overflow-y: auto; }
-        .section { display: none; width: 100%; animation: fadeIn 0.3s ease; }
+        .section { display: none; }
         .section.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
-        h1 { font-size: 18px; color: var(--canva-purp); text-align: center; margin: 0 0 15px; font-weight: 800; }
-        .year-header { color: #5433ff; font-size: 15px; text-align: center; margin: 20px 0 8px; font-weight: 900; }
-        .mes-header { color: #888; font-size: 11px; padding: 5px 0; margin: 10px 0; text-transform: uppercase; border-bottom: 1px solid var(--gris-suave); font-weight: bold; }
-
-        .dia-bloque { background: var(--blanco); border-radius: 12px; margin-bottom: 8px; display: flex; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
-        .dia-numero { background: #f0f2f5; width: 50px; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 800; color: var(--canva-purp); }
-        .jales-lista { flex: 1; padding: 8px 12px; }
-        .jale-item { border-bottom: 1px solid #f0f2f5; padding: 6px 0; position: relative; }
+        .mes-header { color: #888; font-size: 11px; padding: 15px 0 5px 0; text-transform: uppercase; border-bottom: 1px solid var(--gris-suave); font-weight: bold; }
+        .dia-bloque { background: var(--blanco); border-radius: 12px; margin-bottom: 15px; display: flex; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .dia-numero { background: #f0f2f5; width: 60px; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 800; color: var(--canva-purp); border-right: 1px solid var(--gris-suave); }
+        .jales-lista { flex: 1; padding: 12px; }
+        .jale-item { border-bottom: 1px solid #f0f2f5; padding: 10px 0; position: relative; }
         .jale-item:last-child { border-bottom: none; }
-        .jale-lugar { font-size: 13px; font-weight: 700; color: #1a1c1e; text-transform: uppercase; margin: 0; }
-        .jale-sub { font-size: 10px; color: #6e767d; margin: 2px 0 0; }
-        .jale-btns { position: absolute; right: 0; top: 50%; transform: translateY(-50%); display: flex; gap: 5px; }
-        .btn-op { background: var(--fondo); border: none; padding: 6px; cursor: pointer; border-radius: 6px; font-size: 11px; color: #54595f; }
+        .jale-lugar { font-size: 14px; font-weight: 700; color: #1a1c1e; text-transform: uppercase; margin: 0; }
+        .jale-sub { font-size: 11px; color: #6e767d; margin: 2px 0 0; }
+        .status-confirmar { color: #aaa; font-style: italic; }
+        .sin-bateria { color: #ff4d4d; font-weight: bold; font-size: 10px; text-transform: uppercase; }
 
-        input, select { width: 100%; padding: 12px; margin: 5px 0; background: var(--blanco); border: 1.5px solid var(--gris-suave); color: var(--texto); border-radius: 8px; font-size: 14px; outline: none; }
-        .btn-japo { background: linear-gradient(90deg, var(--canva-purp), #5433ff); color: white; border: none; padding: 15px; width: 100%; font-weight: bold; cursor: pointer; border-radius: 8px; font-size: 14px; margin-top: 10px; box-shadow: 0 4px 10px rgba(125, 42, 232, 0.3); }
-
-        /* GALERIA FIX */
-        .gal-item { background: var(--blanco); border-radius: 12px; overflow: hidden; margin-bottom: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); border: 1px solid var(--gris-suave); }
-        .gal-item video, .gal-item img { width: 100%; display: block; height: 180px; object-fit: cover; background: #000; }
-        .gal-btns { display: flex; padding: 8px; gap: 8px; }
-        .btn-gal { flex: 1; padding: 10px; font-size: 10px; background: #f0f2f5; color: var(--canva-purp); border: none; border-radius: 6px; font-weight: 800; text-transform: uppercase; }
-
-        /* MODAL CON BOTON CERRAR */
-        #modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); z-index:9999; align-items:center; justify-content:center; }
-        #modal-content { width: 95%; max-height: 80%; position: relative; }
-        .close-btn { position: absolute; top: -40px; right: 0; background: red; color: white; border: none; padding: 10px 15px; border-radius: 50%; font-weight: bold; font-size: 18px; cursor: pointer; }
+        input, select { width: 100%; padding: 12px; margin: 5px 0; background: var(--blanco); border: 1px solid var(--gris-suave); border-radius: 8px; font-size: 14px; }
+        .btn-japo { width: 100%; padding: 15px; color: white; background: linear-gradient(90deg, var(--canva-purp), #5433ff); border: none; border-radius: 8px; font-weight: bold; text-transform: uppercase; cursor: pointer; margin-top: 10px; }
+        .btn-wa-float { width: 100%; background: #25d366; color: white; padding: 12px; border-radius: 8px; border: none; font-weight: bold; margin-bottom: 15px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
     </style>
 </head>
 <body>
 
-<div id="modal">
-    <div id="modal-content">
-        <button class="close-btn" onclick="document.getElementById('modal').style.display='none'">✕</button>
-        <div id="modal-media"></div>
-    </div>
-</div>
+    <nav id="sidebar">
+        <div style="text-align: center; color: white; font-weight: 800; font-size: 10px; margin-bottom: 30px;">PACHUCOS <br> <span style="font-size: 15px;">2026</span></div>
+        <button class="nav-btn active" onclick="ver('age')">📅 AGENDA</button>
+        <button class="nav-btn" onclick="ver('add')">➕ FECHA</button>
+        <button class="nav-btn" onclick="ver('cal')">🗓️ CAL</button>
+    </nav>
 
-<nav id="sidebar">
-    <h2>PACHUCOS</h2>
-    <button class="nav-btn active" onclick="ver('age')">📅 AGENDA</button>
-    <button class="nav-btn" onclick="ver('add')">➕ FECHA</button>
-    <button class="nav-btn" onclick="ver('cal')">🗓️ CAL</button>
-    <button class="nav-btn" onclick="ver('gal')">🖼️ GALERÍA</button>
-</nav>
+    <main>
+        <section id="age" class="section active">
+            <button class="btn-wa-float" onclick="compartirAgendaCompleta()">🟢 COMPARTIR AGENDA COMPLETA</button>
+            <div id="lista-agenda">Cargando...</div>
+        </section>
 
-<main>
-    <section id="age" class="section active">
-        <h1>Agenda de Eventos</h1>
-        <div id="lista-agenda">Cargando...</div>
-    </section>
-
-    <section id="add" class="section">
-        <h1 id="f-tit">Registrar Jale</h1>
-        <div style="display:flex; gap:5px;">
-            <input type="number" id="f-anio" value="2026">
-            <select id="f-mes">
-                <option value="1">Enero</option><option value="2">Febrero</option><option value="3">Marzo</option><option value="4">Abril</option><option value="5">Mayo</option><option value="6">Junio</option>
-                <option value="7">Julio</option><option value="8">Agosto</option><option value="9">Septiembre</option><option value="10">Octubre</option><option value="11">Noviembre</option><option value="12">Diciembre</option>
+        <section id="add" class="section">
+            <h2 style="color:var(--canva-purp); font-size: 18px;">Registrar Nuevo Jale</h2>
+            <div style="display: flex; gap: 5px;">
+                <input type="number" id="f-dia" placeholder="Día">
+                <select id="f-mes">
+                    <option value="1">Enero</option><option value="2">Febrero</option><option value="3">Marzo</option>
+                    <option value="4">Abril</option><option value="5">Mayo</option><option value="6">Junio</option>
+                    <option value="7">Julio</option><option value="8">Agosto</option><option value="9">Septiembre</option>
+                    <option value="10">Octubre</option><option value="11">Noviembre</option><option value="12">Diciembre</option>
+                </select>
+            </div>
+            <input type="text" id="f-lug" placeholder="Lugar">
+            <select id="f-bat">
+                <option value="si">¿Con batería? SI</option>
+                <option value="no">¿Con batería? NO</option>
             </select>
-            <input type="number" id="f-dia" placeholder="Día">
-        </div>
-        <select id="f-rep">
-            <option value="">¿Quién agendó?</option>
-            <option value="JOSÉ">JOSÉ</option><option value="CHAVA">CHAVA</option><option value="TOÑO">TOÑO</option><option value="OTROS">OTROS</option>
-        </select>
-        <input type="text" id="f-lug" placeholder="Lugar">
-        <div style="display:flex; gap:5px;">
-            <input type="text" id="f-hor" placeholder="Hora (Ej: 8 PM)">
-            <input type="text" id="f-tie" placeholder="Tiempo (Ej: 5h)">
-        </div>
-        <input type="hidden" id="edit-idx" value="-1">
-        <button class="btn-japo" id="save-btn" onclick="confirmarRegistro()">GUARDAR EVENTO</button>
-        <button class="btn-japo" style="background:#888;" onclick="resetForm(); ver('age');">CANCELAR</button>
-    </section>
+            <div style="display: flex; gap: 5px; align-items: center;">
+                <input type="number" id="f-hor-num" placeholder="Hora (Ej: 4)">
+                <select id="f-ampm" style="width: 80px;"><option value="AM">AM</option><option value="PM" selected>PM</option></select>
+            </div>
+            <input type="number" id="f-dur" placeholder="Total de horas por tocar">
+            <select id="f-rep">
+                <option value="TOÑO">TOÑO</option><option value="CHAVA">CHAVA</option><option value="JOSÉ">JOSÉ</option>
+            </select>
+            <button class="btn-japo" onclick="guardarNuevo()">GUARDAR EVENTO</button>
+        </section>
 
-    <section id="cal" class="section">
-        <h1>Calendario</h1>
-        <div id="cal-box"></div>
-    </section>
+        <section id="cal" class="section">
+            <div id="calendar-container">
+                <iframe src="https://calendar.google.com/calendar/embed?height=600&wkst=1&bgcolor=%23ffffff&ctz=America%2FMexico_City&showTitle=0&showNav=1&showDate=1&showPrint=0&showTabs=0&showCalendars=0&showTz=0&src=es.mexican%23holiday%40group.v.calendar.google.com" style="border:0" width="100%" height="500" frameborder="0" scrolling="no"></iframe>
+            </div>
+        </section>
+    </main>
 
-    <section id="gal" class="section">
-        <h1>Galería Multimedia</h1>
-        <div id="gal-grid"></div>
-    </section>
-</main>
+    <script>
+        const TOKEN = "ghp_u0T7T3n9R1P1uN2Q1xZ5t9L7M0v2B1s4A5u3";
+        const URL_REPO = "https://api.github.com/repos/Antozavala/Pachucos_Men_App/contents/agenda.json";
+        let agenda = [];
+        const MESES = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
 
-<script>
-    const p1 = 'ghp_'; const p2 = 'mJchPuyZG02IgagsFkXSQAPdDyF6Qv3Z2YuL';
-    const TOKEN = p1 + p2; const USER = 'psicoazt-hub', REPO = 'PMapp';
+        async function init() {
+            // Cargar caché si existe para modo Offline
+            const cache = localStorage.getItem('pachucos_cache');
+            if(cache) { agenda = JSON.parse(cache); renderUI(); }
+            loadFromGitHub();
+        }
 
-    let agenda = [];
-    const MESES = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
-    // LISTA DE TUS ARCHIVOS REALES EN GITHUB
-    const ASSETS = ["VN20251209_045334.mp4", "download_20251208_090855_0000.mp4", "Diseño sin título_20251208_090215_0000.mp4", "VID-20250304-WA0067.mp4", "origin_1768640677638.png", "BackgroundEraser_20251218_105209714.png", "Black White Torn Paper Photography Portfolio Cover Page_20260317_084528_0000.png"];
+        async function loadFromGitHub() {
+            try {
+                const res = await fetch(`${URL_REPO}?t=${Date.now()}`, { headers: { 'Authorization': `token ${TOKEN}` } });
+                const data = await res.json();
+                const content = decodeURIComponent(escape(atob(data.content.replace(/\s/g, ''))));
+                agenda = JSON.parse(content);
+                
+                // Auto-borrado 48h
+                const hoy = new Date();
+                const originalLen = agenda.length;
+                agenda = agenda.filter(j => {
+                    const fechaJale = new Date(j.anio, j.mes - 1, j.dia);
+                    return (hoy - fechaJale) < (48 * 60 * 60 * 1000);
+                });
 
-    function ver(id) {
-        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-        document.getElementById(id).classList.add('active');
-        const btn = Array.from(document.querySelectorAll('.nav-btn')).find(b => b.getAttribute('onclick').includes(id));
-        if(btn) btn.classList.add('active');
-        
-        if(id === 'age') loadAgenda();
-        if(id === 'cal') document.getElementById('cal-box').innerHTML = `<iframe src="https://calendar.google.com/calendar/embed?bgcolor=%23ffffff&src=ZXMubWV4aWNhbiNob2xpZGF5QGdyb3VwLnYuY2FsZW5kYXIuZ29vZ2xlLmNvbQ" style="border:0" width="100%" height="400" frameborder="0"></iframe>`;
-        if(id === 'gal') loadGal();
-    }
+                localStorage.setItem('pachucos_cache', JSON.stringify(agenda));
+                if(agenda.length !== originalLen) await syncGitHub("Auto-limpieza");
+                renderUI();
+            } catch (e) { console.log("Modo Offline"); }
+        }
 
-    async function loadAgenda() {
-        try {
-            const r = await fetch(`https://api.github.com/repos/${USER}/${REPO}/contents/agenda.json?t=${Date.now()}`, { headers: { 'Authorization': `token ${TOKEN}` } });
-            const d = await r.json();
-            agenda = JSON.parse(decodeURIComponent(escape(atob(d.content.replace(/\s/g, '')))));
-            renderAgendaUI();
-        } catch(e) { console.error(e); }
-    }
-
-    function renderAgendaUI() {
-        let h = "", curY = "", curM = "";
-        agenda.sort((a,b) => (new Date(a.anio, a.mes-1, a.dia)) - (new Date(b.anio, b.mes-1, b.dia)));
-        const grouped = {};
-        agenda.forEach(f => {
-            const key = `${f.anio}-${f.mes}-${f.dia}`;
-            if(!grouped[key]) grouped[key] = [];
-            grouped[key].push(f);
-        });
-
-        agenda.forEach((f) => {
-            const key = `${f.anio}-${f.mes}-${f.dia}`;
-            if(!grouped[key]) return;
-            if(curY !== f.anio) { curY = f.anio; h += `<div class="year-header">🔥 PACHUCOS ${curY} 🔥</div>`; }
-            if(curM !== f.mes) { curM = f.mes; h += `<div class="mes-header">${MESES[f.mes-1]}</div>`; }
-            h += `<div class="dia-bloque"><div class="dia-numero">${f.dia}</div><div class="jales-lista">`;
-            grouped[key].forEach((jale) => {
-                const globalIdx = agenda.indexOf(jale);
-                h += `<div class="jale-item"><p class="jale-lugar">📍 ${jale.lugar}</p><p class="jale-sub">${jale.representante} • ${jale.hora || '?'} • ${jale.tiempo || '?'}</p><div class="jale-btns"><button class="btn-op" onclick="editarRegistro(${globalIdx})">✏️</button><button class="btn-op" style="color:#ff4d4d" onclick="borrarRegistro(${globalIdx})">🗑️</button></div></div>`;
+        function renderUI() {
+            const list = document.getElementById('lista-agenda');
+            list.innerHTML = "";
+            
+            // Jerarquizar: Año > Mes > Día > Hora (AM/PM)
+            agenda.sort((a, b) => {
+                const hA = convertirHora(a.hora); const hB = convertirHora(b.hora);
+                return new Date(a.anio, a.mes-1, a.dia, hA) - new Date(b.anio, b.mes-1, b.dia, hB);
             });
-            h += `</div></div>`;
-            delete grouped[key];
-        });
-        document.getElementById('lista-agenda').innerHTML = h || "Sin fechas.";
-    }
 
-    async function syncAgenda() {
-        const res = await fetch(`https://api.github.com/repos/${USER}/${REPO}/contents/agenda.json`, { headers: { Authorization: `token ${TOKEN}` } });
-        const json = await res.json();
-        const content = btoa(unescape(encodeURIComponent(JSON.stringify(agenda))));
-        await fetch(`https://api.github.com/repos/${USER}/${REPO}/contents/agenda.json`, {
-            method: 'PUT', headers: { Authorization: `token ${TOKEN}`, 'Content-Type': 'application/json' },
-            body: JSON.stringify({ message: "Update", content: content, sha: json.sha })
-        });
-        alert("¡Guardado!"); resetForm(); ver('age');
-    }
+            let curM = "";
+            const grouped = {};
+            agenda.forEach(j => {
+                const key = `${j.anio}-${j.mes}-${j.dia}`;
+                if(!grouped[key]) grouped[key] = [];
+                grouped[key].push(j);
+            });
 
-    function confirmarRegistro() { if(!document.getElementById('f-dia').value || !document.getElementById('f-rep').value) return alert("Faltan datos."); guardarRegistro(); }
-    async function guardarRegistro() {
-        const j = { anio:document.getElementById('f-anio').value, mes:document.getElementById('f-mes').value, dia:document.getElementById('f-dia').value, representante:document.getElementById('f-rep').value, lugar:document.getElementById('f-lug').value || '?', hora:document.getElementById('f-hor').value, tiempo:document.getElementById('f-tie').value };
-        const idx = parseInt(document.getElementById('edit-idx').value);
-        if(idx > -1) agenda[idx] = j; else agenda.push(j);
-        await syncAgenda();
-    }
+            agenda.forEach(j => {
+                if(curM !== j.mes) {
+                    curM = j.mes;
+                    list.innerHTML += `<div class="mes-header">${MESES[j.mes-1]} ${j.anio}</div>`;
+                }
+                const key = `${j.anio}-${j.mes}-${j.dia}`;
+                if(grouped[key]) {
+                    let itemsHtml = "";
+                    grouped[key].forEach(ev => {
+                        const lugar = ev.lugar === "?" ? '<span class="status-confirmar">Lugar por confirmar</span>' : ev.lugar;
+                        const bat = ev.bateria === "no" ? '<span class="sin-bateria"> - Sin Batería</span>' : '';
+                        const hora = ev.hora === "?" ? '<span class="status-confirmar">Por confirmar</span>' : ev.hora;
+                        const tiempo = ev.tiempo === "?" ? '<span class="status-confirmar">Por confirmar</span>' : ev.tiempo;
+                        
+                        itemsHtml += `
+                            <div class="jale-item">
+                                <p class="jale-lugar">${lugar}${bat}</p>
+                                <p class="jale-sub">${ev.representante} • Inicio: ${hora} • Tiempo: ${tiempo}</p>
+                            </div>`;
+                    });
 
-    function borrarRegistro(i) { if(confirm("¿Eliminar?")) { agenda.splice(i,1); syncAgenda(); } }
-    function editarRegistro(i) { 
-        const f = agenda[i]; document.getElementById('f-anio').value=f.anio; document.getElementById('f-mes').value=f.mes; 
-        document.getElementById('f-dia').value=f.dia; document.getElementById('f-rep').value=f.representante; 
-        document.getElementById('f-lug').value=f.lugar; document.getElementById('f-hor').value=f.hora; 
-        document.getElementById('f-tie').value=f.tiempo; document.getElementById('edit-idx').value=i; 
-        document.getElementById('f-tit').innerText="Modificar Jale"; ver('add'); 
-    }
+                    list.innerHTML += `
+                        <div class="dia-bloque">
+                            <div class="dia-numero">${j.dia}</div>
+                            <div class="jales-lista">${itemsHtml}</div>
+                        </div>`;
+                    delete grouped[key];
+                }
+            });
+        }
 
-    function resetForm() { 
-        document.getElementById('edit-idx').value="-1"; document.getElementById('f-tit').innerText="Registrar Jale"; 
-        document.getElementById('f-dia').value=""; document.getElementById('f-lug').value=""; 
-        document.getElementById('f-hor').value=""; document.getElementById('f-tie').value=""; 
-        document.getElementById('f-rep').value="";
-    }
+        function convertirHora(hStr) {
+            if(!hStr || hStr.includes("?")) return 23;
+            const parts = hStr.split(" ");
+            let h = parseInt(parts[0]);
+            if(parts[1] === "PM" && h < 12) h += 12;
+            if(parts[1] === "AM" && h === 12) h = 0;
+            return h;
+        }
 
-    function loadGal() {
-        document.getElementById('gal-grid').innerHTML = ASSETS.map(n => {
-            const url = `https://raw.githubusercontent.com/${USER}/${REPO}/main/${n}`;
-            const isVid = n.toLowerCase().endsWith('.mp4');
-            return `<div class="gal-item">
-                ${isVid ? `<video src="${url}#t=0.1" preload="metadata" playsinline muted></video>` : `<img src="${url}">`}
-                <div class="gal-btns">
-                    <button class="btn-gal" onclick="playMedia('${url}', ${isVid})">VER</button>
-                    <button class="btn-gal" onclick="downloadMedia('${url}', '${n}')">BAJAR</button>
-                </div>
-            </div>`;
-        }).join('');
-    }
+        async function guardarNuevo() {
+            const dia = document.getElementById('f-dia').value;
+            const mes = document.getElementById('f-mes').value;
+            const lugar = document.getElementById('f-lug').value || "?";
+            const hNum = document.getElementById('f-hor-num').value;
+            const ampm = document.getElementById('f-ampm').value;
+            const dur = document.getElementById('f-dur').value;
+            const bat = document.getElementById('f-bat').value;
 
-    function playMedia(u, v) {
-        const m = document.getElementById('modal'); const c = document.getElementById('modal-media');
-        c.innerHTML = v ? `<video src="${u}" controls autoplay style="width:100%; border-radius:12px;"></video>` : `<img src="${u}" style="width:100%; border-radius:12px;">`;
-        m.style.display = 'flex';
-    }
+            const duplicado = agenda.find(x => x.dia == dia && x.mes == mes && x.lugar == lugar && x.anio == "2026");
+            if(duplicado) return alert("¡Ya existe este jale en la agenda!");
 
-    async function downloadMedia(u, n) {
-        const r = await fetch(u); const b = await r.blob();
-        const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = n; a.click();
-    }
+            const nuevo = {
+                anio: "2026", mes, dia, 
+                representante: document.getElementById('f-rep').value,
+                lugar: lugar,
+                bateria: bat,
+                hora: hNum ? `${hNum}:00 ${ampm}` : "?",
+                tiempo: dur ? `${dur} horas` : "?"
+            };
 
-    window.onload = () => ver('age');
-</script>
+            agenda.push(nuevo);
+            renderUI();
+            await syncGitHub(`Nuevo jale: ${lugar}`);
+            ver('age');
+        }
+
+        async function syncGitHub(msg) {
+            try {
+                const res = await fetch(URL_REPO, { headers: { 'Authorization': `token ${TOKEN}` } });
+                const data = await res.json();
+                const body = JSON.stringify({
+                    message: msg,
+                    content: btoa(unescape(encodeURIComponent(JSON.stringify(agenda, null, 2)))),
+                    sha: data.sha
+                });
+                await fetch(URL_REPO, {
+                    method: 'PUT',
+                    headers: { 'Authorization': `token ${TOKEN}`, 'Content-Type': 'application/json' },
+                    body: body
+                });
+                alert("Agenda actualizada en la nube");
+            } catch (e) { alert("Guardado local (Sin Internet)"); }
+        }
+
+        function compartirAgendaCompleta() {
+            let texto = "*📅 AGENDA PACHUCOS MEN 2026*%0A%0A";
+            agenda.forEach(j => {
+                texto += `📍 *${j.dia}/${j.mes}:* ${j.lugar} (${j.hora})%0A`;
+            });
+            window.open(`https://wa.me/?text=${texto}`);
+        }
+
+        function ver(id) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            const btn = Array.from(document.querySelectorAll('.nav-btn')).find(b => b.getAttribute('onclick').includes(id));
+            if(btn) btn.classList.add('active');
+        }
+
+        init();
+    </script>
 </body>
 </html>
