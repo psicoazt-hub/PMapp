@@ -31,7 +31,7 @@
 
         input, select { width: 100%; padding: 12px; margin: 5px 0; background: var(--blanco); border: 1px solid var(--gris-suave); border-radius: 8px; font-size: 14px; }
         .btn-japo { width: 100%; padding: 15px; color: white; background: linear-gradient(90deg, var(--canva-purp), #5433ff); border: none; border-radius: 8px; font-weight: bold; text-transform: uppercase; cursor: pointer; margin-top: 10px; }
-        .btn-wa-float { width: 100%; background: #25d366; color: white; padding: 12px; border-radius: 8px; border: none; font-weight: bold; margin-bottom: 15px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .btn-wa-float { width: 100%; background: #25d366; color: white; padding: 12px; border-radius: 8px; border: none; font-weight: bold; margin-bottom: 15px; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -45,19 +45,19 @@
 
     <main>
         <section id="age" class="section active">
-            <button class="btn-wa-float" onclick="compartirAgendaCompleta()">🟢 COMPARTIR AGENDA COMPLETA</button>
-            <div id="lista-agenda">Cargando...</div>
+            <button class="btn-wa-float" onclick="compartirAgendaCompleta()">🟢 COMPARTIR WHATSAPP</button>
+            <div id="lista-agenda">Conectando con GitHub...</div>
         </section>
 
         <section id="add" class="section">
-            <h2 style="color:var(--canva-purp); font-size: 18px;">Registrar Nuevo Jale</h2>
+            <h2 style="color:var(--canva-purp); font-size: 18px;">Nuevo Jale</h2>
             <div style="display: flex; gap: 5px;">
                 <input type="number" id="f-dia" placeholder="Día">
                 <select id="f-mes">
-                    <option value="1">Enero</option><option value="2">Febrero</option><option value="3">Marzo</option>
-                    <option value="4">Abril</option><option value="5">Mayo</option><option value="6">Junio</option>
-                    <option value="7">Julio</option><option value="8">Agosto</option><option value="9">Septiembre</option>
-                    <option value="10">Octubre</option><option value="11">Noviembre</option><option value="12">Diciembre</option>
+                    <option value="1">Ene</option><option value="2">Feb</option><option value="3">Mar</option>
+                    <option value="4">Abr</option><option value="5">May</option><option value="6">Jun</option>
+                    <option value="7">Jul</option><option value="8">Ago</option><option value="9">Sep</option>
+                    <option value="10">Oct</option><option value="11">Nov</option><option value="12">Dic</option>
                 </select>
             </div>
             <input type="text" id="f-lug" placeholder="Lugar">
@@ -69,7 +69,7 @@
                 <input type="number" id="f-hor-num" placeholder="Hora (Ej: 4)">
                 <select id="f-ampm" style="width: 80px;"><option value="AM">AM</option><option value="PM" selected>PM</option></select>
             </div>
-            <input type="number" id="f-dur" placeholder="Total de horas por tocar">
+            <input type="number" id="f-dur" placeholder="Total de horas">
             <select id="f-rep">
                 <option value="TOÑO">TOÑO</option><option value="CHAVA">CHAVA</option><option value="JOSÉ">JOSÉ</option>
             </select>
@@ -77,9 +77,7 @@
         </section>
 
         <section id="cal" class="section">
-            <div id="calendar-container">
-                <iframe src="https://calendar.google.com/calendar/embed?height=600&wkst=1&bgcolor=%23ffffff&ctz=America%2FMexico_City&showTitle=0&showNav=1&showDate=1&showPrint=0&showTabs=0&showCalendars=0&showTz=0&src=es.mexican%23holiday%40group.v.calendar.google.com" style="border:0" width="100%" height="500" frameborder="0" scrolling="no"></iframe>
-            </div>
+            <iframe src="https://calendar.google.com/calendar/embed?height=600&wkst=1&bgcolor=%23ffffff&ctz=America%2FMexico_City&showTitle=0&showNav=1&showDate=1&showPrint=0&showTabs=0&showCalendars=0&showTz=0&src=es.mexican%23holiday%40group.v.calendar.google.com" style="border:0" width="100%" height="500" frameborder="0"></iframe>
         </section>
     </main>
 
@@ -90,9 +88,8 @@
         const MESES = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
 
         async function init() {
-            // Cargar caché si existe para modo Offline
             const cache = localStorage.getItem('pachucos_cache');
-            if(cache) { agenda = JSON.parse(cache); renderUI(); }
+            if(cache) { try { agenda = JSON.parse(cache); renderUI(); } catch(e){} }
             loadFromGitHub();
         }
 
@@ -101,78 +98,55 @@
                 const res = await fetch(`${URL_REPO}?t=${Date.now()}`, { headers: { 'Authorization': `token ${TOKEN}` } });
                 const data = await res.json();
                 const content = decodeURIComponent(escape(atob(data.content.replace(/\s/g, ''))));
-                agenda = JSON.parse(content);
-                
+                const rawData = JSON.parse(content);
+
+                // TRADUCTOR DE DATOS VIEJOS (Para que no se cicle la app)
+                agenda = rawData.map(j => ({
+                    anio: j.anio || "2026",
+                    mes: j.mes || "1",
+                    dia: j.dia || "1",
+                    representante: j.representante || "TOÑO",
+                    lugar: j.lugar || "?",
+                    bateria: j.bateria || (j.lugar && j.lugar.toLowerCase().includes("sin batería") ? "no" : "si"),
+                    hora: j.hora || "?",
+                    tiempo: j.tiempo || "?"
+                }));
+
                 // Auto-borrado 48h
                 const hoy = new Date();
-                const originalLen = agenda.length;
-                agenda = agenda.filter(j => {
-                    const fechaJale = new Date(j.anio, j.mes - 1, j.dia);
-                    return (hoy - fechaJale) < (48 * 60 * 60 * 1000);
-                });
+                agenda = agenda.filter(j => (hoy - new Date(j.anio, j.mes-1, j.dia)) < (48 * 60 * 60 * 1000));
 
                 localStorage.setItem('pachucos_cache', JSON.stringify(agenda));
-                if(agenda.length !== originalLen) await syncGitHub("Auto-limpieza");
                 renderUI();
-            } catch (e) { console.log("Modo Offline"); }
+            } catch (e) { document.getElementById('lista-agenda').innerText = "Modo Lectura (Sin red)"; }
         }
 
         function renderUI() {
             const list = document.getElementById('lista-agenda');
             list.innerHTML = "";
+            agenda.sort((a,b) => new Date(a.anio, a.mes-1, a.dia) - new Date(b.anio, b.mes-1, b.dia));
             
-            // Jerarquizar: Año > Mes > Día > Hora (AM/PM)
-            agenda.sort((a, b) => {
-                const hA = convertirHora(a.hora); const hB = convertirHora(b.hora);
-                return new Date(a.anio, a.mes-1, a.dia, hA) - new Date(b.anio, b.mes-1, b.dia, hB);
-            });
-
             let curM = "";
-            const grouped = {};
-            agenda.forEach(j => {
-                const key = `${j.anio}-${j.mes}-${j.dia}`;
-                if(!grouped[key]) grouped[key] = [];
-                grouped[key].push(j);
-            });
-
             agenda.forEach(j => {
                 if(curM !== j.mes) {
                     curM = j.mes;
                     list.innerHTML += `<div class="mes-header">${MESES[j.mes-1]} ${j.anio}</div>`;
                 }
-                const key = `${j.anio}-${j.mes}-${j.dia}`;
-                if(grouped[key]) {
-                    let itemsHtml = "";
-                    grouped[key].forEach(ev => {
-                        const lugar = ev.lugar === "?" ? '<span class="status-confirmar">Lugar por confirmar</span>' : ev.lugar;
-                        const bat = ev.bateria === "no" ? '<span class="sin-bateria"> - Sin Batería</span>' : '';
-                        const hora = ev.hora === "?" ? '<span class="status-confirmar">Por confirmar</span>' : ev.hora;
-                        const tiempo = ev.tiempo === "?" ? '<span class="status-confirmar">Por confirmar</span>' : ev.tiempo;
-                        
-                        itemsHtml += `
+                const lug = j.lugar.replace(/sin batería/gi, "").replace(/\?/g, "").trim() || "Por confirmar";
+                const bat = j.bateria === "no" ? '<span class="sin-bateria"> - Sin Batería</span>' : '';
+                const hDisplay = j.hora.includes("?") ? '<span class="status-confirmar">Por confirmar</span>' : j.hora;
+                
+                list.innerHTML += `
+                    <div class="dia-bloque">
+                        <div class="dia-numero">${j.dia}</div>
+                        <div class="jales-lista">
                             <div class="jale-item">
-                                <p class="jale-lugar">${lugar}${bat}</p>
-                                <p class="jale-sub">${ev.representante} • Inicio: ${hora} • Tiempo: ${tiempo}</p>
-                            </div>`;
-                    });
-
-                    list.innerHTML += `
-                        <div class="dia-bloque">
-                            <div class="dia-numero">${j.dia}</div>
-                            <div class="jales-lista">${itemsHtml}</div>
-                        </div>`;
-                    delete grouped[key];
-                }
+                                <p class="jale-lugar">${lug}${bat}</p>
+                                <p class="jale-sub">${j.representante} • Inicio: ${hDisplay} • Tiempo: ${j.tiempo}</p>
+                            </div>
+                        </div>
+                    </div>`;
             });
-        }
-
-        function convertirHora(hStr) {
-            if(!hStr || hStr.includes("?")) return 23;
-            const parts = hStr.split(" ");
-            let h = parseInt(parts[0]);
-            if(parts[1] === "PM" && h < 12) h += 12;
-            if(parts[1] === "AM" && h === 12) h = 0;
-            return h;
         }
 
         async function guardarNuevo() {
@@ -184,48 +158,40 @@
             const dur = document.getElementById('f-dur').value;
             const bat = document.getElementById('f-bat').value;
 
-            const duplicado = agenda.find(x => x.dia == dia && x.mes == mes && x.lugar == lugar && x.anio == "2026");
-            if(duplicado) return alert("¡Ya existe este jale en la agenda!");
+            if(agenda.find(x => x.dia == dia && x.mes == mes && x.lugar == lugar)) return alert("¡Ya existe!");
 
             const nuevo = {
                 anio: "2026", mes, dia, 
                 representante: document.getElementById('f-rep').value,
-                lugar: lugar,
-                bateria: bat,
+                lugar, bateria: bat,
                 hora: hNum ? `${hNum}:00 ${ampm}` : "?",
                 tiempo: dur ? `${dur} horas` : "?"
             };
 
             agenda.push(nuevo);
             renderUI();
-            await syncGitHub(`Nuevo jale: ${lugar}`);
+            await syncGitHub(`Nuevo: ${lugar}`);
             ver('age');
         }
 
         async function syncGitHub(msg) {
-            try {
-                const res = await fetch(URL_REPO, { headers: { 'Authorization': `token ${TOKEN}` } });
-                const data = await res.json();
-                const body = JSON.stringify({
+            const res = await fetch(URL_REPO, { headers: { 'Authorization': `token ${TOKEN}` } });
+            const data = await res.json();
+            await fetch(URL_REPO, {
+                method: 'PUT',
+                headers: { 'Authorization': `token ${TOKEN}`, 'Content-Type': 'application/json' },
+                body: JSON.stringify({
                     message: msg,
-                    content: btoa(unescape(encodeURIComponent(JSON.stringify(agenda, null, 2)))),
+                    content: btoa(unescape(encodeURIComponent(JSON.stringify(agenda)))),
                     sha: data.sha
-                });
-                await fetch(URL_REPO, {
-                    method: 'PUT',
-                    headers: { 'Authorization': `token ${TOKEN}`, 'Content-Type': 'application/json' },
-                    body: body
-                });
-                alert("Agenda actualizada en la nube");
-            } catch (e) { alert("Guardado local (Sin Internet)"); }
+                })
+            });
         }
 
         function compartirAgendaCompleta() {
-            let texto = "*📅 AGENDA PACHUCOS MEN 2026*%0A%0A";
-            agenda.forEach(j => {
-                texto += `📍 *${j.dia}/${j.mes}:* ${j.lugar} (${j.hora})%0A`;
-            });
-            window.open(`https://wa.me/?text=${texto}`);
+            let t = "*📅 AGENDA PACHUCOS MEN*%0A%0A";
+            agenda.forEach(j => t += `📍 *${j.dia}/${j.mes}:* ${j.lugar}%0A`);
+            window.open(`https://wa.me/?text=${t}`);
         }
 
         function ver(id) {
@@ -235,7 +201,6 @@
             const btn = Array.from(document.querySelectorAll('.nav-btn')).find(b => b.getAttribute('onclick').includes(id));
             if(btn) btn.classList.add('active');
         }
-
         init();
     </script>
 </body>
