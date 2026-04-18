@@ -23,10 +23,8 @@
         .dia-numero { background: #f0f2f5; width: 60px; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 800; color: var(--canva-purp); border-right: 1px solid var(--gris-suave); }
         .jales-lista { flex: 1; padding: 12px; }
         .jale-item { border-bottom: 1px solid #f0f2f5; padding: 10px 0; position: relative; }
-        .jale-item:last-child { border-bottom: none; }
         .jale-lugar { font-size: 14px; font-weight: 700; color: #1a1c1e; text-transform: uppercase; margin: 0; }
         .jale-sub { font-size: 11px; color: #6e767d; margin: 2px 0 0; }
-        .status-confirmar { color: #aaa; font-style: italic; }
         .sin-bateria { color: #ff4d4d; font-weight: bold; font-size: 10px; text-transform: uppercase; }
 
         input, select { width: 100%; padding: 12px; margin: 5px 0; background: var(--blanco); border: 1px solid var(--gris-suave); border-radius: 8px; font-size: 14px; }
@@ -46,7 +44,7 @@
     <main>
         <section id="age" class="section active">
             <button class="btn-wa-float" onclick="compartirAgendaCompleta()">🟢 COMPARTIR WHATSAPP</button>
-            <div id="lista-agenda">Conectando con GitHub...</div>
+            <div id="lista-agenda">Cargando datos...</div>
         </section>
 
         <section id="add" class="section">
@@ -65,15 +63,14 @@
                 <option value="si">¿Con batería? SI</option>
                 <option value="no">¿Con batería? NO</option>
             </select>
-            <div style="display: flex; gap: 5px; align-items: center;">
-                <input type="number" id="f-hor-num" placeholder="Hora (Ej: 4)">
-                <select id="f-ampm" style="width: 80px;"><option value="AM">AM</option><option value="PM" selected>PM</option></select>
+            <div style="display: flex; gap: 5px;">
+                <input type="text" id="f-hor" placeholder="Hora (Ej: 4:00 PM)">
+                <input type="text" id="f-tie" placeholder="Tiempo (Ej: 3 horas)">
             </div>
-            <input type="number" id="f-dur" placeholder="Total de horas">
             <select id="f-rep">
                 <option value="TOÑO">TOÑO</option><option value="CHAVA">CHAVA</option><option value="JOSÉ">JOSÉ</option>
             </select>
-            <button class="btn-japo" onclick="guardarNuevo()">GUARDAR EVENTO</button>
+            <button class="btn-japo" onclick="guardarNuevo()">GUARDAR</button>
         </section>
 
         <section id="cal" class="section">
@@ -82,14 +79,16 @@
     </main>
 
     <script>
+        // DATOS DE CONEXIÓN ORIGINALES (LOS QUE SÍ TE FUNCIONAN)
+        const USER = "Antozavala";
+        const REPO = "Pachucos_Men_App";
         const TOKEN = "ghp_u0T7T3n9R1P1uN2Q1xZ5t9L7M0v2B1s4A5u3";
-        const URL_REPO = "https://api.github.com/repos/Antozavala/Pachucos_Men_App/contents/agenda.json";
+        const URL_REPO = `https://api.github.com/repos/${USER}/${REPO}/contents/agenda.json`;
+        
         let agenda = [];
         const MESES = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
 
         async function init() {
-            const cache = localStorage.getItem('pachucos_cache');
-            if(cache) { try { agenda = JSON.parse(cache); renderUI(); } catch(e){} }
             loadFromGitHub();
         }
 
@@ -98,27 +97,24 @@
                 const res = await fetch(`${URL_REPO}?t=${Date.now()}`, { headers: { 'Authorization': `token ${TOKEN}` } });
                 const data = await res.json();
                 const content = decodeURIComponent(escape(atob(data.content.replace(/\s/g, ''))));
-                const rawData = JSON.parse(content);
+                const raw = JSON.parse(content);
 
-                // TRADUCTOR DE DATOS VIEJOS (Para que no se cicle la app)
-                agenda = rawData.map(j => ({
+                // MAPEO PARA COMPATIBILIDAD (EL PARCHE)
+                agenda = raw.map(j => ({
                     anio: j.anio || "2026",
                     mes: j.mes || "1",
                     dia: j.dia || "1",
                     representante: j.representante || "TOÑO",
                     lugar: j.lugar || "?",
-                    bateria: j.bateria || (j.lugar && j.lugar.toLowerCase().includes("sin batería") ? "no" : "si"),
+                    bateria: j.bateria || (j.lugar.toLowerCase().includes("sin batería") ? "no" : "si"),
                     hora: j.hora || "?",
                     tiempo: j.tiempo || "?"
                 }));
 
-                // Auto-borrado 48h
-                const hoy = new Date();
-                agenda = agenda.filter(j => (hoy - new Date(j.anio, j.mes-1, j.dia)) < (48 * 60 * 60 * 1000));
-
-                localStorage.setItem('pachucos_cache', JSON.stringify(agenda));
                 renderUI();
-            } catch (e) { document.getElementById('lista-agenda').innerText = "Modo Lectura (Sin red)"; }
+            } catch (e) {
+                document.getElementById('lista-agenda').innerText = "Error al conectar. Revisa el Token.";
+            }
         }
 
         function renderUI() {
@@ -132,17 +128,17 @@
                     curM = j.mes;
                     list.innerHTML += `<div class="mes-header">${MESES[j.mes-1]} ${j.anio}</div>`;
                 }
-                const lug = j.lugar.replace(/sin batería/gi, "").replace(/\?/g, "").trim() || "Por confirmar";
-                const bat = j.bateria === "no" ? '<span class="sin-bateria"> - Sin Batería</span>' : '';
-                const hDisplay = j.hora.includes("?") ? '<span class="status-confirmar">Por confirmar</span>' : j.hora;
+                // Limpiar el texto del lugar para no repetir "sin batería"
+                const lugLimpio = j.lugar.replace(/sin batería/gi, "").trim();
+                const batTag = j.bateria === "no" ? '<span class="sin-bateria"> - SIN BATERÍA</span>' : '';
                 
                 list.innerHTML += `
                     <div class="dia-bloque">
                         <div class="dia-numero">${j.dia}</div>
                         <div class="jales-lista">
                             <div class="jale-item">
-                                <p class="jale-lugar">${lug}${bat}</p>
-                                <p class="jale-sub">${j.representante} • Inicio: ${hDisplay} • Tiempo: ${j.tiempo}</p>
+                                <p class="jale-lugar">${lugLimpio}${batTag}</p>
+                                <p class="jale-sub">${j.representante} • ${j.hora} • ${j.tiempo}</p>
                             </div>
                         </div>
                     </div>`;
@@ -150,28 +146,20 @@
         }
 
         async function guardarNuevo() {
-            const dia = document.getElementById('f-dia').value;
-            const mes = document.getElementById('f-mes').value;
-            const lugar = document.getElementById('f-lug').value || "?";
-            const hNum = document.getElementById('f-hor-num').value;
-            const ampm = document.getElementById('f-ampm').value;
-            const dur = document.getElementById('f-dur').value;
-            const bat = document.getElementById('f-bat').value;
-
-            if(agenda.find(x => x.dia == dia && x.mes == mes && x.lugar == lugar)) return alert("¡Ya existe!");
-
             const nuevo = {
-                anio: "2026", mes, dia, 
+                anio: "2026",
+                mes: document.getElementById('f-mes').value,
+                dia: document.getElementById('f-dia').value,
                 representante: document.getElementById('f-rep').value,
-                lugar, bateria: bat,
-                hora: hNum ? `${hNum}:00 ${ampm}` : "?",
-                tiempo: dur ? `${dur} horas` : "?"
+                lugar: document.getElementById('f-lug').value,
+                bateria: document.getElementById('f-bat').value,
+                hora: document.getElementById('f-hor').value || "?",
+                tiempo: document.getElementById('f-tie').value || "?"
             };
-
             agenda.push(nuevo);
-            renderUI();
-            await syncGitHub(`Nuevo: ${lugar}`);
+            await syncGitHub(`Nuevo: ${nuevo.lugar}`);
             ver('age');
+            renderUI();
         }
 
         async function syncGitHub(msg) {
@@ -189,8 +177,8 @@
         }
 
         function compartirAgendaCompleta() {
-            let t = "*📅 AGENDA PACHUCOS MEN*%0A%0A";
-            agenda.forEach(j => t += `📍 *${j.dia}/${j.mes}:* ${j.lugar}%0A`);
+            let t = "*📅 AGENDA PACHUCOS MEN 2026*%0A%0A";
+            agenda.forEach(j => t += `📍 *${j.dia}/${j.mes}:* ${j.lugar} (${j.hora})%0A`);
             window.open(`https://wa.me/?text=${t}`);
         }
 
@@ -198,8 +186,7 @@
             document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
             document.getElementById(id).classList.add('active');
-            const btn = Array.from(document.querySelectorAll('.nav-btn')).find(b => b.getAttribute('onclick').includes(id));
-            if(btn) btn.classList.add('active');
+            event.currentTarget.classList.add('active');
         }
         init();
     </script>
