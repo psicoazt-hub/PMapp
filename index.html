@@ -6,7 +6,7 @@
     <title>PACHUCOS MEN 2026</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
-        :root { --canva-purp: #7d2ae8; --canva-blue: #00c4cc; --fondo: #f4f7f6; --blanco: #ffffff; --texto: #2d3136; --gris-suave: #e2e5e9; }
+        :root { --canva-purp: #7d2ae8; --canva-blue: #00c4cc; --fondo: #f4f7f6; --blanco: #ffffff; --texto: #2d3136; --gris-suave: #e2e5e9; --error: #ff4d4d; --warning: #ffcc00; }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { background: var(--fondo); color: var(--texto); font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; height: 100vh; overflow: hidden; }
         
@@ -27,25 +27,26 @@
         .dia-bloque { background: var(--blanco); border-radius: 12px; margin-bottom: 8px; display: flex; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
         .dia-numero { background: #f0f2f5; width: 50px; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 800; color: var(--canva-purp); }
         .jales-lista { flex: 1; padding: 8px 12px; }
+        
         .jale-item { border-bottom: 1px solid #f0f2f5; padding: 6px 0; position: relative; }
+        .jale-item.conflicto { background: #fff4f4; border-left: 4px solid var(--error); padding-left: 8px; }
         .jale-item:last-child { border-bottom: none; }
+        
         .jale-lugar { font-size: 13px; font-weight: 700; color: #1a1c1e; text-transform: uppercase; margin: 0; }
         .jale-sub { font-size: 10px; color: #6e767d; margin: 2px 0 0; }
+        
         .jale-btns { position: absolute; right: 0; top: 50%; transform: translateY(-50%); display: flex; gap: 5px; }
         .btn-op { background: var(--fondo); border: none; padding: 6px; cursor: pointer; border-radius: 6px; font-size: 11px; color: #54595f; }
+        .btn-revisar { background: var(--error); color: white; border: none; padding: 4px 8px; border-radius: 4px; font-size: 9px; font-weight: 900; cursor: pointer; }
 
         input, select { width: 100%; padding: 12px; margin: 5px 0; background: var(--blanco); border: 1.5px solid var(--gris-suave); color: var(--texto); border-radius: 8px; font-size: 14px; outline: none; }
         .btn-japo { background: linear-gradient(90deg, var(--canva-purp), #5433ff); color: white; border: none; padding: 15px; width: 100%; font-weight: bold; cursor: pointer; border-radius: 8px; font-size: 14px; margin-top: 10px; box-shadow: 0 4px 10px rgba(125, 42, 232, 0.3); }
 
-        /* GALERIA FIX */
         .gal-item { background: var(--blanco); border-radius: 12px; overflow: hidden; margin-bottom: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); border: 1px solid var(--gris-suave); }
         .gal-item video, .gal-item img { width: 100%; display: block; height: 180px; object-fit: cover; background: #000; }
-        .gal-btns { display: flex; padding: 8px; gap: 8px; }
-        .btn-gal { flex: 1; padding: 10px; font-size: 10px; background: #f0f2f5; color: var(--canva-purp); border: none; border-radius: 6px; font-weight: 800; text-transform: uppercase; }
-
-        /* MODAL CON BOTON CERRAR */
+        
         #modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); z-index:9999; align-items:center; justify-content:center; }
-        #modal-content { width: 95%; max-height: 80%; position: relative; }
+        #modal-content { width: 90%; background: white; padding: 20px; border-radius: 15px; position: relative; max-height: 80%; overflow-y: auto; }
         .close-btn { position: absolute; top: -40px; right: 0; background: red; color: white; border: none; padding: 10px 15px; border-radius: 50%; font-weight: bold; font-size: 18px; cursor: pointer; }
     </style>
 </head>
@@ -69,6 +70,10 @@
 <main>
     <section id="age" class="section active">
         <h1>Agenda de Eventos</h1>
+        <button onclick="compartirAgendaWhatsApp()" style="background: #25D366; color: white; border: none; padding: 12px; width: 100%; font-weight: bold; cursor: pointer; border-radius: 8px; font-size: 14px; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; gap: 8px;">
+            🟢 COMPARTIR AGENDA POR WHATSAPP
+        </button>
+        <div id="off-status" style="display:none; background:var(--warning); font-size:10px; text-align:center; padding:5px; border-radius:5px; margin-bottom:10px; font-weight:bold;">⚠️ MODO OFFLINE: Los jales se subirán al detectar internet.</div>
         <div id="lista-agenda">Cargando...</div>
     </section>
 
@@ -113,7 +118,6 @@
 
     let agenda = [];
     const MESES = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
-    // LISTA DE TUS ARCHIVOS REALES EN GITHUB
     const ASSETS = ["VN20251209_045334.mp4", "download_20251208_090855_0000.mp4", "Diseño sin título_20251208_090215_0000.mp4", "VID-20250304-WA0067.mp4", "origin_1768640677638.png", "BackgroundEraser_20251218_105209714.png", "Black White Torn Paper Photography Portfolio Cover Page_20260317_084528_0000.png"];
 
     function ver(id) {
@@ -124,22 +128,38 @@
         if(btn) btn.classList.add('active');
         
         if(id === 'age') loadAgenda();
-        if(id === 'cal') document.getElementById('cal-box').innerHTML = `<iframe src="https://calendar.google.com/calendar/embed?bgcolor=%23ffffff&src=ZXMubWV4aWNhbiNob2xpZGF5QGdyb3VwLnYuY2FsZW5kYXIuZ29vZ2xlLmNvbQ" style="border:0" width="100%" height="400" frameborder="0"></iframe>`;
         if(id === 'gal') loadGal();
+        if(id === 'cal') document.getElementById('cal-box').innerHTML = `<iframe src="https://calendar.google.com/calendar/embed?bgcolor=%23ffffff&src=ZXMubWV4aWNhbiNob2xpZGF5QGdyb3VwLnYuY2FsZW5kYXIuZ29vZ2xlLmNvbQ" style="border:0" width="100%" height="400" frameborder="0"></iframe>`;
     }
 
     async function loadAgenda() {
         try {
             const r = await fetch(`https://api.github.com/repos/${USER}/${REPO}/contents/agenda.json?t=${Date.now()}`, { headers: { 'Authorization': `token ${TOKEN}` } });
+            if(!r.ok) throw new Error();
             const d = await r.json();
             agenda = JSON.parse(decodeURIComponent(escape(atob(d.content.replace(/\s/g, '')))));
-            renderAgendaUI();
-        } catch(e) { console.error(e); }
+            localStorage.setItem('pachucos_backup', JSON.stringify(agenda));
+            document.getElementById('off-status').style.display = 'none';
+        } catch(e) {
+            const cache = localStorage.getItem('pachucos_backup');
+            if(cache) {
+                agenda = JSON.parse(cache);
+                document.getElementById('off-status').style.display = 'block';
+            }
+        }
+        renderAgendaUI();
     }
 
     function renderAgendaUI() {
         let h = "", curY = "", curM = "";
         agenda.sort((a,b) => (new Date(a.anio, a.mes-1, a.dia)) - (new Date(b.anio, b.mes-1, b.dia)));
+        
+        const counts = {};
+        agenda.forEach(x => {
+            const key = `${x.anio}-${x.mes}-${x.dia}-${x.hora.toUpperCase().trim()}`;
+            counts[key] = (counts[key] || 0) + 1;
+        });
+
         const grouped = {};
         agenda.forEach(f => {
             const key = `${f.anio}-${f.mes}-${f.dia}`;
@@ -147,39 +167,110 @@
             grouped[key].push(f);
         });
 
+        const procesados = new Set();
         agenda.forEach((f) => {
-            const key = `${f.anio}-${f.mes}-${f.dia}`;
-            if(!grouped[key]) return;
+            const dKey = `${f.anio}-${f.mes}-${f.dia}`;
+            if(procesados.has(dKey)) return;
+            procesados.add(dKey);
+
             if(curY !== f.anio) { curY = f.anio; h += `<div class="year-header">🔥 PACHUCOS ${curY} 🔥</div>`; }
             if(curM !== f.mes) { curM = f.mes; h += `<div class="mes-header">${MESES[f.mes-1]}</div>`; }
+            
             h += `<div class="dia-bloque"><div class="dia-numero">${f.dia}</div><div class="jales-lista">`;
-            grouped[key].forEach((jale) => {
-                const globalIdx = agenda.indexOf(jale);
-                h += `<div class="jale-item"><p class="jale-lugar">📍 ${jale.lugar}</p><p class="jale-sub">${jale.representante} • ${jale.hora || '?'} • ${jale.tiempo || '?'}</p><div class="jale-btns"><button class="btn-op" onclick="editarRegistro(${globalIdx})">✏️</button><button class="btn-op" style="color:#ff4d4d" onclick="borrarRegistro(${globalIdx})">🗑️</button></div></div>`;
+            grouped[dKey].forEach((jale) => {
+                const cKey = `${jale.anio}-${jale.mes}-${jale.dia}-${jale.hora.toUpperCase().trim()}`;
+                const esConflicto = counts[cKey] > 1;
+                const idx = agenda.indexOf(jale);
+                
+                h += `<div class="jale-item ${esConflicto ? 'conflicto' : ''}">
+                        <p class="jale-lugar">📍 ${jale.lugar}</p>
+                        <p class="jale-sub">${jale.representante} • ${jale.hora || '?'} • ${jale.tiempo || '?'}</p>
+                        <div class="jale-btns">
+                            ${esConflicto ? `<button class="btn-revisar" onclick="revisarConflicto('${cKey}')"><b>REVISAR</b></button>` : ''}
+                            <button class="btn-op" onclick="editarRegistro(${idx})">✏️</button>
+                            <button class="btn-op" style="color:#ff4d4d" onclick="borrarRegistro(${idx})">🗑️</button>
+                        </div>
+                      </div>`;
             });
             h += `</div></div>`;
-            delete grouped[key];
         });
         document.getElementById('lista-agenda').innerHTML = h || "Sin fechas.";
     }
 
-    async function syncAgenda() {
-        const res = await fetch(`https://api.github.com/repos/${USER}/${REPO}/contents/agenda.json`, { headers: { Authorization: `token ${TOKEN}` } });
-        const json = await res.json();
-        const content = btoa(unescape(encodeURIComponent(JSON.stringify(agenda))));
-        await fetch(`https://api.github.com/repos/${USER}/${REPO}/contents/agenda.json`, {
-            method: 'PUT', headers: { Authorization: `token ${TOKEN}`, 'Content-Type': 'application/json' },
-            body: JSON.stringify({ message: "Update", content: content, sha: json.sha })
+    function revisarConflicto(key) {
+        const dups = agenda.filter(x => `${x.anio}-${x.mes}-${x.dia}-${x.hora.toUpperCase().trim()}` === key);
+        dups.sort((a,b) => (a.ts || 0) - (b.ts || 0));
+        
+        let txt = `<h3 style="color:red; margin-top:0;">CONFLICTO DE HORARIO</h3><hr>`;
+        dups.forEach((d, i) => {
+            const horaReg = d.ts ? new Date(d.ts).toLocaleString() : "Desconocida";
+            txt += `<div style="padding:10px; border-radius:8px; margin-bottom:10px; border:2px solid ${i===0?'#2ecc71':'#e74c3c'}; background:${i===0?'#f0fff4':'#fff5f5'}">
+                <b>${i===0 ? '🏆 PRIORIDAD (Registró primero):' : '⚠️ SEGUNDO REGISTRO:'}</b><br>
+                Lugar: ${d.lugar}<br>Rep: ${d.representante}<br>
+                <small>Fecha de registro: ${horaReg}</small>
+            </div>`;
         });
-        alert("¡Guardado!"); resetForm(); ver('age');
+        document.getElementById('modal-media').innerHTML = txt;
+        document.getElementById('modal').style.display = 'flex';
     }
 
-    function confirmarRegistro() { if(!document.getElementById('f-dia').value || !document.getElementById('f-rep').value) return alert("Faltan datos."); guardarRegistro(); }
+    function confirmarRegistro() {
+        const dia = document.getElementById('f-dia').value;
+        const mes = document.getElementById('f-mes').value;
+        const anio = document.getElementById('f-anio').value;
+        const hora = document.getElementById('f-hor').value.toUpperCase().trim();
+        const rep = document.getElementById('f-rep').value;
+
+        if(!dia || !rep) return alert("Faltan datos.");
+
+        const yaExiste = agenda.find(x => x.anio==anio && x.mes==mes && x.dia==dia && x.hora.toUpperCase().trim()==hora);
+        if(yaExiste) {
+            if(!confirm(`⚠️ ATENCIÓN: ${yaExiste.representante} ya agendó a esa hora. ¿Quieres guardarlo de todos modos?`)) return;
+        }
+        guardarRegistro();
+    }
+
     async function guardarRegistro() {
-        const j = { anio:document.getElementById('f-anio').value, mes:document.getElementById('f-mes').value, dia:document.getElementById('f-dia').value, representante:document.getElementById('f-rep').value, lugar:document.getElementById('f-lug').value || '?', hora:document.getElementById('f-hor').value, tiempo:document.getElementById('f-tie').value };
+        const j = { 
+            anio: document.getElementById('f-anio').value, 
+            mes: document.getElementById('f-mes').value, 
+            dia: document.getElementById('f-dia').value, 
+            representante: document.getElementById('f-rep').value, 
+            lugar: document.getElementById('f-lug').value || '?', 
+            hora: document.getElementById('f-hor').value, 
+            tiempo: document.getElementById('f-tie').value,
+            ts: Date.now() 
+        };
         const idx = parseInt(document.getElementById('edit-idx').value);
         if(idx > -1) agenda[idx] = j; else agenda.push(j);
+        
+        localStorage.setItem('pachucos_backup', JSON.stringify(agenda));
+        renderAgendaUI();
         await syncAgenda();
+    }
+
+    async function syncAgenda() {
+        try {
+            const res = await fetch(`https://api.github.com/repos/${USER}/${REPO}/contents/agenda.json`, { headers: { Authorization: `token ${TOKEN}` } });
+            const json = await res.json();
+            
+            // Fusión inteligente: No borra lo que otros subieron mientras estabas offline
+            const cloudData = JSON.parse(decodeURIComponent(escape(atob(json.content.replace(/\s/g, '')))));
+            const finalData = [...cloudData];
+            agenda.forEach(local => {
+                if(!finalData.find(cloud => cloud.ts === local.ts)) finalData.push(local);
+            });
+
+            const content = btoa(unescape(encodeURIComponent(JSON.stringify(finalData))));
+            await fetch(`https://api.github.com/repos/${USER}/${REPO}/contents/agenda.json`, {
+                method: 'PUT', headers: { Authorization: `token ${TOKEN}`, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: "Sync", content: content, sha: json.sha })
+            });
+            alert("¡Sincronizado con GitHub!"); resetForm(); ver('age');
+        } catch(e) {
+            alert("Sin conexión. Jale guardado en el cel, se subirá al detectar red.");
+            resetForm(); ver('age');
+        }
     }
 
     function borrarRegistro(i) { if(confirm("¿Eliminar?")) { agenda.splice(i,1); syncAgenda(); } }
@@ -198,31 +289,32 @@
         document.getElementById('f-rep').value="";
     }
 
+    function compartirAgendaWhatsApp() {
+        if (!agenda.length) return alert("Nada que compartir.");
+        const ord = [...agenda].sort((a,b) => (new Date(a.anio, a.mes-1, a.dia)) - (new Date(b.anio, b.mes-1, b.dia)));
+        let m = "*🔥 AGENDA PACHUCOS MEN 🔥*\n\n", mesAct = "";
+        ord.forEach(f => {
+            const nMes = MESES[f.mes-1];
+            if(mesAct !== nMes) { mesAct = nMes; m += `\n--- *${mesAct.toUpperCase()}* ---\n`; }
+            m += `📅 *${f.dia}*: ${f.lugar}\n   _${f.hora} | ${f.representante}_\n`;
+        });
+        window.open(`https://wa.me/?text=${encodeURIComponent(m)}`, '_blank');
+    }
+
     function loadGal() {
         document.getElementById('gal-grid').innerHTML = ASSETS.map(n => {
             const url = `https://raw.githubusercontent.com/${USER}/${REPO}/main/${n}`;
-            const isVid = n.toLowerCase().endsWith('.mp4');
-            return `<div class="gal-item">
-                ${isVid ? `<video src="${url}#t=0.1" preload="metadata" playsinline muted></video>` : `<img src="${url}">`}
-                <div class="gal-btns">
-                    <button class="btn-gal" onclick="playMedia('${url}', ${isVid})">VER</button>
-                    <button class="btn-gal" onclick="downloadMedia('${url}', '${n}')">BAJAR</button>
-                </div>
-            </div>`;
+            return `<div class="gal-item">${n.endsWith('.mp4')?`<video src="${url}#t=0.1" muted></video>`:`<img src="${url}">`}
+            <div class="gal-btns"><button class="btn-gal" onclick="playMedia('${url}', ${n.endsWith('.mp4')})">VER</button></div></div>`;
         }).join('');
     }
 
     function playMedia(u, v) {
-        const m = document.getElementById('modal'); const c = document.getElementById('modal-media');
-        c.innerHTML = v ? `<video src="${u}" controls autoplay style="width:100%; border-radius:12px;"></video>` : `<img src="${u}" style="width:100%; border-radius:12px;">`;
-        m.style.display = 'flex';
+        document.getElementById('modal-media').innerHTML = v ? `<video src="${u}" controls autoplay style="width:100%"></video>` : `<img src="${u}" style="width:100%">`;
+        document.getElementById('modal').style.display = 'flex';
     }
 
-    async function downloadMedia(u, n) {
-        const r = await fetch(u); const b = await r.blob();
-        const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = n; a.click();
-    }
-
+    window.addEventListener('online', syncAgenda);
     window.onload = () => ver('age');
 </script>
 </body>
