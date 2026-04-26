@@ -34,7 +34,6 @@
         
         .jale-lugar { font-size: 13px; font-weight: 700; color: #1a1c1e; text-transform: uppercase; margin: 0; }
         .jale-sub { font-size: 10px; color: #6e767d; margin: 2px 0 0; }
-        .por-confirmar { color: #aaa; font-style: italic; font-weight: normal; font-size: 11px; }
         
         .jale-btns { position: absolute; right: 0; top: 50%; transform: translateY(-50%); display: flex; gap: 5px; }
         .btn-op { background: var(--fondo); border: none; padding: 6px; cursor: pointer; border-radius: 6px; font-size: 11px; color: #54595f; }
@@ -43,6 +42,9 @@
         input, select { width: 100%; padding: 12px; margin: 5px 0; background: var(--blanco); border: 1.5px solid var(--gris-suave); color: var(--texto); border-radius: 8px; font-size: 14px; outline: none; }
         .btn-japo { background: linear-gradient(90deg, var(--canva-purp), #5433ff); color: white; border: none; padding: 15px; width: 100%; font-weight: bold; cursor: pointer; border-radius: 8px; font-size: 14px; margin-top: 10px; box-shadow: 0 4px 10px rgba(125, 42, 232, 0.3); }
 
+        .gal-item { background: var(--blanco); border-radius: 12px; overflow: hidden; margin-bottom: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); border: 1px solid var(--gris-suave); }
+        .gal-item video, .gal-item img { width: 100%; display: block; height: 180px; object-fit: cover; background: #000; }
+        
         #modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); z-index:9999; align-items:center; justify-content:center; }
         #modal-content { width: 90%; background: white; padding: 20px; border-radius: 15px; position: relative; max-height: 80%; overflow-y: auto; }
         .close-btn { position: absolute; top: -40px; right: 0; background: red; color: white; border: none; padding: 10px 15px; border-radius: 50%; font-weight: bold; font-size: 18px; cursor: pointer; }
@@ -90,13 +92,9 @@
             <option value="JOSÉ">JOSÉ</option><option value="CHAVA">CHAVA</option><option value="TOÑO">TOÑO</option><option value="OTROS">OTROS</option>
         </select>
         <input type="text" id="f-lug" placeholder="Lugar">
-        <div style="display:flex; gap:5px; align-items: center;">
-            <input type="text" id="f-hor" placeholder="Hora (Ej: 8)" style="flex: 2;">
-            <select id="f-ampm" style="flex: 1;">
-                <option value="PM">PM</option>
-                <option value="AM">AM</option>
-            </select>
-            <input type="text" id="f-tie" placeholder="Duración (Ej: 5)" style="flex: 2;">
+        <div style="display:flex; gap:5px;">
+            <input type="text" id="f-hor" placeholder="Hora (Ej: 8 PM)">
+            <input type="text" id="f-tie" placeholder="Tiempo (Ej: 5h)">
         </div>
         <input type="hidden" id="edit-idx" value="-1">
         <button class="btn-japo" id="save-btn" onclick="confirmarRegistro()">GUARDAR EVENTO</button>
@@ -120,7 +118,7 @@
 
     let agenda = [];
     const MESES = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
-    const ASSETS = ["origin_1768640677638.png", "BackgroundEraser_20251218_105209714.png", "Black White Torn Paper Photography Portfolio Cover Page_20260317_084528_0000.png"];
+    const ASSETS = ["VN20251209_045334.mp4", "download_20251208_090855_0000.mp4", "Diseño sin título_20251208_090215_0000.mp4", "VID-20250304-WA0067.mp4", "origin_1768640677638.png", "BackgroundEraser_20251218_105209714.png", "Black White Torn Paper Photography Portfolio Cover Page_20260317_084528_0000.png"];
 
     function ver(id) {
         document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
@@ -144,55 +142,21 @@
             document.getElementById('off-status').style.display = 'none';
         } catch(e) {
             const cache = localStorage.getItem('pachucos_backup');
-            if(cache) { agenda = JSON.parse(cache); document.getElementById('off-status').style.display = 'block'; }
+            if(cache) {
+                agenda = JSON.parse(cache);
+                document.getElementById('off-status').style.display = 'block';
+            }
         }
         renderAgendaUI();
     }
 
-    function formatearDato(valor) {
-        if (!valor || valor === "?" || valor.toString().trim() === "") return `<span class="por-confirmar">por confirmar</span>`;
-        return valor;
-    }
-
-    // --- FUNCIÓN DE TRADUCCIÓN DE HORARIO PARA ORDENAR ---
-    function obtenerMinutosDelDia(horaStr) {
-        if (!horaStr || horaStr === "?" || horaStr.toString().includes("confirmar")) return 1440; // Al final del día si no hay hora
-        
-        let h = horaStr.toString().toUpperCase().trim();
-        let hrs = 0, mins = 0;
-
-        // Detectar AM/PM
-        let esPM = h.includes("PM");
-        let esAM = h.includes("AM");
-
-        // Limpiar solo los números y dos puntos
-        let soloHora = h.replace("AM", "").replace("PM", "").trim();
-        let partes = soloHora.split(":");
-        
-        hrs = parseInt(partes[0]);
-        mins = partes[1] ? parseInt(partes[1]) : 0;
-
-        if (esPM && hrs < 12) hrs += 12;
-        if (esAM && hrs === 12) hrs = 0;
-
-        return (hrs * 60) + mins;
-    }
-
     function renderAgendaUI() {
         let h = "", curY = "", curM = "";
-
-        // ORDENAMIENTO COMPLETO: AÑO -> MES -> DÍA -> HORA
-        agenda.sort((a, b) => {
-            if (a.anio !== b.anio) return a.anio - b.anio;
-            if (a.mes !== b.mes) return a.mes - b.mes;
-            if (a.dia !== b.dia) return a.dia - b.dia;
-            return obtenerMinutosDelDia(a.hora) - obtenerMinutosDelDia(b.hora);
-        });
+        agenda.sort((a,b) => (new Date(a.anio, a.mes-1, a.dia)) - (new Date(b.anio, b.mes-1, b.dia)));
         
         const counts = {};
         agenda.forEach(x => {
-            const hStr = (x.hora || "").toString().toUpperCase().trim();
-            const key = `${x.anio}-${x.mes}-${x.dia}-${hStr}`;
+            const key = `${x.anio}-${x.mes}-${x.dia}-${x.hora.toUpperCase().trim()}`;
             counts[key] = (counts[key] || 0) + 1;
         });
 
@@ -214,15 +178,15 @@
             
             h += `<div class="dia-bloque"><div class="dia-numero">${f.dia}</div><div class="jales-lista">`;
             grouped[dKey].forEach((jale) => {
-                const hStr = (jale.hora || "").toString().toUpperCase().trim();
-                const cKey = `${jale.anio}-${jale.mes}-${jale.dia}-${hStr}`;
+                const cKey = `${jale.anio}-${jale.mes}-${jale.dia}-${jale.hora.toUpperCase().trim()}`;
                 const esConflicto = counts[cKey] > 1;
                 const idx = agenda.indexOf(jale);
                 
                 h += `<div class="jale-item ${esConflicto ? 'conflicto' : ''}">
-                        <p class="jale-lugar">📍 ${formatearDato(jale.lugar)}</p>
-                        <p class="jale-sub">${jale.representante} • ${formatearDato(jale.hora)} • ${formatearDato(jale.tiempo)}</p>
+                        <p class="jale-lugar">📍 ${jale.lugar}</p>
+                        <p class="jale-sub">${jale.representante} • ${jale.hora || '?'} • ${jale.tiempo || '?'}</p>
                         <div class="jale-btns">
+                            ${esConflicto ? `<button class="btn-revisar" onclick="revisarConflicto('${cKey}')"><b>REVISAR</b></button>` : ''}
                             <button class="btn-op" onclick="editarRegistro(${idx})">✏️</button>
                             <button class="btn-op" style="color:#ff4d4d" onclick="borrarRegistro(${idx})">🗑️</button>
                         </div>
@@ -233,28 +197,50 @@
         document.getElementById('lista-agenda').innerHTML = h || "Sin fechas.";
     }
 
+    function revisarConflicto(key) {
+        const dups = agenda.filter(x => `${x.anio}-${x.mes}-${x.dia}-${x.hora.toUpperCase().trim()}` === key);
+        dups.sort((a,b) => (a.ts || 0) - (b.ts || 0));
+        
+        let txt = `<h3 style="color:red; margin-top:0;">CONFLICTO DE HORARIO</h3><hr>`;
+        dups.forEach((d, i) => {
+            const horaReg = d.ts ? new Date(d.ts).toLocaleString() : "Desconocida";
+            txt += `<div style="padding:10px; border-radius:8px; margin-bottom:10px; border:2px solid ${i===0?'#2ecc71':'#e74c3c'}; background:${i===0?'#f0fff4':'#fff5f5'}">
+                <b>${i===0 ? '🏆 PRIORIDAD (Registró primero):' : '⚠️ SEGUNDO REGISTRO:'}</b><br>
+                Lugar: ${d.lugar}<br>Rep: ${d.representante}<br>
+                <small>Fecha de registro: ${horaReg}</small>
+            </div>`;
+        });
+        document.getElementById('modal-media').innerHTML = txt;
+        document.getElementById('modal').style.display = 'flex';
+    }
+
     function confirmarRegistro() {
-        if(!document.getElementById('f-dia').value || !document.getElementById('f-rep').value) return alert("Faltan datos.");
+        const dia = document.getElementById('f-dia').value;
+        const mes = document.getElementById('f-mes').value;
+        const anio = document.getElementById('f-anio').value;
+        const hora = document.getElementById('f-hor').value.toUpperCase().trim();
+        const rep = document.getElementById('f-rep').value;
+
+        if(!dia || !rep) return alert("Faltan datos.");
+
+        const yaExiste = agenda.find(x => x.anio==anio && x.mes==mes && x.dia==dia && x.hora.toUpperCase().trim()==hora);
+        if(yaExiste) {
+            if(!confirm(`⚠️ ATENCIÓN: ${yaExiste.representante} ya agendó a esa hora. ¿Quieres guardarlo de todos modos?`)) return;
+        }
         guardarRegistro();
     }
 
     async function guardarRegistro() {
-        let hRaw = document.getElementById('f-hor').value.trim();
-        let ampm = document.getElementById('f-ampm').value;
-        let tRaw = document.getElementById('f-tie').value.trim();
-
-        let hFinal = hRaw;
-        if (hRaw !== "" && !isNaN(hRaw)) hFinal = `${hRaw}:00 ${ampm}`;
-
-        let tFinal = tRaw;
-        if (tRaw !== "" && !isNaN(tRaw)) tFinal = `${tRaw} HORAS`;
-
         const j = { 
-            anio: document.getElementById('f-anio').value, mes: document.getElementById('f-mes').value, 
-            dia: document.getElementById('f-dia').value, representante: document.getElementById('f-rep').value, 
-            lugar: document.getElementById('f-lug').value.trim(), hora: hFinal, tiempo: tFinal, ts: Date.now() 
+            anio: document.getElementById('f-anio').value, 
+            mes: document.getElementById('f-mes').value, 
+            dia: document.getElementById('f-dia').value, 
+            representante: document.getElementById('f-rep').value, 
+            lugar: document.getElementById('f-lug').value || '?', 
+            hora: document.getElementById('f-hor').value, 
+            tiempo: document.getElementById('f-tie').value,
+            ts: Date.now() 
         };
-        
         const idx = parseInt(document.getElementById('edit-idx').value);
         if(idx > -1) agenda[idx] = j; else agenda.push(j);
         
@@ -265,34 +251,52 @@
 
     async function syncAgenda() {
         try {
-            const res = await fetch(`https://api.github.com/repos/${USER}/${REPO}/contents/agenda.json`, { headers: { Authorization: `token ${TOKEN}` } });
+            const res = await fetch(`https://api.github.com/repos/${USER}/${REPO}/contents/agenda.json?t=${Date.now()}`, { headers: { Authorization: `token ${TOKEN}` } });
             const json = await res.json();
+            
             const cloudData = JSON.parse(decodeURIComponent(escape(atob(json.content.replace(/\s/g, '')))));
-            const finalData = [...cloudData];
-            agenda.forEach(local => { if(!finalData.find(cloud => cloud.ts === local.ts)) finalData.push(local); });
-            const content = btoa(unescape(encodeURIComponent(JSON.stringify(finalData))));
+            const backup = JSON.parse(localStorage.getItem('pachucos_backup') || "[]");
+
+            // Solo bajamos lo que sea NUEVO de otros compañeros.
+            // Si algo está en la nube pero no en nuestra lista local Y estaba en el backup, significa que TÚ lo borraste.
+            cloudData.forEach(cloudItem => {
+                const enLocal = agenda.find(l => l.ts === cloudItem.ts);
+                const enBackup = backup.find(b => b.ts === cloudItem.ts);
+                if(!enLocal && !enBackup) {
+                    agenda.push(cloudItem);
+                }
+            });
+
+            const content = btoa(unescape(encodeURIComponent(JSON.stringify(agenda))));
             await fetch(`https://api.github.com/repos/${USER}/${REPO}/contents/agenda.json`, {
                 method: 'PUT', headers: { Authorization: `token ${TOKEN}`, 'Content-Type': 'application/json' },
-                body: JSON.stringify({ message: "Sync", content: content, sha: json.sha })
+                body: JSON.stringify({ message: "Sync Update", content: content, sha: json.sha })
             });
+
+            localStorage.setItem('pachucos_backup', JSON.stringify(agenda));
             alert("¡Sincronizado y Ordenado!"); resetForm(); ver('age');
-        } catch(e) { alert("Guardado local."); resetForm(); ver('age'); }
+        } catch(e) {
+            alert("Sin conexión. Cambios guardados localmente, se subirán al detectar red.");
+            resetForm(); ver('age');
+        }
     }
 
-    function borrarRegistro(i) { if(confirm("¿Eliminar?")) { agenda.splice(i,1); syncAgenda(); } }
-    
+    function borrarRegistro(i) { 
+        if(confirm("¿Eliminar?")) { 
+            agenda.splice(i,1); 
+            // Guardamos inmediatamente el borrado en el backup local antes de sincronizar
+            localStorage.setItem('pachucos_backup', JSON.stringify(agenda));
+            renderAgendaUI();
+            syncAgenda(); 
+        } 
+    }
+
     function editarRegistro(i) { 
-        const f = agenda[i]; 
-        document.getElementById('f-anio').value=f.anio; document.getElementById('f-mes').value=f.mes; 
+        const f = agenda[i]; document.getElementById('f-anio').value=f.anio; document.getElementById('f-mes').value=f.mes; 
         document.getElementById('f-dia').value=f.dia; document.getElementById('f-rep').value=f.representante; 
-        document.getElementById('f-lug').value=f.lugar; 
-        if(f.hora && f.hora.includes(' ')) {
-            const parts = f.hora.split(' ');
-            document.getElementById('f-hor').value = parts[0].replace(':00', '');
-            document.getElementById('f-ampm').value = parts[1];
-        } else { document.getElementById('f-hor').value = f.hora; }
-        document.getElementById('f-tie').value = f.tiempo.replace(' HORAS', '');
-        document.getElementById('edit-idx').value=i; document.getElementById('f-tit').innerText="Modificar Jale"; ver('add'); 
+        document.getElementById('f-lug').value=f.lugar; document.getElementById('f-hor').value=f.hora; 
+        document.getElementById('f-tie').value=f.tiempo; document.getElementById('edit-idx').value=i; 
+        document.getElementById('f-tit').innerText="Modificar Jale"; ver('add'); 
     }
 
     function resetForm() { 
@@ -304,12 +308,12 @@
 
     function compartirAgendaWhatsApp() {
         if (!agenda.length) return alert("Nada que compartir.");
+        const ord = [...agenda].sort((a,b) => (new Date(a.anio, a.mes-1, a.dia)) - (new Date(b.anio, b.mes-1, b.dia)));
         let m = "*🔥 AGENDA PACHUCOS MEN 🔥*\n\n", mesAct = "";
-        agenda.forEach(f => {
+        ord.forEach(f => {
             const nMes = MESES[f.mes-1];
             if(mesAct !== nMes) { mesAct = nMes; m += `\n--- *${mesAct.toUpperCase()}* ---\n`; }
-            let lug = f.lugar === "" || f.lugar === "?" ? "POR CONFIRMAR" : f.lugar;
-            m += `📅 *${f.dia}*: ${lug}\n   _${f.hora || 'Por confirmar'} | ${f.representante}_\n`;
+            m += `📅 *${f.dia}*: ${f.lugar}\n   _${f.hora} | ${f.representante}_\n`;
         });
         window.open(`https://wa.me/?text=${encodeURIComponent(m)}`, '_blank');
     }
