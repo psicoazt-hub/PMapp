@@ -54,7 +54,7 @@
 
 <div id="modal">
     <div id="modal-content">
-        <button class="close-btn" onclick="document.getElementById('modal').style.display='none'">✕</button>
+        <button class="close-btn" onclick="cerrarModal()">✕</button>
         <div id="modal-media"></div>
     </div>
 </div>
@@ -117,8 +117,22 @@
     const TOKEN = p1 + p2; const USER = 'psicoazt-hub', REPO = 'PMapp';
 
     let agenda = [];
+    let eliminados = JSON.parse(localStorage.getItem('pachucos_deleted') || "[]");
     const MESES = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
     const ASSETS = ["VN20251209_045334.mp4", "download_20251208_090855_0000.mp4", "Diseño sin título_20251208_090215_0000.mp4", "VID-20250304-WA0067.mp4", "origin_1768640677638.png", "BackgroundEraser_20251218_105209714.png", "Black White Torn Paper Photography Portfolio Cover Page_20260317_084528_0000.png"];
+
+    window.addEventListener('popstate', function(e) { cerrarModal(); });
+
+    function mostrarModal(html) {
+        document.getElementById('modal-media').innerHTML = html;
+        document.getElementById('modal').style.display = 'flex';
+        window.history.pushState({modal: true}, "");
+    }
+
+    function cerrarModal() {
+        document.getElementById('modal').style.display = 'none';
+        document.getElementById('modal-media').innerHTML = '';
+    }
 
     function ver(id) {
         document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
@@ -138,6 +152,7 @@
             if(!r.ok) throw new Error();
             const d = await r.json();
             agenda = JSON.parse(decodeURIComponent(escape(atob(d.content.replace(/\s/g, '')))));
+            agenda = agenda.filter(item => !eliminados.includes(item.ts));
             localStorage.setItem('pachucos_backup', JSON.stringify(agenda));
             document.getElementById('off-status').style.display = 'none';
         } catch(e) {
@@ -152,7 +167,22 @@
 
     function renderAgendaUI() {
         let h = "", curY = "", curM = "";
-        agenda.sort((a,b) => (new Date(a.anio, a.mes-1, a.dia)) - (new Date(b.anio, b.mes-1, b.dia)));
+        
+        agenda.sort((a,b) => {
+            const dateA = new Date(a.anio, a.mes-1, a.dia);
+            const dateB = new Date(b.anio, b.mes-1, b.dia);
+            if(dateA - dateB !== 0) return dateA - dateB;
+            
+            const parseHora = (t) => {
+                if(!t) return 0;
+                let hStr = t.toUpperCase();
+                let num = parseInt(hStr.match(/\d+/)?.[0] || 0);
+                if(hStr.includes("PM") && num < 12) num += 12;
+                if(hStr.includes("AM") && num === 12) num = 0;
+                return num;
+            };
+            return parseHora(a.hora) - parseHora(b.hora);
+        });
         
         const counts = {};
         agenda.forEach(x => {
@@ -210,8 +240,7 @@
                 <small>Fecha de registro: ${horaReg}</small>
             </div>`;
         });
-        document.getElementById('modal-media').innerHTML = txt;
-        document.getElementById('modal').style.display = 'flex';
+        mostrarModal(txt);
     }
 
     function confirmarRegistro() {
@@ -222,6 +251,12 @@
         const rep = document.getElementById('f-rep').value;
 
         if(!dia || !rep) return alert("Faltan datos.");
+
+        const aNum = parseInt(anio), mNum = parseInt(mes), dNum = parseInt(dia);
+        const fechaValidar = new Date(aNum, mNum - 1, dNum);
+        if (fechaValidar.getFullYear() !== aNum || fechaValidar.getMonth() !== (mNum - 1) || fechaValidar.getDate() !== dNum) {
+            return alert("❌ Fecha inválida. Ese día no existe en el mes seleccionado.");
+        }
 
         const yaExiste = agenda.find(x => x.anio==anio && x.mes==mes && x.dia==dia && x.hora.toUpperCase().trim()==hora);
         if(yaExiste) {
@@ -255,14 +290,11 @@
             const json = await res.json();
             
             const cloudData = JSON.parse(decodeURIComponent(escape(atob(json.content.replace(/\s/g, '')))));
-            const backup = JSON.parse(localStorage.getItem('pachucos_backup') || "[]");
-
-            // Solo bajamos lo que sea NUEVO de otros compañeros.
-            // Si algo está en la nube pero no en nuestra lista local Y estaba en el backup, significa que TÚ lo borraste.
+            
             cloudData.forEach(cloudItem => {
                 const enLocal = agenda.find(l => l.ts === cloudItem.ts);
-                const enBackup = backup.find(b => b.ts === cloudItem.ts);
-                if(!enLocal && !enBackup) {
+                const fueBorrado = eliminados.includes(cloudItem.ts);
+                if(!enLocal && !fueBorrado) {
                     agenda.push(cloudItem);
                 }
             });
@@ -283,8 +315,9 @@
 
     function borrarRegistro(i) { 
         if(confirm("¿Eliminar?")) { 
+            eliminados.push(agenda[i].ts);
+            localStorage.setItem('pachucos_deleted', JSON.stringify(eliminados));
             agenda.splice(i,1); 
-            // Guardamos inmediatamente el borrado en el backup local antes de sincronizar
             localStorage.setItem('pachucos_backup', JSON.stringify(agenda));
             renderAgendaUI();
             syncAgenda(); 
@@ -308,7 +341,23 @@
 
     function compartirAgendaWhatsApp() {
         if (!agenda.length) return alert("Nada que compartir.");
-        const ord = [...agenda].sort((a,b) => (new Date(a.anio, a.mes-1, a.dia)) - (new Date(b.anio, b.mes-1, b.dia)));
+        let ord = [...agenda];
+        
+        ord.sort((a,b) => {
+            const dateA = new Date(a.anio, a.mes-1, a.dia);
+            const dateB = new Date(b.anio, b.mes-1, b.dia);
+            if(dateA - dateB !== 0) return dateA - dateB;
+            const parseHora = (t) => {
+                if(!t) return 0;
+                let hStr = t.toUpperCase();
+                let num = parseInt(hStr.match(/\d+/)?.[0] || 0);
+                if(hStr.includes("PM") && num < 12) num += 12;
+                if(hStr.includes("AM") && num === 12) num = 0;
+                return num;
+            };
+            return parseHora(a.hora) - parseHora(b.hora);
+        });
+
         let m = "*🔥 AGENDA PACHUCOS MEN 🔥*\n\n", mesAct = "";
         ord.forEach(f => {
             const nMes = MESES[f.mes-1];
@@ -327,8 +376,8 @@
     }
 
     function playMedia(u, v) {
-        document.getElementById('modal-media').innerHTML = v ? `<video src="${u}" controls autoplay style="width:100%"></video>` : `<img src="${u}" style="width:100%">`;
-        document.getElementById('modal').style.display = 'flex';
+        let h = v ? `<video src="${u}" controls autoplay style="width:100%"></video>` : `<img src="${u}" style="width:100%">`;
+        mostrarModal(h);
     }
 
     window.addEventListener('online', syncAgenda);
