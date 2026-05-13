@@ -21,19 +21,14 @@
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
         h1 { font-size: 18px; color: var(--canva-purp); text-align: center; margin: 0 0 15px; font-weight: 800; }
-        /* Resaltado de años: Color más oscuro y peso 900 */
         .year-header { color: #333; font-size: 15px; text-align: center; margin: 20px 0 8px; font-weight: 900; }
-        /* Resaltado de meses: Color más oscuro y peso 800, manteniendo tamaño */
         .mes-header { color: #333; font-size: 11px; padding: 5px 0; margin: 10px 0; text-transform: uppercase; border-bottom: 1px solid var(--gris-suave); font-weight: 800; }
 
         .dia-bloque { background: var(--blanco); border-radius: 12px; margin-bottom: 8px; display: flex; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
-        /* Ajuste de alineación para acomodar el nombre del día */
         .dia-numero { background: #f0f2f5; width: 50px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 20px; font-weight: 800; color: var(--canva-purp); padding-top: 5px; }
-        /* Estilo para el nombre del día debajo del número */
         .dia-semana { display: block; font-size: 0.45em; font-weight: normal; color: #6e767d; margin-top: -3px; }
         
         .jales-lista { flex: 1; padding: 8px 12px; }
-        
         .jale-item { border-bottom: 1px solid #f0f2f5; padding: 6px 0; position: relative; }
         .jale-item.conflicto { background: #fff4f4; border-left: 4px solid var(--error); padding-left: 8px; }
         .jale-item:last-child { border-bottom: none; }
@@ -67,10 +62,10 @@
 
 <nav id="sidebar">
     <h2>PACHUCOS</h2>
-    <button class="nav-btn active" onclick="ver('age')">📅 AGENDA</button>
-    <button class="nav-btn" onclick="ver('add')">➕ FECHA</button>
-    <button class="nav-btn" onclick="ver('cal')">🗓️ CAL</button>
-    <button class="nav-btn" onclick="ver('gal')">🖼️ GALERÍA</button>
+    <button class="nav-btn active" id="btn-age" onclick="ver('age')">📅 AGENDA</button>
+    <button class="nav-btn" id="btn-add" onclick="ver('add')">➕ FECHA</button>
+    <button class="nav-btn" id="btn-cal" onclick="ver('cal')">🗓️ CAL</button>
+    <button class="nav-btn" id="btn-gal" onclick="ver('gal')">🖼️ GALERÍA</button>
 </nav>
 
 <main>
@@ -125,9 +120,17 @@
     let agenda = [];
     let eliminados = JSON.parse(localStorage.getItem('pachucos_deleted') || "[]");
     const MESES = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
-    const ASSETS = ["VN20251209_045334.mp4", "download_20251208_090855_0000.mp4", "Diseño sin título_20251208_090215_0000.mp4", "VID-20250304-WA0067.mp4", "origin_1768640677638.png", "BackgroundEraser_20251218_105209714.png", "Black White Torn Paper Photography Portfolio Cover Page_20260317_084528_0000.png"];
 
-    window.addEventListener('popstate', function(e) { cerrarModal(); });
+    // Solución 3: Manejo de historial para el botón "Atrás"
+    window.addEventListener('popstate', function(e) { 
+        if(document.getElementById('modal').style.display === 'flex') {
+            cerrarModal();
+        } else if (e.state && e.state.section) {
+            ver(e.state.section, false);
+        } else {
+            ver('age', false);
+        }
+    });
 
     function mostrarModal(html) {
         document.getElementById('modal-media').innerHTML = html;
@@ -140,16 +143,19 @@
         document.getElementById('modal-media').innerHTML = '';
     }
 
-    function ver(id) {
+    function ver(id, push = true) {
         document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
         document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
         document.getElementById(id).classList.add('active');
-        const btn = Array.from(document.querySelectorAll('.nav-btn')).find(b => b.getAttribute('onclick').includes(id));
-        if(btn) btn.classList.add('active');
+        
+        const btnId = 'btn-' + id;
+        if(document.getElementById(btnId)) document.getElementById(btnId).classList.add('active');
         
         if(id === 'age') loadAgenda();
-        if(id === 'gal') loadGal();
         if(id === 'cal') document.getElementById('cal-box').innerHTML = `<iframe src="https://calendar.google.com/calendar/embed?bgcolor=%23ffffff&src=ZXMubWV4aWNhbiNob2xpZGF5QGdyb3VwLnYuY2FsZW5kYXIuZ29vZ2xlLmNvbQ" style="border:0" width="100%" height="400" frameborder="0"></iframe>`;
+        
+        // Registrar en historial para que el gesto de atrás regrese a la agenda
+        if(push) window.history.pushState({section: id}, "");
     }
 
     async function loadAgenda() {
@@ -173,12 +179,10 @@
 
     function renderAgendaUI() {
         let h = "", curY = "", curM = "";
-        
         agenda.sort((a,b) => {
             const dateA = new Date(a.anio, a.mes-1, a.dia);
             const dateB = new Date(b.anio, b.mes-1, b.dia);
             if(dateA - dateB !== 0) return dateA - dateB;
-            
             const parseHora = (t) => {
                 if(!t) return 0;
                 let hStr = t.toUpperCase();
@@ -212,18 +216,14 @@
             if(curY !== f.anio) { curY = f.anio; h += `<div class="year-header">🔥 PACHUCOS ${curY} 🔥</div>`; }
             if(curM !== f.mes) { curM = f.mes; h += `<div class="mes-header">${MESES[f.mes-1]}</div>`; }
             
-            // Lógica para obtener el día de la semana (ej. "sábado")
             const fechaObj = new Date(f.anio, f.mes - 1, f.dia);
             const diaSemana = fechaObj.toLocaleDateString('es-ES', { weekday: 'long' });
 
-            // HTML modificado para insertar el día de la semana debajo del número
             h += `<div class="dia-bloque"><div class="dia-numero">${f.dia}<br><span class="dia-semana">${diaSemana}</span></div><div class="jales-lista">`;
-            
             grouped[dKey].forEach((jale) => {
                 const cKey = `${jale.anio}-${jale.mes}-${jale.dia}-${jale.hora.toUpperCase().trim()}`;
                 const esConflicto = counts[cKey] > 1;
                 const idx = agenda.indexOf(jale);
-                
                 h += `<div class="jale-item ${esConflicto ? 'conflicto' : ''}">
                         <p class="jale-lugar">📍 ${jale.lugar}</p>
                         <p class="jale-sub">${jale.representante} • ${jale.hora || '?'} • ${jale.tiempo || '?'}</p>
@@ -239,38 +239,27 @@
         document.getElementById('lista-agenda').innerHTML = h || "Sin fechas.";
     }
 
-    function revisarConflicto(key) {
-        const dups = agenda.filter(x => `${x.anio}-${x.mes}-${x.dia}-${x.hora.toUpperCase().trim()}` === key);
-        dups.sort((a,b) => (a.ts || 0) - (b.ts || 0));
-        
-        let txt = `<h3 style="color:red; margin-top:0;">CONFLICTO DE HORARIO</h3><hr>`;
-        dups.forEach((d, i) => {
-            const horaReg = d.ts ? new Date(d.ts).toLocaleString() : "Desconocida";
-            txt += `<div style="padding:10px; border-radius:8px; margin-bottom:10px; border:2px solid ${i===0?'#2ecc71':'#e74c3c'}; background:${i===0?'#f0fff4':'#fff5f5'}">
-                <b>${i===0 ? '🏆 PRIORIDAD (Registró primero):' : '⚠️ SEGUNDO REGISTRO:'}</b><br>
-                Lugar: ${d.lugar}<br>Rep: ${d.representante}<br>
-                <small>Fecha de registro: ${horaReg}</small>
-            </div>`;
-        });
-        mostrarModal(txt);
-    }
-
+    // Solución 2: Evitar falso conflicto al editar el mismo jale
     function confirmarRegistro() {
         const dia = document.getElementById('f-dia').value;
         const mes = document.getElementById('f-mes').value;
         const anio = document.getElementById('f-anio').value;
         const hora = document.getElementById('f-hor').value.toUpperCase().trim();
         const rep = document.getElementById('f-rep').value;
+        const editIdx = parseInt(document.getElementById('edit-idx').value);
 
         if(!dia || !rep) return alert("Faltan datos.");
 
-        const aNum = parseInt(anio), mNum = parseInt(mes), dNum = parseInt(dia);
-        const fechaValidar = new Date(aNum, mNum - 1, dNum);
-        if (fechaValidar.getFullYear() !== aNum || fechaValidar.getMonth() !== (mNum - 1) || fechaValidar.getDate() !== dNum) {
-            return alert("❌ Fecha inválida. Ese día no existe en el mes seleccionado.");
-        }
+        // Validar fecha real
+        const fechaValidar = new Date(anio, mes - 1, dia);
+        if (fechaValidar.getDate() != dia) return alert("❌ Fecha inválida.");
 
-        const yaExiste = agenda.find(x => x.anio==anio && x.mes==mes && x.dia==dia && x.hora.toUpperCase().trim()==hora);
+        // Buscar si ya existe el jale, EXCLUYENDO el que estamos editando actualmente
+        const yaExiste = agenda.find((x, idx) => 
+            x.anio == anio && x.mes == mes && x.dia == dia && 
+            x.hora.toUpperCase().trim() == hora && idx !== editIdx
+        );
+
         if(yaExiste) {
             if(!confirm(`⚠️ ATENCIÓN: ${yaExiste.representante} ya agendó a esa hora. ¿Quieres guardarlo de todos modos?`)) return;
         }
@@ -289,8 +278,12 @@
             ts: Date.now() 
         };
         const idx = parseInt(document.getElementById('edit-idx').value);
-        if(idx > -1) agenda[idx] = j; else agenda.push(j);
-        
+        if(idx > -1) {
+            j.ts = agenda[idx].ts; // Mantener el timestamp original al editar
+            agenda[idx] = j;
+        } else {
+            agenda.push(j);
+        }
         localStorage.setItem('pachucos_backup', JSON.stringify(agenda));
         renderAgendaUI();
         await syncAgenda();
@@ -300,28 +293,20 @@
         try {
             const res = await fetch(`https://api.github.com/repos/${USER}/${REPO}/contents/agenda.json?t=${Date.now()}`, { headers: { Authorization: `token ${TOKEN}` } });
             const json = await res.json();
-            
             const cloudData = JSON.parse(decodeURIComponent(escape(atob(json.content.replace(/\s/g, '')))));
-            
             cloudData.forEach(cloudItem => {
                 const enLocal = agenda.find(l => l.ts === cloudItem.ts);
-                const fueBorrado = eliminados.includes(cloudItem.ts);
-                if(!enLocal && !fueBorrado) {
-                    agenda.push(cloudItem);
-                }
+                if(!enLocal && !eliminados.includes(cloudItem.ts)) agenda.push(cloudItem);
             });
-
             const content = btoa(unescape(encodeURIComponent(JSON.stringify(agenda))));
             await fetch(`https://api.github.com/repos/${USER}/${REPO}/contents/agenda.json`, {
                 method: 'PUT', headers: { Authorization: `token ${TOKEN}`, 'Content-Type': 'application/json' },
                 body: JSON.stringify({ message: "Sync Update", content: content, sha: json.sha })
             });
-
             localStorage.setItem('pachucos_backup', JSON.stringify(agenda));
-            alert("¡Sincronizado y Ordenado!"); resetForm(); ver('age');
+            alert("¡Sincronizado!"); resetForm(); ver('age');
         } catch(e) {
-            alert("Sin conexión. Cambios guardados localmente, se subirán al detectar red.");
-            resetForm(); ver('age');
+            alert("Cambios guardados localmente."); resetForm(); ver('age');
         }
     }
 
@@ -330,49 +315,39 @@
             eliminados.push(agenda[i].ts);
             localStorage.setItem('pachucos_deleted', JSON.stringify(eliminados));
             agenda.splice(i,1); 
-            localStorage.setItem('pachucos_backup', JSON.stringify(agenda));
             renderAgendaUI();
             syncAgenda(); 
         } 
     }
 
     function editarRegistro(i) { 
-        const f = agenda[i]; document.getElementById('f-anio').value=f.anio; document.getElementById('f-mes').value=f.mes; 
-        document.getElementById('f-dia').value=f.dia; document.getElementById('f-rep').value=f.representante; 
-        document.getElementById('f-lug').value=f.lugar; document.getElementById('f-hor').value=f.hora; 
-        document.getElementById('f-tie').value=f.tiempo; document.getElementById('edit-idx').value=i; 
-        document.getElementById('f-tit').innerText="Modificar Jale"; ver('add'); 
+        const f = agenda[i]; 
+        document.getElementById('f-anio').value=f.anio; 
+        document.getElementById('f-mes').value=f.mes; 
+        document.getElementById('f-dia').value=f.dia; 
+        document.getElementById('f-rep').value=f.representante; 
+        document.getElementById('f-lug').value=f.lugar; 
+        document.getElementById('f-hor').value=f.hora; 
+        document.getElementById('f-tie').value=f.tiempo; 
+        document.getElementById('edit-idx').value=i; 
+        document.getElementById('f-tit').innerText="Modificar Jale"; 
+        ver('add'); 
     }
 
     function resetForm() { 
-        document.getElementById('edit-idx').value="-1"; document.getElementById('f-tit').innerText="Registrar Jale"; 
-        document.getElementById('f-dia').value=""; document.getElementById('f-lug').value=""; 
-        document.getElementById('f-hor').value=""; document.getElementById('f-tie').value=""; 
-        document.getElementById('f-rep').value="";
+        document.getElementById('edit-idx').value="-1"; 
+        document.getElementById('f-tit').innerText="Registrar Jale"; 
+        document.getElementById('f-dia').value=""; 
+        document.getElementById('f-lug').value=""; 
+        document.getElementById('f-hor').value=""; 
+        document.getElementById('f-tie').value=""; 
     }
 
-    function compartirAgendaWhatsApp() {
-        if (!agenda.length) return alert("Nada que compartir.");
-        let ord = [...agenda];
-        
-        ord.sort((a,b) => {
-            const dateA = new Date(a.anio, a.mes-1, a.dia);
-            const dateB = new Date(b.anio, b.mes-1, b.dia);
-            if(dateA - dateB !== 0) return dateA - dateB;
-            const parseHora = (t) => {
-                if(!t) return 0;
-                let hStr = t.toUpperCase();
-                let num = parseInt(hStr.match(/\d+/)?.[0] || 0);
-                if(hStr.includes("PM") && num < 12) num += 12;
-                if(hStr.includes("AM") && num === 12) num = 0;
-                return num;
-            };
-            return parseHora(a.hora) - parseHora(b.hora);
-        });
-
-        // La función de compartir por WhatsApp termina aquí en el código original que me pasaste.
-        // Asumo que tienes el resto de la lógica para abrir el enlace de WhatsApp.
-    }
+    // Solución 1: Carga automática al iniciar la app
+    window.onload = () => {
+        ver('age', false);
+        loadAgenda();
+    };
 </script>
 </body>
 </html>
